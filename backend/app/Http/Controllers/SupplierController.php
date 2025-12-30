@@ -1,0 +1,134 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Supplier;
+use Illuminate\Http\Request;
+
+class SupplierController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        $query = Supplier::query();
+
+        // ✅ Only search when keyword is NOT empty
+        if ($request->filled('keyword')) {
+            $keyword = trim($request->keyword);
+
+            if ($keyword !== '') {
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('name', 'like', "%$keyword%")
+                        ->orWhere('contact_name', 'like', "%$keyword%")
+                        ->orWhere('phone', 'like', "%$keyword%")
+                        ->orWhere('email', 'like', "%$keyword%");
+                });
+            }
+        }
+
+        // ✅ Only filter status when it's NOT empty
+        if ($request->has('status') && $request->status !== '' && $request->status !== null) {
+            $query->where('status', $request->status);
+        }
+
+        // ✅ Per-page (default 10) — -1 means list all
+        $perPage = $request->query('per_page', 10);
+
+        // If per_page = -1 → return all suppliers
+        if ($perPage == -1) {
+            $items = $query->orderBy('id', 'desc')->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Products retrieved successfully.',
+                'data' => [
+                    'current_page' => 1,
+                    'data' => $items,
+                    'per_page' => $items->count(),
+                    'total' => $items->count(),
+                    'last_page' => 1
+                ]
+            ], 200);
+        }
+
+        $suppliers = $query->orderBy('id', 'desc')->paginate($perPage);
+
+        return response()->json([
+            'success'   => true,
+            'message'   => 'Suppliers retrieved successfully.',
+            'data'      => $suppliers,
+        ], 200);
+    }
+
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create() {}
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name'         => 'required|string|max:255',
+            'contact_name' => 'nullable|string|max:255',
+            'phone'        => 'nullable|string|max:50',
+            'email'        => 'nullable|email|max:255',
+            'address'      => 'nullable|string',
+            'status'      => 'required',
+        ]);
+
+        $supplier = Supplier::create($validated);
+
+        return response()->json($supplier, 201);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Supplier $supplier)
+    {
+        return response()->json($supplier, 200);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Supplier $supplier)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Supplier $supplier)
+    {
+        $validated = $request->validate([
+            'name'         => 'required|string|max:255',
+            'contact_name' => 'nullable|string|max:255',
+            'phone'        => 'nullable|string|max:50',
+            'email'        => 'nullable|email|max:255',
+            'address'      => 'nullable|string',
+            'status'      => 'required',
+        ]);
+
+        $supplier->update($validated);
+
+        return response()->json($supplier, 200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Supplier $supplier)
+    {
+        $supplier->delete();
+
+        return response()->json(null, 204);
+    }
+}

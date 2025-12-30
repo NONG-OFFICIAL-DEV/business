@@ -1,0 +1,447 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Purchase;
+use App\Models\PurchaseStatus;
+use App\Models\Role;
+use App\Models\Stock;
+use App\Models\User;
+use App\Services\NotificationService;
+use App\Services\StockService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class PurchaseController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        $query = Purchase::with([
+            'items.product:id,name',
+            'supplier:id,name',
+            'purchaseStatus:code,label'
+        ]);
+
+        $user = Auth::user();
+        $userRole = $user->role->id ?? null;
+
+        // $roleStatusMap = [
+        //     3 => ['draft', 'requested', 'approved', 'rejected', 'ordered', 'received', 'completed'],
+        //     2 => ['requested', 'approved', 'rejected', 'ordered', 'received', 'completed'],
+        //     1 => ['draft', 'requested', 'approved', 'rejected', 'ordered', 'received', 'completed', 'cancelled'],
+        // ];
+
+        $roleStatusMap = [
+            3 => ['draft', 'request', 'pending', 'approved', 'rejected', 'completed'],
+            2 => ['request', 'pending', 'approved', 'rejected', 'completed'],
+            1 => ['draft', 'request', 'pending', 'rejected',  'completed', 'return', 'approved'],
+        ];
+
+        if (isset($roleStatusMap[$userRole])) {
+            $query->whereIn('purchase_status_code', $roleStatusMap[$userRole]);
+        }
+
+        // 🔍 Search by important names:
+        // purchase_number, invoice_number, supplier name
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('purchase_number', 'like', "%{$keyword}%")
+                    ->orWhere('invoice_number', 'like', "%{$keyword}%")
+                    ->orWhereHas('supplier', function ($sq) use ($keyword) {
+                        $sq->where('name', 'like', "%{$keyword}%");
+                    });
+            });
+        }
+
+        // 🔍 Filter by status
+        if ($request->filled('status')) {
+            $query->where('purchase_status_code', $request->status);
+        }
+
+        // 🔍 Filter by payment status
+        if ($request->filled('payment_status')) {
+            $query->where('payment_status', $request->payment_status);
+        }
+
+        // 🔍 Filter by date range
+        if ($request->filled('date_from')) {
+            $query->whereDate('purchase_date', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('purchase_date', '<=', $request->date_to);
+        }
+
+        // 🔍 Filter by supplier_id
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', $request->supplier_id);
+        }
+
+        // Pagination
+        $perPage = $request->query('per_page', 10);
+
+        $purchases = $query
+            ->orderBy('id', 'desc')
+            ->paginate($perPage);
+
+        return response()->json($purchases);
+    }
+
+
+    private function generatePurchaseNumber()
+    {
+        $year = date('Y');
+
+        $last = Purchase::whereYear('created_at', $year)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $nextId = $last ? $last->id + 1 : 1;
+
+        return "PUR-{$year}-" . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'supplier_id' => 'required|exists:suppliers,id',
+            'purchase_date' => 'required|date',
+            'discount' => 'nullable|numeric|min:0',
+            'tax' => 'nullable|numeric|min:0',
+            'purchase_status_code' => 'required',
+            'payment_status' => 'required|in:paid,unpaid,partial',
+            'note' => 'nullable|string',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.cost_price' => 'required|numeric|min:0',
+            'items.*.item_discount' => 'nullable|numeric|min:0',
+            'items.*.item_tax' => 'nullable|numeric|min:0',
+        ]);
+
+        return DB::transaction(function () use ($data) {
+
+            $purchaseSubtotal = 0;
+            $totalDiscount = 0;
+            $totalTax = 0;
+            $user = Auth::user();
+            // create purchase first without totals
+            $purchase = Purchase::create([
+                'purchase_by' => $user->id,
+                'supplier_id'     => $data['supplier_id'],
+                'purchase_date'   => $data['purchase_date'],
+                'purchase_status_code'  => $data['purchase_status_code'],
+                'payment_status'  => $data['payment_status'],
+                'subtotal'        => 0,
+                'discount'        => 0,
+                'tax'             => 0,
+                'total_amount'    => 0,
+                'purchase_number' => $this->generatePurchaseNumber(),
+                'note'            => $data['note'] ?? null,
+            ]);
+
+            // optional invoice number
+            $purchase->invoice_number = 'INV-' . date('Ymd') . '-' . $purchase->id;
+            $purchase->save();
+
+            // calculate and store items
+            foreach ($data['items'] as $reqItem) {
+                $quantity  = (float) $reqItem['quantity'];
+                $costPrice = (float) $reqItem['cost_price'];
+                $discount  = (float) ($reqItem['item_discount'] ?? 0);
+                $tax       = (float) ($reqItem['item_tax'] ?? 0);
+
+                $subtotal       = $quantity * $costPrice;
+                $discountAmount = $subtotal * ($discount / 100);
+                $taxAmount      = ($subtotal - $discountAmount) * ($tax / 100);
+                $total          = $subtotal - $discountAmount + $taxAmount;
+
+                $purchaseSubtotal += $subtotal;
+                $totalDiscount   += $discountAmount;
+                $totalTax        += $taxAmount;
+
+                $purchase->items()->create([
+                    'product_id'    => $reqItem['product_id'],
+                    'quantity'      => $quantity,
+                    'cost_price'    => $costPrice,
+                    'item_discount' => $discount,   // percent
+                    'item_tax'      => $tax,        // percent
+                    'total'         => $total,
+                ]);
+
+                $isDraft = $data['purchase_status_code'] === 'draft' || $data['purchase_status_code'] === 'request';
+
+                StockService::addStock(
+                    $reqItem['product_id'],
+                    $quantity,
+                    $costPrice,
+                    'purchase',
+                    $purchase->id,
+                    "Purchase #{$purchase->id}",
+                    $isDraft
+                );
+            }
+
+            // update purchase totals
+            $finalTotal = $purchaseSubtotal - $totalDiscount + $totalTax;
+
+            $purchase->update([
+                'subtotal'     => $purchaseSubtotal,
+                'discount'     => $totalDiscount,
+                'tax'          => $totalTax,
+                'total_amount' => $finalTotal,
+            ]);
+
+            /// Send notification
+            if ($purchase->purchase_status_code === 'request') {
+                $approvers = User::where('role_id', Role::where('name', 'manager')->first()->id)->get();
+                $notificationService = new NotificationService();
+                foreach ($approvers as $approver) {
+                    $notificationService->create(
+                        $approver,
+                        'New Purchase Request',
+                        "Purchase #{$purchase->purchase_number} requires your approval",
+                        [
+                            'icon' => 'mdi-cart',
+                            'color' => 'primary',
+                            'action_url' => "/purchases/{$purchase->id}",
+                            'channel' => 'system',
+                        ]
+                    );
+                }
+
+                // Send Telegram if linked
+                if ($approver->telegram_chat_id) {
+                    $title = 'New Purchase Request';
+                    $message = "Purchase #{$purchase->purchase_number} requires your approval";
+
+                    $notificationService->sendTelegram($approver->telegram_chat_id, $title, $message);
+                }
+            }
+
+
+
+            return response()->json($purchase->load('items.product', 'supplier'), 201);
+        });
+    }
+
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        $purchase = Purchase::findOrFail($id);
+
+        if ($purchase->purchase_status_code === 'received') {
+            return response()->json(['message' => 'Cannot edit a completed purchase'], 400);
+        }
+
+        $data = $request->validate([
+            'supplier_id' => 'required|exists:suppliers,id',
+            'purchase_date' => 'required|date',
+            'discount' => 'nullable|numeric|min:0',
+            'tax' => 'nullable|numeric|min:0',
+            'purchase_status_code' => 'required',
+            'payment_status' => 'required|in:paid,unpaid,partial',
+            'note' => 'nullable|string',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.cost_price' => 'required|numeric|min:0',
+            'items.*.item_discount' => 'nullable|numeric|min:0',
+            'items.*.item_tax' => 'nullable|numeric|min:0',
+        ]);
+
+        return DB::transaction(function () use ($purchase, $data) {
+
+            // Determine if the previous purchase was draft/request
+            $wasDraft = in_array($purchase->purchase_status_code, ['draft', 'request']);
+
+            // rollback old stock correctly
+            foreach ($purchase->items as $old) {
+                $stock = Stock::firstOrCreate(['product_id' => $old->product_id]);
+
+                if ($wasDraft) {
+                    $stock->decrement('draft_qty', $old->quantity);
+                } else {
+                    $stock->decrement('quantity', $old->quantity);
+                }
+            }
+
+            // delete old items
+            $purchase->items()->delete();
+
+            $purchaseSubtotal = 0;
+            $totalDiscount = 0;
+            $totalTax = 0;
+
+            $isDraft = in_array($data['purchase_status_code'], ['draft', 'request']);
+
+            // save new items
+            foreach ($data['items'] as $reqItem) {
+                $quantity  = (float) $reqItem['quantity'];
+                $costPrice = (float) $reqItem['cost_price'];
+                $discount  = (float) ($reqItem['item_discount'] ?? 0);
+                $tax       = (float) ($reqItem['item_tax'] ?? 0);
+
+                $subtotal       = $quantity * $costPrice;
+                $discountAmount = $subtotal * ($discount / 100);
+                $taxAmount      = ($subtotal - $discountAmount) * ($tax / 100);
+                $total          = $subtotal - $discountAmount + $taxAmount;
+
+                $purchaseSubtotal += $subtotal;
+                $totalDiscount   += $discountAmount;
+                $totalTax        += $taxAmount;
+
+                $purchase->items()->create([
+                    'product_id'    => $reqItem['product_id'],
+                    'quantity'      => $quantity,
+                    'cost_price'    => $costPrice,
+                    'item_discount' => $discount,
+                    'item_tax'      => $tax,
+                    'total'         => $total,
+                ]);
+
+                StockService::addStock(
+                    $reqItem['product_id'],
+                    $quantity,
+                    $costPrice,
+                    'purchase',
+                    $purchase->id,
+                    "Purchase #{$purchase->id}",
+                    $isDraft
+                );
+            }
+
+            // update totals
+            $finalTotal = $purchaseSubtotal - $totalDiscount + $totalTax;
+            $purchase->update([
+                'supplier_id'  => $data['supplier_id'],
+                'purchase_date' => $data['purchase_date'],
+                'purchase_status_code' => $data['purchase_status_code'],
+                'payment_status' => $data['payment_status'],
+                'subtotal'     => $purchaseSubtotal,
+                'discount'     => $totalDiscount,
+                'tax'          => $totalTax,
+                'total_amount' => $finalTotal,
+                'note'         => $data['note'] ?? null,
+            ]);
+
+            return response()->json($purchase->load('items.product', 'supplier'));
+        });
+    }
+
+    // ** update status
+    public function updateStatus(Request $request, Purchase $purchase)
+    {
+        // Validate incoming code exists in purchase_statuses
+        $request->validate([
+            'status' => 'required|exists:purchase_statuses,code',
+        ]);
+
+        // Find the status record by code
+        $status = PurchaseStatus::where('code', $request->status)->first();
+
+        if (!$status) {
+            return response()->json(['message' => 'Invalid status code'], 400);
+        }
+
+        DB::transaction(function () use ($purchase, $status) {
+
+            // If approved, move draft_qty to actual quantity
+            if ($status->code === 'approved') {
+                foreach ($purchase->items as $item) {
+                    $stock = Stock::firstOrCreate(['product_id' => $item->product_id]);
+
+                    // Move draft_qty to quantity
+                    $stock->increment('quantity', $item->quantity);
+                    $stock->decrement('draft_qty', $item->quantity);
+                }
+            }
+
+            // Update the purchase status
+            $purchase->purchase_status_code = $status->code;
+
+            if ($status->code === 'completed') {
+                $purchase->completed_at = now();
+            }
+
+            $purchase->save();
+
+            // Notify only the purchaser
+            $purchaser = $purchase->createdBy;
+            if ($purchaser) {
+                $title = "Purchase Status Updated";
+                $message = "Purchase #{$purchase->purchase_number} has been {$status->label} by manager";
+
+                // Send system notification
+                $notificationService = new NotificationService();
+                $notificationService->create(
+                    $purchaser,
+                    'Purchase Status Updated',
+                    $message,
+                    [
+                        'icon' => 'mdi-update',
+                        'color' => $status->code === 'approved' ? 'success' : 'error',
+                        'action_url' => "/purchases/{$purchase->id}",
+                    ]
+                );
+
+                // Send Telegram if linked
+                if ($purchaser->telegram_chat_id) {
+                    $notificationService->sendTelegram($purchaser->telegram_chat_id, $title, $message);
+                }
+            }
+        });
+
+        return response()->json([
+            'message' => 'Purchase status updated successfully',
+            'purchase' => $purchase,
+            'status' => $status,
+        ]);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        return Purchase::with('items.product', 'supplier', 'purchaseStatus:code,label')->findOrFail($id);
+    }
+
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        $purchase = Purchase::findOrFail($id);
+        $purchase->delete();
+        return response()->json(null, 204);
+    }
+
+    public function statuses()
+    {
+        $user = Auth::user();
+        $roleCode = $user->role->id ?? null;
+        $roleStatusMap = [
+            3 => ['draft', 'request', 'pending', 'approved', 'rejected', 'completed'],
+            2 => ['request', 'approved', 'rejected', 'completed'],
+            1 => ['draft', 'request', 'approved', 'rejected', 'completed', 'return'],
+        ];
+
+        $allowedStatuses = $roleStatusMap[$roleCode] ?? [];
+        $statuses = PurchaseStatus::whereIn('code', $allowedStatuses)->get();
+
+        return response()->json($statuses);
+    }
+}

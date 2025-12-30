@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Models;
+
+use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\Model;
+
+class PurchaseItem extends Model
+{
+    use Auditable;
+    
+    protected $fillable = [
+        'purchase_id',
+        'product_id',
+        'quantity',
+        'total',
+        'cost_price',
+        'item_discount',
+        'item_tax'
+    ];
+
+    public function purchase()
+    {
+        return $this->belongsTo(Purchase::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+}
