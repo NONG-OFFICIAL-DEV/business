@@ -1,0 +1,72 @@
+version: "3.9"
+
+services:
+  # --------------------------
+  # PostgreSQL Database
+  # --------------------------
+  db:
+    image: postgres:15
+    container_name: inventory_db
+    environment:
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpass
+      POSTGRES_DB: inventory_management_db
+    ports:
+      - "5432:5432"        # Expose to host for dev tools
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  # --------------------------
+  # Backend API
+  # --------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: inventory_backend
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: inventory_management_db
+      DB_USERNAME: devuser
+      DB_PASSWORD: devpass
+      APP_ENV: development
+      APP_DEBUG: "true"
+    ports:
+      - "9002:9002"         # Host access
+    volumes:
+      - ./backend:/app       # Live reload
+    depends_on:
+      - db
+
+
+  # --------------------------
+  # Frontend
+  # --------------------------
+  # frontend:
+  #   build: ./frontend
+  #   container_name: inventory_frontend
+  #   environment:
+  #     VUE_APP_API_URL: http://localhost:8000
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/app
+  #   depends_on:
+  #     - backend
+
+  # --------------------------
+  # Optional: Adminer GUI for DB
+  # --------------------------
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
