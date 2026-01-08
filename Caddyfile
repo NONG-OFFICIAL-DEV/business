@@ -1,33 +1,21 @@
 inventory.nongofficial.store {
-    
-    # Frontend proxy
-    handle_path / {
-        reverse_proxy frontend:5174
+    # Frontend static files
+    root * /app/frontend/dist
+    file_server
+
+    # Backend API
+    handle /api/* {
+        reverse_proxy backend:9002
     }
 
-    # Backend / Laravel PHP
-    handle_path /api* {
-        root * /var/www/html/public
-        php_fastcgi backend:9002
-        file_server
-    }
-
-    # AI Service
-    handle_path /ai/api/* {
-        reverse_proxy ai:8080 {
-            header_up Host {host}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
-            header_up X-Forwarded-Proto {scheme}
-        }
+    # AI API
+    handle /ai/api/* {
+        reverse_proxy ai:8080
     }
 
     log {
         output file /var/log/caddy/access.log
     }
 
-    # Optional error log
-    handle_errors {
-        respond "Internal Server Error" 500
-    }
+    tls you@example.com  # Use your email for automatic HTTPS
 }

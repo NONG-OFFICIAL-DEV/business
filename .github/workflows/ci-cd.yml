@@ -46,11 +46,12 @@ jobs:
           docker push $IMAGE_FRONTEND:$IMAGE_TAG
 
       # -------------------
-      # Build & Push Webserver (nginx)
+      # Build & Push Webserver (Caddy)
       # -------------------
       - name: Build & push webserver image
         run: |
-          docker build -t $IMAGE_WEBSERVER:latest -t $IMAGE_WEBSERVER:$IMAGE_TAG ./backend/nginx
+          # Build using Dockerfile for Caddy, context is repo root
+          docker build -f ./Caddy.Dockerfile -t $IMAGE_WEBSERVER:latest -t $IMAGE_WEBSERVER:$IMAGE_TAG .
           docker push $IMAGE_WEBSERVER:latest
           docker push $IMAGE_WEBSERVER:$IMAGE_TAG
 
