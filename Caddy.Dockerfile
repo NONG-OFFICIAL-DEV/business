@@ -1,4 +1,5 @@
-FROM caddy:2.8.6-alpine
+# Use official Caddy 2 Alpine variant
+FROM caddy:2-alpine
 
-# Copy Caddyfile from root
+# Copy Caddyfile from repo root
 COPY Caddyfile /etc/caddy/Caddyfile
