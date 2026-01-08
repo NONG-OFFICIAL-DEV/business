@@ -9,10 +9,10 @@ jobs:
   build-push:
     runs-on: ubuntu-latest
     env:
-      IMAGE_BACKEND: ${{ secrets.DOCKER_USERNAME }}/inventory-backend
-      IMAGE_FRONTEND: ${{ secrets.DOCKER_USERNAME }}/inventory-frontend
-      IMAGE_WEBSERVER: ${{ secrets.DOCKER_USERNAME }}/inventory-webserver
-      IMAGE_AI: ${{ secrets.DOCKER_USERNAME }}/inventory-ai
+      IMAGE_BACKEND: ${{ secrets.DOCKERHUB_USERNAME }}/inventory-backend
+      IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME }}/inventory-frontend
+      IMAGE_WEBSERVER: ${{ secrets.DOCKERHUB_USERNAME }}/inventory-webserver
+      IMAGE_AI: ${{ secrets.DOCKERHUB_USERNAME }}/inventory-ai
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
@@ -24,8 +24,8 @@ jobs:
       - name: Docker login
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # -------------------
       # Build & Push Backend
@@ -107,10 +107,10 @@ jobs:
             cd ~/inventory
 
             # Pull latest images
-            docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-backend:latest
-            docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-frontend:latest
-            docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-webserver:latest
-            docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-ai:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-backend:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-frontend:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-webserver:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-ai:latest
 
             # Stop containers but KEEP volumes (no -v)
             docker-compose down --remove-orphans || true
