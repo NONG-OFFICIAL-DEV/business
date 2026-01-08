@@ -29,12 +29,16 @@ services:
     stdin_open: true
     container_name: inventory_frontend
     image: nongdev/inventory-frontend:latest
+    # env_file:
+    #   - ./frontend/.env
     build:
       context: ./frontend
       dockerfile: Dockerfile
     volumes:
-      - /app/node_modules
-      - ./frontend:/var/www/html/
+      - ./frontend/dist:/var/www/html 
+    # volumes:
+    #   - /app/node_modules
+    #   - ./frontend:/var/www/html/
     networks:
       - app-network
 
@@ -52,25 +56,43 @@ services:
 
 
   #Nginx Service
-  webserver:
-    depends_on:
-      - backend
-      - frontend
-      - ai
-    build:
-      context: ./backend/nginx
-      dockerfile: Dockerfile
-    image: nongdev/inventory-webserver:latest
-    container_name: inventory_webserver
-    restart: unless-stopped
-    tty: true
-    ports:
-      - "82:82"
-    volumes:
-      - ./backend/public:/var/www/html:ro 
-    networks:
-      - app-network
-
+  # webserver:
+  #   depends_on:
+  #     - backend
+  #     - frontend
+  #     - ai
+  #   build:
+  #     context: ./backend/nginx
+  #     dockerfile: Dockerfile
+  #   image: nongdev/inventory-webserver:latest
+  #   container_name: inventory_webserver
+  #   restart: unless-stopped
+  #   tty: true
+  #   ports:
+  #     - "82:82"
+  #   volumes:
+  #     - ./backend/public:/var/www/html:ro 
+  #   networks:
+  #     - app-network
+    # Caddy Webserver
+    webserver:
+      container_name: inventory_webserver
+      image: caddy:2.8.6-alpine
+      restart: unless-stopped
+      ports:
+        - "82:80"        # temporary testing on port 82
+        - "443:443"      # future SSL
+      networks:
+        - app-network
+      volumes:
+        - ./Caddyfile:/etc/caddy/Caddyfile:ro
+        - ./backend/public:/var/www/html
+        - caddy_data:/data
+        - caddy_config:/config
+      depends_on:
+        - backend
+        - frontend
+        - ai
   db:
     image: postgres:15
     container_name: inventory_postgres_db
@@ -96,3 +118,5 @@ volumes:
     # backend_vendor:
     backend_storage:
     postgres_data:
+    caddy_data:
+    caddy_config:
