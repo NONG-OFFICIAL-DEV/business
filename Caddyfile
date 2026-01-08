@@ -1,6 +1,7 @@
 inventory.nongofficial.store {
     # Frontend static files
     root * /app/frontend/dist
+    try_files {path} /index.html
     file_server
 
     # Backend API
