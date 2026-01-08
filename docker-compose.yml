@@ -12,7 +12,7 @@ services:
       - ./backend/.env
     working_dir: /var/www/html/
     volumes:
-        - ./backend/.env:/var/www/html/.env
+        # - ./backend/.env:/var/www/html/.env
         - backend_storage:/var/www/html/storage
         - ./backend/bootstrap/cache:/var/www/html/bootstrap/cache
     networks:
