@@ -52,7 +52,7 @@ services:
     container_name: inventory_webserver
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "82:80"
       - "443:443"
     volumes:
       - caddy_data:/data
