@@ -1,4 +1,4 @@
-# Stage: Build frontend
+# Stage 1: Build frontend
 FROM node:20 AS build-stage
 
 WORKDIR /app
@@ -13,11 +13,11 @@ COPY . .
 # Build the frontend (Vite, React, Vue, etc.)
 RUN npm run build
 
-# -------- Serve with Caddy --------
+# Stage 2: Serve with Caddy
 FROM caddy:2-alpine
 
 # Copy built Vue app
-COPY --from=build /app/dist /usr/share/caddy
+COPY --from=build-stage /app/dist /usr/share/caddy
 
 # Optional: custom Caddyfile
 # COPY Caddyfile /etc/caddy/Caddyfile
