@@ -23,6 +23,8 @@ services:
     restart: always
     networks:
       - web
+    volumes:
+      - ./frontend/dist:/var/www/html/public:ro
 
   ai:
     build:
