@@ -1,20 +1,14 @@
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
     image: nongdev/inventory-backend:latest
-    container_name: inventory_backend
-    restart: unless-stopped
-    tty: true
+    restart: always
+    networks:
+      - web
     env_file:
       - ./backend/.env
-    working_dir: /var/www/html/
     volumes:
       - backend_storage:/var/www/html/storage
       - ./backend/bootstrap/cache:/var/www/html/bootstrap/cache
-    networks:
-      - app-network
     depends_on:
       - db
     command: >
@@ -25,50 +19,25 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
     image: nongdev/inventory-frontend:latest
-    container_name: inventory_frontend
-    restart: unless-stopped
+    restart: always
     networks:
-      - app-network
+      - web
 
   ai:
     build:
       context: ./inventory_ai
-      dockerfile: Dockerfile
     image: nongdev/inventory-ai:latest
-    container_name: inventory_ai
-    restart: unless-stopped
+    restart: always
     networks:
-      - app-network
+      - web
     depends_on:
       - db
-
-  caddy:
-    build:
-      context: .
-      dockerfile: Caddy.Dockerfile
-    image: nongdev/inventory-webserver:latest
-    container_name: inventory_webserver
-    restart: unless-stopped
-    ports:
-      - "82:80"
-      - "444:443"
-    volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-      - ./frontend/dist:/app/frontend/dist:ro
-    networks:
-      - app-network
-    depends_on:
-      - backend
-      - frontend
-      - ai
 
   db:
     image: postgres:15
     container_name: inventory_postgres_db
-    restart: unless-stopped
+    restart: always
     environment:
       POSTGRES_DB: inventory_management_db
       POSTGRES_USER: postgres
@@ -78,14 +47,4 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
-
-volumes:
-  backend_storage:
-  postgres_data:
-  caddy_data:
-  caddy_config:
+      - web
