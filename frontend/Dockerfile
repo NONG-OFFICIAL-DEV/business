@@ -15,9 +15,5 @@ RUN npm run build
 
 # Stage 2: Serve with Caddy
 FROM caddy:2-alpine
-
-# Copy built Vue app
-COPY --from=build-stage /app/dist /usr/share/caddy
-
-# Optional: custom Caddyfile
-# COPY Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/dist /usr/share/caddy
+COPY Caddyfile /etc/caddy/Caddyfile
