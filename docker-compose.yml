@@ -48,3 +48,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - web
+
+networks:
+  web:
+    external: true
