@@ -13,7 +13,11 @@ COPY . .
 # Build the frontend (Vite, React, Vue, etc.)
 RUN npm run build
 
-# Stage 2: Serve with Caddy
+# Stage 2: Serve with Caddy # -------- Serve with Caddy --------
 FROM caddy:2-alpine
-COPY --from=build /app/dist /usr/share/caddy
+
+# Copy built Vue app
+COPY --from=build-stage /app/dist /usr/share/caddy
+
+# Optional: custom Caddyfile
 COPY Caddyfile /etc/caddy/Caddyfile
