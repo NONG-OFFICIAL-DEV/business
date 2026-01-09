@@ -52,3 +52,7 @@ services:
 networks:
   web:
     external: true
+
+volumes:
+  backend_storage:
+  postgres_data:
