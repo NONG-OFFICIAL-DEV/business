@@ -60,25 +60,38 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Clean old docker stuff on VM
-      - name: Cleanup old Docker
+      # -------------------
+      # Cleanup old Docker + permissions
+      # -------------------
+      - name: Cleanup old Docker & permissions
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ubuntu
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            echo ">>> Removing old containers & images but KEEPING volumes..."
-            cd ~/inventory || true
+            set -e
+
+            echo ">>> Fix permissions on ~/inventory"
+            sudo chown -R ubuntu:ubuntu ~/inventory || true
+            chmod -R u+rwX ~/inventory || true
+
+            echo ">>> Stop old containers"
+            cd ~/inventory || mkdir -p ~/inventory
             docker compose down --remove-orphans || true
-            docker image prune -af || true   # only images, not volumes
+
+            echo ">>> Clean unused Docker resources"
+            docker image prune -af || true
             docker container prune -f || true
             docker network prune -f || true
 
-            rm -rf ~/inventory/docker-compose.yml
+            # Remove old docker-compose.yml safely
+            rm -f ~/inventory/docker-compose.yml
             mkdir -p ~/inventory
 
+      # -------------------
       # Copy docker-compose.yml
+      # -------------------
       - name: Copy docker-compose.yml to server
         uses: appleboy/scp-action@master
         with:
@@ -88,8 +101,9 @@ jobs:
           source: "docker-compose.yml"
           target: "~/inventory/"
 
-
-      # Deploy
+      # -------------------
+      # Deploy containers
+      # -------------------
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
         with:
@@ -100,25 +114,22 @@ jobs:
             set -e
             cd ~/inventory
 
-            # Pull latest images
+            echo ">>> Pull latest Docker images"
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-backend:latest
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-frontend:latest
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-ai:latest
 
-            # Stop containers but KEEP volumes (no -v)
-            docker compose down --remove-orphans || true
-
-            # Start containers with existing volumes
+            echo ">>> Start containers"
             docker compose up -d --remove-orphans
 
-            # Wait for DB before migrations (20s)
+            echo ">>> Wait for DB to be ready"
             sleep 20
 
-            # Run JWT secret (must run AFTER config exists)
+            echo ">>> Generate JWT secret"
             docker compose exec backend php artisan jwt:secret --force
 
-            # Run migrations
+            echo ">>> Run migrations (optional)"
             # docker compose exec backend php artisan migrate --force
 
-            # Run seeders
+            echo ">>> Run seeders (optional)"
             # docker compose exec backend php artisan db:seed --force
