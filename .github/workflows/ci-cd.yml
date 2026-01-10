@@ -87,6 +87,7 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           source: "docker-compose.yml"
           target: "~/inventory"
+          overwrite: true 
 
       # Deploy
       - name: Deploy to server
