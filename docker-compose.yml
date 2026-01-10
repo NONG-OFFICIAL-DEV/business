@@ -16,7 +16,13 @@ services:
              chmod -R 775 storage bootstrap/cache &&
              php-fpm"
     ports:
-      - "9000:9000"
+      - "8000:8000" # <-- Expose backend HTTP port for Caddy to reach
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/test" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   frontend:
     build:
       context: ./frontend
