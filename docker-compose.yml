@@ -7,14 +7,13 @@ services:
     env_file:
       - ./backend/.env
     volumes:
-      - .:/var/www/html
       - backend_storage:/var/www/html/storage
-      # - ./backend/bootstrap/cache:/var/www/html/bootstrap/cache
+      - ./backend/bootstrap/cache:/var/www/html/bootstrap/cache
     depends_on:
       - db
     command: >
-      sh -c "chown -R www-data:www-data /var/www/html &&
-             chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache &&
+      sh -c "chown -R www-data:www-data storage bootstrap/cache &&
+             chmod -R 775 storage bootstrap/cache &&
              php-fpm"
     ports:
       - "9000:9000"
