@@ -24,7 +24,7 @@ services:
     networks:
       - web
     volumes:
-      - ./backend/Caddyfile:/etc/caddy/Caddyfile
+      - ./backend/Caddyfile:/etc/caddy/Caddyfile:ro
     ports:
       - "8080:80"
   frontend:
