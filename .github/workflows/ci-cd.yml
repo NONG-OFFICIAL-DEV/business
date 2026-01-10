@@ -120,13 +120,14 @@ jobs:
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-ai:latest
 
             echo ">>> Start containers"
+            docker compose down --remove-orphans || true
             docker compose up -d --remove-orphans
 
             echo ">>> Wait for DB to be ready"
             sleep 20
 
             echo ">>> Generate JWT secret"
-            docker compose exec backend php artisan jwt:secret --force
+            # docker compose exec backend php artisan jwt:secret --force
 
             echo ">>> Run migrations (optional)"
             # docker compose exec backend php artisan migrate --force
