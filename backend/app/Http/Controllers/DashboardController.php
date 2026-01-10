@@ -34,8 +34,12 @@ class DashboardController extends Controller
                     ->selectRaw('COALESCE(SUM(quantity), 0)')
                     ->whereColumn('stocks.product_id', 'products.id');
             }, 'current_stock')
-            ->having('current_stock', '<', 5)
-            ->get();
+            ->whereRaw('(
+                select COALESCE(SUM(quantity), 0)
+                from stocks
+                where stocks.product_id = products.id
+            ) < ?', [5])
+                    ->get();
 
         $lowStock = $lowStockProducts->count();
 
@@ -87,7 +91,7 @@ class DashboardController extends Controller
         -----------------------------------------------------*/
         // purchases table must contain: id, total_amount, created_at
         $monthlyPurchases = DB::table('purchases')
-            ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total')
+            ->selectRaw('EXTRACT(MONTH FROM created_at) as month, SUM(total_amount) as total')
             ->whereBetween('created_at', [$start, $end])
             ->groupBy('month')
             ->orderBy('month')
@@ -96,7 +100,7 @@ class DashboardController extends Controller
 
         // sales table must contain: id, total_amount, created_at
         $monthlySales = DB::table('sales')
-            ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as total')
+            ->selectRaw('EXTRACT(MONTH FROM created_at) as month, SUM(total_amount) as total')
             ->whereBetween('created_at', [$start, $end])
             ->groupBy('month')
             ->orderBy('month')
@@ -151,11 +155,11 @@ class DashboardController extends Controller
         $year = $request->year ?? date('Y'); // default current year
 
         $monthlyData = Purchase::select(
-            DB::raw('MONTH(purchase_date) as month'),
+            DB::raw('EXTRACT(MONTH FROM purchase_date) as month'),
             DB::raw('SUM(total_amount) as total')
         )
             ->whereYear('purchase_date', $year)
-            ->groupBy(DB::raw('MONTH(purchase_date)'))
+            ->groupBy(DB::raw('EXTRACT(MONTH FROM purchase_date)'))
             ->orderBy('month')
             ->get();
 

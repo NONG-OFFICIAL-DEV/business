@@ -2,77 +2,77 @@
   <v-container fluid class="pa-0">
     <custom-title icon="mdi-view-dashboard">Inventory Dashboard</custom-title>
 
-    <!-- <v-row class="mb-6" dense> -->
-      <!-- <v-col cols="4" md="4">
+    <v-row class="mb-6" dense>
+      <v-col cols="4" md="3">
         <v-card elevation="0" rounded="xl" class="pa-4 revenue-card">
           <span class="text-grey">Inventory Value</span>
 
           <div class="d-flex align-center">
-            <h1 class="font-weight-bold me-3">
-              {{ formatCurrency(inventoryValue) }}
-            </h1>
+            <v-tooltip location="end">
+              <template #activator="{ props }">
+                <h1 v-bind="props" class="font-weight-bold me-3">
+                  {{ formatCompactCurrency(inventoryValue) }}
+                </h1>
+              </template>
 
-            <v-chip size="small" color="red" label variant="tonal">
+              {{ formatCurrency(inventoryValue) }}
+            </v-tooltip>
+
+            <!-- <v-chip size="small" color="red" label variant="tonal">
               <v-icon size="14" class="mr-1">mdi-arrow-up</v-icon>
               7.9%
-            </v-chip>
+            </v-chip> -->
           </div>
         </v-card>
-      </v-col> -->
+      </v-col>
 
       <!-- KPI CARDS -->
       <!-- <v-col cols="12" md="8"> -->
-        <v-row dense>
-          <v-col
-            v-for="card in cards"
-            :key="card.title"
-            cols="12"
-            sm="3"
-            md="3"
+      <v-row dense>
+        <v-col v-for="card in cards" :key="card.title" cols="12" sm="4" md="4">
+          <v-card
+            class="card pa-4"
+            elevation="0"
+            rounded="xl"
+            @click="handleCardClick(card)"
           >
-            <v-card
-              class="card pa-4"
-              elevation="0"
-              rounded="xl"
-              @click="handleCardClick(card)"
-            >
-              <div class="d-flex justify-space-between align-center">
-                <span class="text-kpi">{{ card.title }}</span>
-                <v-icon :color="card.color" size="20">
-                  {{ card.icon }}
+            <div class="d-flex justify-space-between align-center">
+              <span class="text-kpi">{{ card.title }}</span>
+              <v-icon :color="card.color" size="20">
+                {{ card.icon }}
+              </v-icon>
+            </div>
+
+            <div class="d-flex justify-space-between align-center mt-3">
+              <h2 class="font-weight-bold">
+                {{ card.value }}
+              </h2>
+
+              <v-chip
+                v-if="card.trend !== undefined"
+                size="small"
+                label
+                :color="card.trend > 0 ? 'green' : 'red'"
+              >
+                <v-icon size="14" class="mr-1">
+                  {{ card.trend > 0 ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
                 </v-icon>
-              </div>
-
-              <div class="d-flex justify-space-between align-center mt-3">
-                <h2 class="font-weight-bold">
-                  {{ card.value }}
-                </h2>
-
-                <v-chip
-                  v-if="card.trend !== undefined"
-                  size="small"
-                  label
-                  :color="card.trend > 0 ? 'green' : 'red'"
-                >
-                  <v-icon size="14" class="mr-1">
-                    {{ card.trend > 0 ? 'mdi-arrow-up' : 'mdi-arrow-down' }}
-                  </v-icon>
-                  {{ card.trend }}%
-                </v-chip>
-              </div>
-            </v-card>
-          </v-col>
-        </v-row>
+                {{ card.trend }}%
+              </v-chip>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
       <!-- </v-col> -->
-    <!-- </v-row> -->
+      <!-- </v-row> -->
 
-    <v-row dense class="mt-4">
-      <v-col cols="12" md="6">
-        <v-card :elevation="0" class="pa-6" rounded="xl">
-          <v-toolbar class="bg-white">
-            <h3>Stock by Category</h3>
-            <v-spacer></v-spacer>
-            <!-- <v-select
+      <v-row dense class="mt-4">
+        <v-col cols="12" md="6">
+          <v-card :elevation="0" class="pa-6" rounded="xl">
+            <v-toolbar class="bg-white">
+              <h3>Stock by Category</h3>
+              <v-spacer></v-spacer>
+              <!-- <v-select
               v-model="selectedMonth"
               :items="monthsReport"
               label="Month"
@@ -81,35 +81,36 @@
               hide-details
               max-width="170"
             ></v-select> -->
-            {{ formatDate(new Date()) }}
-          </v-toolbar>
+              {{ formatDate(new Date()) }}
+            </v-toolbar>
 
-          <div style="height: 275px">
-            <canvas ref="barChartCanvas"></canvas>
-          </div>
-        </v-card>
-      </v-col>
-      <v-col cols="12" md="6">
-        <v-card :elevation="0" class="pa-6" rounded="xl">
-          <v-toolbar class="bg-white">
-            <h3>Monthly Purchase</h3>
-            <!-- vs. Sales -->
-            <v-spacer></v-spacer>
-            <v-select
-              v-model="selectedYear"
-              :items="years"
-              label="Year"
-              rounded="lg"
-              density="compact"
-              hide-details
-              max-width="170"
-            ></v-select>
-          </v-toolbar>
-          <div style="height: 275px">
-            <canvas ref="chartCanvas"></canvas>
-          </div>
-        </v-card>
-      </v-col>
+            <div style="height: 275px">
+              <canvas ref="barChartCanvas"></canvas>
+            </div>
+          </v-card>
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-card :elevation="0" class="pa-6" rounded="xl">
+            <v-toolbar class="bg-white">
+              <h3>Monthly Purchase</h3>
+              <!-- vs. Sales -->
+              <v-spacer></v-spacer>
+              <v-select
+                v-model="selectedYear"
+                :items="years"
+                label="Year"
+                rounded="lg"
+                density="compact"
+                hide-details
+                max-width="170"
+              ></v-select>
+            </v-toolbar>
+            <div style="height: 275px">
+              <canvas ref="chartCanvas"></canvas>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
     </v-row>
     <!-- {{ dashboardStore.monthlyPurchases.data }} -->
   </v-container>
@@ -166,6 +167,25 @@
     }
     return list
   })
+
+  const formatCompactCurrency = value => {
+    if (value === null || value === undefined) return '$0'
+
+    const abs = Math.abs(value)
+
+    if (abs >= 1_000_000) {
+      return `$${(value / 1_000_000).toFixed(2)}M`
+    }
+
+    if (abs >= 1_000) {
+      return `$${(value / 1_000).toFixed(1)}K`
+    }
+
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(value)
+  }
 
   onMounted(async () => {
     await dashboardStore.fetchStats()
@@ -263,13 +283,13 @@
   const cards = computed(() => {
     if (!dashboardStore.stats) return []
     return [
-      {
-        title: 'Total Products',
-        value: dashboardStore.stats.totalProducts,
-        icon: 'mdi-cube-outline',
-        color: 'blue-grey',
-        trend: 12
-      },
+      // {
+      //   title: 'Total Products',
+      //   value: dashboardStore.stats.totalProducts,
+      //   icon: 'mdi-cube-outline',
+      //   color: 'blue-grey',
+      //   trend: 12
+      // },
       {
         title: 'Total Stock',
         value: dashboardStore.stats.inStock,
