@@ -2,17 +2,18 @@ FROM php:8.4-fpm
 
 WORKDIR /var/www/html
 
-# System dependencies
+# Added libpq-dev for PostgreSQL
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
+    libpq-dev \
     unzip \
     git \
     curl \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install pdo_mysql gd zip \
+ && docker-php-ext-install pdo_mysql pdo_pgsql gd zip \
  && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
