@@ -28,11 +28,11 @@ use Illuminate\Support\Facades\Route;
 // })->middleware('auth:sanctum');
 
 
-// Route::get('/user', function () {
-//     return response()->json([
-//         'message' => 'API is working'
-//     ]);
-// });
+Route::get('/test', function () {
+    return response()->json([
+        'message' => 'API is working'
+    ]);
+});
 Route::prefix('users')->group(function () {
     Route::get('/', [UserController::class, 'index']);
     Route::post('/', [UserController::class, 'store']);
