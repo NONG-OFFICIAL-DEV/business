@@ -65,7 +65,7 @@ services:
     volumes:
       - ./backend/public:/var/www/html:ro 
     networks:
-      - app-network
+      - web
 
 networks:
   web:
