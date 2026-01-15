@@ -158,6 +158,12 @@
           title: 'Users',
           icon: 'mdi-account',
           roles: [1]
+        },
+        {
+          path: '/empployee-management',
+          title: 'Employees',
+          icon: 'mdi-account',
+          roles: [1]
         }
       ]
     },

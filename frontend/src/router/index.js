@@ -29,6 +29,12 @@ const routes = [
         component: () => import('@/views/users/RolesManagement.vue'),
         meta: { requiresAuth: true }
       },
+      {
+        path: '/empployee-management',
+        name: 'EmployeeManagement',
+        component: () => import('@/views/employees/EmployeeManagement.vue'),
+        meta: { requiresAuth: true }
+      },
 
       // Stock Management Pages
       {
