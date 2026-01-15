@@ -128,7 +128,7 @@ jobs:
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-backend:latest
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-frontend:latest
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-ai:latest
-            docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-webserver:latest
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/inventory-webserver:latest
 
             echo ">>> Start containers"
             docker compose down --remove-orphans || true
