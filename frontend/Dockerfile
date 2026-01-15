@@ -20,6 +20,6 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Serve with Caddy
-# FROM caddy:2-alpine
-# COPY --from=build-stage /app/dist /usr/share/caddy
-# COPY Caddyfile /etc/caddy/Caddyfile
+FROM caddy:2-alpine
+COPY --from=build-stage /app/dist /usr/share/caddy
+COPY Caddyfile /etc/caddy/Caddyfile
