@@ -1,305 +1,3 @@
-<template>
-  <v-app-bar color="surface-light" order="1" class="px-4">
-    <template v-slot:prepend>
-      <v-icon icon="mdi-storefront" color="primary" size="large" />
-    </template>
-    <v-app-bar-title class="font-weight-black">Quick POS</v-app-bar-title>
-    <v-spacer></v-spacer>
-    <v-text-field
-      v-model="search"
-      prepend-inner-icon="mdi-magnify"
-      label="Search items..."
-      hide-details
-      density="compact"
-      rounded="lg"
-    ></v-text-field>
-  </v-app-bar>
-
-  <v-navigation-drawer location="end" name="drawer" permanent width="400">
-    <template v-slot:prepend>
-      <v-toolbar color="white" flat border="bottom">
-        <v-toolbar-title class="font-weight-bold">
-          Current Order
-        </v-toolbar-title>
-        <v-btn
-          icon="mdi-delete-sweep-outline"
-          color="error"
-          variant="text"
-          @click="cart = []"
-          :disabled="!cart.length"
-        ></v-btn>
-      </v-toolbar>
-    </template>
-
-    <div class="flex-grow-1 overflow-y-auto pa-2">
-      <v-empty-state
-        v-if="cart.length === 0"
-        icon="mdi-cart-outline"
-        title="Your cart is empty"
-        text="Tap on products to start an order"
-        class="mt-10"
-      ></v-empty-state>
-
-      <v-list v-else lines="two">
-        <v-list-item
-          v-for="item in cart"
-          :key="item.id"
-          class="px-2 mb-2 border rounded-lg"
-        >
-          <template v-slot:prepend>
-            <v-avatar rounded="lg" size="50" :image="item.image_url"></v-avatar>
-          </template>
-
-          <v-list-item-title>
-            {{ item.name }}
-          </v-list-item-title>
-          <v-list-item-subtitle class="text-primary font-weight-bold">
-            ${{ (item.price * item.qty).toFixed(2) }}
-          </v-list-item-subtitle>
-
-          <template v-slot:append>
-            <div
-              class="d-flex align-center bg-grey-lighten-4 rounded-pill px-1"
-            >
-              <v-btn
-                icon="mdi-minus"
-                size="x-small"
-                variant="text"
-                @click="decrease(item)"
-              ></v-btn>
-              <span class="mx-2 font-weight-bold text-caption">
-                {{ item.qty }}
-              </span>
-              <v-btn
-                icon="mdi-plus"
-                size="x-small"
-                variant="text"
-                @click="increase(item)"
-              ></v-btn>
-              <v-btn
-                icon="mdi-delete-outline"
-                size="x-small"
-                color="error"
-                variant="text"
-                @click="remove(item)"
-              />
-            </div>
-          </template>
-        </v-list-item>
-      </v-list>
-    </div>
-
-    <template v-slot:append>
-      <v-sheet class="pa-5" rounded="xl" elevation="3" border>
-        <!-- Header -->
-        <div class="d-flex align-center mb-4">
-          <v-icon icon="mdi-cash-register" color="primary" class="mr-2" />
-          <v-list-item-title class="text-h6 font-weight-bold">
-            Payment Summary
-          </v-list-item-title>
-        </div>
-
-        <!-- Payment Method -->
-        <v-select
-          v-model="paymentMethod"
-          :items="[
-            { title: 'Cash', value: 'cash' },
-            { title: 'Card', value: 'card' },
-            { title: 'QR Payment', value: 'qr' }
-          ]"
-          label="Payment Method"
-          prepend-inner-icon="mdi-credit-card-outline"
-          density="compact"
-          variant="outlined"
-          rounded="lg"
-          hide-details
-          class="mb-4"
-        />
-
-        <!-- Price Breakdown -->
-        <v-sheet class="pa-3 bg-grey-lighten-4 rounded-lg">
-          <div class="d-flex justify-space-between text-body-2 mb-2">
-            <span class="text-grey-darken-1">Subtotal</span>
-            <span>${{ subtotal.toFixed(2) }}</span>
-          </div>
-
-          <div class="d-flex justify-space-between text-body-2 mb-2">
-            <span class="text-grey-darken-1">Tax (10%)</span>
-            <span>${{ tax.toFixed(2) }}</span>
-          </div>
-
-          <div class="d-flex justify-space-between text-body-2">
-            <span class="text-grey-darken-1">Discount</span>
-            <span class="text-error">- ${{ discount.toFixed(2) }}</span>
-          </div>
-        </v-sheet>
-
-        <v-divider class="my-4" />
-
-        <!-- Total -->
-        <div class="d-flex justify-space-between align-center mb-4">
-          <span class="text-h6 font-weight-bold">Total</span>
-          <span class="text-h5 font-weight-black text-primary">
-            ${{ total.toFixed(2) }}
-          </span>
-        </div>
-
-        <!-- Checkout Button -->
-        <v-btn
-          block
-          size="large"
-          color="primary"
-          elevation="6"
-          rounded="xl"
-          prepend-icon="mdi-check-circle-outline"
-          @click="handleCheckout"
-          :disabled="cart.length === 0"
-        >
-          PROCESS PAYMENT
-        </v-btn>
-      </v-sheet>
-    </template>
-  </v-navigation-drawer>
-
-  <v-main>
-    <v-container>
-      <v-row>
-        <v-col
-          v-for="product in filteredProducts"
-          :key="product.id"
-          cols="6"
-          sm="4"
-          lg="3"
-        >
-          <v-card
-            hover
-            class="product-card rounded-lg overflow-hidden"
-            @click="addToCart(product)"
-          >
-            <v-img
-              :src="product.image_url"
-              height="200px"
-              cover
-              class="bg-grey-lighten-2"
-            >
-              <!-- <template v-slot:placeholder>
-                <v-row class="fill-height ma-0" align="center" justify="center">
-                  <v-progress-circular indeterminate color="grey-lighten-5" />
-                </v-row>
-              </template> -->
-            </v-img>
-
-            <v-card-text class="pa-3">
-              <div class="text-subtitle-1 font-weight-bold text-truncate">
-                {{ product.name }}
-              </div>
-              <div class="d-flex justify-space-between align-center mt-1">
-                <span class="text-primary font-weight-black text-h6">
-                  ${{ product.price }}
-                </span>
-                <v-chip
-                  size="x-small"
-                  :color="product.stock < 10 ? 'error' : 'grey'"
-                >
-                  Qty: {{ product.stock }}
-                </v-chip>
-              </div>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-main>
-  <v-dialog
-    v-model="showQRDialog"
-    fullscreen
-    max-width="500px"
-    transition="dialog-bottom-transition"
-  >
-    <v-card class="pa-4 pa-sm-8">
-      <v-toolbar color="transparent" density="compact">
-        <v-spacer />
-        <v-btn
-          icon="mdi-close"
-          variant="text"
-          @click="showQRDialog = false"
-        ></v-btn>
-      </v-toolbar>
-
-      <v-card-item class="text-center pt-0">
-        <v-card-title class="text-h5 font-weight-bold mb-2">
-          Payment QR Code
-        </v-card-title>
-        <v-card-subtitle class="text-wrap">
-          Scan this code with your banking app to pay
-        </v-card-subtitle>
-      </v-card-item>
-
-      <v-card-text class="d-flex flex-column align-center mt-4">
-        <div class="bg-primary-lighten-5 rounded-pill px-6 py-2 mb-6">
-          <span class="text-subtitle-1 text-medium-emphasis">
-            Total Amount:
-          </span>
-          <span class="text-h5 font-weight-black text-primary ml-2">
-            ${{ total.toFixed(2) }}
-          </span>
-        </div>
-
-        <v-sheet rounded="lg" class="pa-3 mb-6 bg-white" elevation="0">
-          <v-img
-            :src="
-              qrCodeUrl ||
-              'https://www.masskh.com/wp-content/uploads/2023/11/photo1700496472-568x800.jpeg'
-            "
-            width="400"
-            height="400"
-            aspect-ratio="1/1"
-            class="rounded-md"
-          >
-            <template v-slot:placeholder>
-              <v-row class="fill-height ma-0" align="center" justify="center">
-                <v-progress-circular
-                  indeterminate
-                  color="primary"
-                ></v-progress-circular>
-              </v-row>
-            </template>
-          </v-img>
-        </v-sheet>
-
-        <!-- <div class="d-flex align-center mb-6">
-          <v-progress-circular indeterminate size="18" width="2" color="primary" class="mr-3"></v-progress-circular>
-          <span class="text-body-2 text-medium-emphasis">Waiting for payment confirmation...</span>
-        </div> -->
-      </v-card-text>
-
-      <!-- <v-divider class="mb-4"></v-divider> -->
-
-      <!-- <v-card-actions class="flex-column ga-2">
-        <v-btn 
-          color="primary" 
-          variant="flat" 
-          block 
-          size="large" 
-          rounded="lg" 
-          @click="confirmPayment"
-        >
-          I have paid
-        </v-btn>
-        
-        <v-btn 
-          variant="text" 
-          block 
-          color="medium-emphasis" 
-          @click="showQRDialog = false"
-        >
-          Cancel Transaction
-        </v-btn>
-      </v-card-actions> -->
-    </v-card>
-  </v-dialog>
-</template>
-
 <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { useSaleStore } from '@/stores/salePOSStore'
@@ -308,7 +6,7 @@
   const saleStore = useSaleStore()
   const productStore = useProductStore()
   const search = ref('')
-  const paymentMethod = ref(null)
+  const paymentMethod = ref('qr')
 
   const cart = ref([])
 
@@ -422,12 +120,314 @@
   })
 </script>
 
-<style>
-  ::-webkit-scrollbar-thumb {
-    background: transparent;
+<template>
+  <v-layout class="bg-grey-lighten-4">
+    <v-app-bar elevation="0" class="px-4 border-b" color="white">
+      <div class="d-flex align-center">
+        <v-icon icon="mdi-lightning-bolt" color="primary" class="mr-2" />
+        <v-app-bar-title
+          class="font-weight-black text-uppercase"
+          style="letter-spacing: 1px"
+        >
+          Quick
+          <span class="text-primary">POS</span>
+        </v-app-bar-title>
+      </div>
+
+      <v-spacer></v-spacer>
+
+      <v-responsive max-width="400">
+        <v-text-field
+          v-model="search"
+          prepend-inner-icon="mdi-magnify"
+          label="Search products or scan barcode..."
+          hide-details
+          density="compact"
+          variant="solo-filled"
+          flat
+          rounded="pill"
+        ></v-text-field>
+      </v-responsive>
+
+      <v-btn
+        icon="mdi-history"
+        class="ml-2"
+        variant="tonal"
+        color="grey-darken-1"
+      ></v-btn>
+      <v-btn
+        icon="mdi-cog-outline"
+        variant="tonal"
+        color="grey-darken-1"
+        class="ml-2"
+      ></v-btn>
+    </v-app-bar>
+
+    <v-navigation-drawer
+      location="end"
+      width="380"
+      permanent
+      elevation="0"
+      class="border-l-sm bg-grey-lighten-5"
+    >
+      <div class="d-flex flex-column fill-height">
+        <div
+          class="px-4 py-3 bg-white border-b d-flex align-center justify-space-between"
+        >
+          <div class="d-flex align-center">
+            <v-icon
+              icon="mdi-receipt-text-outline"
+              color="grey-darken-1"
+              class="mr-2"
+              size="small"
+            />
+            <span class="text-subtitle-2 font-weight-black text-uppercase">
+              Current Order #82
+            </span>
+          </div>
+          <v-btn
+            :disabled="!cart.length"
+            variant="text"
+            color="error"
+            icon="mdi-close-circle-outline"
+            size="small"
+            @click="cart = []"
+          ></v-btn>
+        </div>
+
+        <div class="flex-grow-1 overflow-y-auto pa-3">
+          <v-card
+            v-for="item in cart"
+            :key="item.id"
+            flat
+            rounded="lg"
+            class="mb-2 border-sm"
+          >
+            <div class="pa-2 d-flex align-center">
+              <v-avatar size="48" rounded="md" class="bg-grey-lighten-4 border">
+                <v-img :src="item.image_url" cover />
+              </v-avatar>
+
+              <div class="ml-3 flex-grow-1">
+                <div class="d-flex justify-space-between align-start">
+                  <span
+                    class="font-weight-bold text-truncate"
+                    style="max-width: 140px"
+                  >
+                    {{ item.name }}
+                  </span>
+                  <span class="font-weight-black">
+                    ${{ (item.price * item.qty).toFixed(2) }}
+                  </span>
+                </div>
+
+                <div class="d-flex align-center justify-space-between mt-1">
+                  <span class="text-grey text-caption">${{ item.price }}</span>
+
+                  <div
+                    class="d-flex align-center bg-grey-lighten-4 rounded-pill border"
+                  >
+                    <v-btn
+                      icon="mdi-minus"
+                      variant="text"
+                      size="x-small"
+                      @click="decrease(item)"
+                    />
+                    <span class="px-2 text-caption font-weight-bold">
+                      {{ item.qty }}
+                    </span>
+                    <v-btn
+                      icon="mdi-plus"
+                      variant="text"
+                      size="x-small"
+                      @click="increase(item)"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </v-card>
+        </div>
+
+        <v-sheet elevation="16" class="pa-4 border-t" color="white">
+          <v-select
+            v-model="paymentMethod"
+            :items="[
+              {
+                title: 'Cash',
+                value: 'cash',
+                props: { prependIcon: 'mdi-cash' }
+              },
+              {
+                title: 'Card',
+                value: 'card',
+                props: { prependIcon: 'mdi-credit-card' }
+              },
+              {
+                title: 'QR Payment',
+                value: 'qr',
+                props: { prependIcon: 'mdi-qrcode' }
+              }
+            ]"
+            label="Payment Method"
+            density="compact"
+            variant="outlined"
+            rounded="lg"
+            hide-details
+            class="mb-4 text-caption"
+            color="primary"
+          >
+            <template v-slot:selection="{ item }">
+              <div class="d-flex align-center">
+                <v-icon
+                  :icon="item.props.prependIcon"
+                  size="small"
+                  class="mr-2"
+                  color="primary"
+                />
+                <span class="text-caption font-weight-bold">
+                  {{ item.title }}
+                </span>
+              </div>
+            </template>
+          </v-select>
+          <div class="mb-3">
+            <div class="d-flex justify-space-between text-caption mb-1">
+              <span class="text-medium-emphasis">Subtotal</span>
+              <span>${{ subtotal.toFixed(2) }}</span>
+            </div>
+            <div
+              class="d-flex justify-space-between text-h6 font-weight-black border-t-sm pt-2"
+            >
+              <span>Total</span>
+              <span class="text-primary">${{ total.toFixed(2) }}</span>
+            </div>
+          </div>
+
+          <v-btn
+            block
+            height="52"
+            color="primary"
+            flat
+            rounded="lg"
+            class="text-button font-weight-black"
+            :disabled="!cart.length"
+            @click="handleCheckout"
+          >
+            COMPLETE ORDER
+          </v-btn>
+        </v-sheet>
+      </div>
+    </v-navigation-drawer>
+    <v-main>
+      <v-container fluid class="pa-6">
+        <div class="d-flex overflow-x-auto pb-4 no-scrollbar">
+          <v-chip-group mandatory selected-class="bg-primary text-white">
+            <v-chip
+              v-for="cat in ['All Items', 'Coffee', 'Tea', 'Pastries', 'Lunch']"
+              :key="cat"
+              class="px-6"
+            >
+              {{ cat }}
+            </v-chip>
+          </v-chip-group>
+        </div>
+
+        <v-row>
+          <v-col
+            v-for="product in filteredProducts"
+            :key="product.id"
+            cols="12"
+            sm="6"
+            md="4"
+            lg="3"
+            xl="2"
+          >
+            <v-card
+              flat
+              class="product-card rounded-xl"
+              @click="addToCart(product)"
+            >
+              <v-img :src="product.image_url" height="180" cover>
+                <div class="d-flex justify-end pa-2">
+                  <v-chip
+                    size="x-small"
+                    color="white"
+                    class="font-weight-bold"
+                    variant="flat"
+                  >
+                    STOCK: {{ product.stock }}
+                  </v-chip>
+                </div>
+              </v-img>
+
+              <v-card-text class="pa-4 bg-white">
+                <div
+                  class="text-subtitle-2 font-weight-bold text-truncate mb-1"
+                >
+                  {{ product.name }}
+                </div>
+                <div class="text-h6 font-weight-black text-primary">
+                  ${{ product.price }}
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+
+    <v-dialog
+      v-model="showQRDialog"
+      max-width="450"
+      transition="scale-transition"
+    >
+      <v-card rounded="xl" class="text-center pa-6">
+        <div class="text-h5 font-weight-black mb-1">Scan to Pay</div>
+        <div class="text-body-2 text-grey mb-6">
+          Total Amount: ${{ total.toFixed(2) }}
+        </div>
+
+        <v-sheet border rounded="xl" class="pa-4 mx-auto mb-6" max-width="300">
+          <v-img
+            src="https://www.masskh.com/wp-content/uploads/2023/11/photo1700496472-568x800.jpeg"
+            rounded="lg"
+            width="1000px"
+          />
+        </v-sheet>
+
+        <v-btn
+          block
+          color="primary"
+          size="large"
+          rounded="pill"
+          @click="showQRDialog = false"
+        >
+          Done / Close
+        </v-btn>
+      </v-card>
+    </v-dialog>
+  </v-layout>
+</template>
+
+<style scoped>
+  .product-card {
+    transition: all 0.2s ease-in-out;
+    border: 1px solid transparent;
+    cursor: pointer;
   }
 
-  * {
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08) !important;
+    border-color: rgb(var(--v-theme-primary));
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
     scrollbar-width: none;
   }
 </style>
