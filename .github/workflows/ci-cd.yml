@@ -12,7 +12,7 @@ jobs:
       IMAGE_BACKEND: ${{ secrets.DOCKERHUB_USERNAME }}/inventory-backend
       IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME }}/inventory-frontend
       IMAGE_AI: ${{ secrets.DOCKERHUB_USERNAME }}/inventory-ai
-      IMAGE_WEBSERVER: ${{ secrets.DOCKER_USERNAME }}/inventory-webserver
+      IMAGE_WEBSERVER: ${{ secrets.DOCKERHUB_USERNAME }}/inventory-webserver
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
