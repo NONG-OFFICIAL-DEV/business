@@ -6,7 +6,7 @@
   >
     <v-list class="pa-4 mb-4 mt-4">
       <v-list-item>
-        <v-img src="logo.png" width="190" contain class="mx-auto" />
+        <v-img :src="logo" width="190" contain class="mx-auto" />
       </v-list-item>
     </v-list>
     <v-list
@@ -76,6 +76,7 @@
 
 <script setup>
   import { ref, computed, watch } from 'vue'
+  import logo from '../../../public/logo.png'
 
   const props = defineProps({
     user: Object // user will be passed from parent (Layout.vue)
@@ -177,13 +178,13 @@
           title: 'Purchase',
           icon: 'mdi-cart-arrow-down',
           roles: [1, 2, 3]
-        },
-        {
-          path: '/purchase-reports',
-          title: 'Sale',
-          icon: 'mdi-cash-register',
-          roles: [1, 2, 3]
         }
+        // {
+        //   path: '/purchase-reports',
+        //   title: 'Sale',
+        //   icon: 'mdi-cash-register',
+        //   roles: [1, 2, 3]
+        // }
       ]
     },
     {
@@ -197,13 +198,13 @@
           title: 'Tax Settings',
           icon: 'mdi-percent',
           roles: [1]
-        },
-        {
-          path: '/settings/payment-methods',
-          title: 'Payment Types',
-          icon: 'mdi-credit-card-multiple',
-          roles: [1]
         }
+        // {
+        //   path: '/settings/payment-methods',
+        //   title: 'Payment Types',
+        //   icon: 'mdi-credit-card-multiple',
+        //   roles: [1]
+        // }
       ]
     },
     {

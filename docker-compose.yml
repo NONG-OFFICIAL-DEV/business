@@ -48,6 +48,24 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - web
+    
+  webserver:
+    depends_on:
+      - backend
+      - ai
+    build:
+      context: ./backend/nginx
+      dockerfile: Dockerfile
+    image: nongdev/inventory-webserver:latest
+    container_name: inventory_webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "82:82"
+    volumes:
+      - ./backend/public:/var/www/html:ro 
+    networks:
+      - app-network
 
 networks:
   web:
