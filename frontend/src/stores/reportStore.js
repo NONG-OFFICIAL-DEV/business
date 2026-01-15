@@ -17,7 +17,6 @@ export const useReportStore = defineStore('report', {
     },
     async fetchReportsInventory(params) {
       const res = await reportService.getReportsInventory(params);
-      console.log(res.data);
       this.inventoryReport = res.data
     }
   }

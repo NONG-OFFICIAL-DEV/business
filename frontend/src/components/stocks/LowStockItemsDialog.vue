@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-  import { ref, watch, computed, onMounted } from 'vue'
+  import { ref, watch, computed } from 'vue'
   import { useDashboardStore } from '@/stores/dashboardStore'
 
   const dashboardStore = useDashboardStore()

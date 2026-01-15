@@ -73,13 +73,13 @@
 </template>
 
 <script setup>
-  import { ref, watch, computed } from 'vue'
+  import { watch, computed } from 'vue'
   import { useStockMovementStore } from '@/stores/stockMovementStore'
   import { useDate } from '@/composables/useDate'
   // import { useAppUtils } from '@/composables/useAppUtils'
 
   // const { confirm, notif } = useAppUtils()
-  const { formatDate, formatDateTime, addDays } = useDate()
+  const { formatDateTime } = useDate()
   const stockMovementStore = useStockMovementStore()
 
   const props = defineProps({

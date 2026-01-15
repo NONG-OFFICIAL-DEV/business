@@ -198,7 +198,6 @@
   })
 
   /* ---------------- OPTIONS ---------------- */
-  const statusOptions = ['draft', 'ordered', 'received', 'cancelled']
   const paymentOptions = ['unpaid', 'partial', 'paid']
 
   /* ---------------- HEADERS ---------------- */
@@ -298,11 +297,6 @@
   const goToCreate = () => router.push('/purchase/create')
   const goToEdit = p => router.push(`/purchase/${p.id}/edit`)
   const goToDetails = p => router.push(`/purchases/${p.id}/details`)
-
-  const changeStatus = async (item, status) => {
-    await purchaseStore.updateStatus(item.id, status)
-    await purchaseStore.fetchPurchases()
-  }
 
   // Function to check if a purchase can be edited
   const canEditPurchase = computed(() => {

@@ -17,7 +17,6 @@ export const useUserStore = defineStore('userStore', {
         const res = await userAPI.getAll(param)
         this.users.data = res
       } catch (err) {
-        console.error('Fetch users failed:', err)
         this.error = err
       } finally {
         this.loading = false

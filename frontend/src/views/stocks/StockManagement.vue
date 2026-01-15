@@ -182,7 +182,7 @@
   const authStore = useAuthStore()
   // import { useAppUtils } from '@/composables/useAppUtils'
 
-  const { formatDate, formatDateTime, addDays } = useDate()
+  const { formatDate } = useDate()
   // const { confirm, notif } = useAppUtils()
   const stockMovementStore = useStockMovementStore()
   const stockStore = useStockStore()
@@ -294,8 +294,6 @@
   }
 
   async function handleAction(payload) {
-    console.log(payload)
-
     const { stockId, ...data } = payload
 
     switch (dialogType.value) {

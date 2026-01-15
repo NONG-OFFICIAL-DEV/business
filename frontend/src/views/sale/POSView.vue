@@ -351,15 +351,15 @@
 
   async function handleQRPayment() {
     try {
-      const saleData = {
-        items: cart.value.map(i => ({
-          product_id: i.id,
-          qty: i.qty,
-          price: i.price
-        })),
-        total: cart.value.reduce((s, i) => s + i.qty * i.price, 0),
-        payment_method: 'qr'
-      }
+      // const saleData = {
+      //   items: cart.value.map(i => ({
+      //     product_id: i.id,
+      //     qty: i.qty,
+      //     price: i.price
+      //   })),
+      //   total: cart.value.reduce((s, i) => s + i.qty * i.price, 0),
+      //   payment_method: 'qr'
+      // }
 
       // // Step 1: Request QR code from backend
       // const res = await saleStore.createQRPayment(saleData)
@@ -379,7 +379,7 @@
       //     await saleStore.fetchProducts()
       //   }
       // }, 3000) // check every 3s
-    } catch (err) {
+    } catch {
       alert('QR Payment failed')
     }
   }
@@ -409,10 +409,10 @@
         payment_method: paymentMethod.value
       }
 
-      const res = await saleStore.checkout(saleData)
+      await saleStore.checkout(saleData)
       cart.value = []
       await productStore.fetchProducts() // refresh stock
-    } catch (err) {
+    } catch {
       alert('Checkout failed')
     }
   }

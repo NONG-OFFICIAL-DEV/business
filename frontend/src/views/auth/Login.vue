@@ -94,7 +94,7 @@
   import { useAppUtils } from '@/composables/useAppUtils'
   import { useI18n } from 'vue-i18n'
   const { t } = useI18n()
-  const { confirm, notif } = useAppUtils()
+  const { notif } = useAppUtils()
   const email = ref('')
   const password = ref('')
   const store = useAuthStore()
@@ -135,9 +135,6 @@
         errors.general = res.message
       }
     }
-  }
-  function onForgotPassword() {
-    console.log('Reset password clicked')
   }
 </script>
 

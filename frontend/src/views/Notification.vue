@@ -141,7 +141,7 @@
 </template>
 
 <script setup>
-  import { ref, onMounted, computed } from 'vue'
+  import { onMounted, computed } from 'vue'
   import { useAuthStore } from '@/stores/auth'
   import { useNotificationStore } from '@/stores/notificationStore'
   const authStore = useAuthStore()
@@ -158,14 +158,13 @@
     window.open(`https://t.me/${botUsername}?start=${token}`, '_blank')
   }
 
-  async function confirmTelegram() {
-    try {
-      notificationStore.confirmTelegram()
-      console.log(res.data.message)
-    } catch (err) {
-      console.error(err.response.data)
-    }
-  }
+  // async function confirmTelegram() {
+  //   try {
+  //     notificationStore.confirmTelegram()
+  //   } catch (err) {
+  //     console.error(err.response.data)
+  //   }
+  // }
 
   const makeAsRead = id => {
     notificationStore.makeAsRead(id)

@@ -138,8 +138,8 @@
 
 
 <script setup>
-  import { ref, onMounted, computed } from 'vue'
-  import { useRoute, useRouter } from 'vue-router'
+  import { onMounted, computed } from 'vue'
+  import { useRoute } from 'vue-router'
   import { useDate } from '@/composables/useDate'
   import { useAuditLogStore } from '@/stores/auditLogStore'
 
@@ -147,7 +147,6 @@
   const store = useAuditLogStore()
 
   const route = useRoute()
-  const router = useRouter()
   const id = route.params.id
 
   const chipColor = computed(() => {

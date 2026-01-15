@@ -13,6 +13,7 @@
       v-model:opened="open"
       v-for="(link, i) in filteredMenu"
       :key="link.title"
+      :value="i"
       density="compact"
       class="pa-0"
     >

@@ -26,7 +26,7 @@
     try {
       await authStore.fetchMe()
       user.value = authStore.me
-    } catch (error) {
+    } catch {
       await authStore.logout()
       router.push({ name: 'Login' })
     }

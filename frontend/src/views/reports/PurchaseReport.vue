@@ -286,7 +286,6 @@
   }
 
   function generateReport() {
-    console.log('Filters:', filters.value)
     // Call API with filters.value to fetch new data
     renderCharts()
   }

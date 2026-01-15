@@ -194,7 +194,7 @@
     usersStore.fetchUsers({
       keyword: filters.value.keyword,
       roles: filters.value.roles?.join(',') ?? '',
-      status: filters.value.status,
+      status: filters.value.status
     })
   }
   const resetFilter = () => {

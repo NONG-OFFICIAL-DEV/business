@@ -66,51 +66,51 @@
       <!-- </v-col> -->
       <!-- </v-row> -->
 
-      <v-row dense class="mt-4">
-        <v-col cols="12" md="6">
-          <v-card :elevation="0" class="pa-6" rounded="xl">
-            <v-toolbar class="bg-white">
-              <h3>Stock by Category</h3>
-              <v-spacer></v-spacer>
-              <!-- <v-select
-              v-model="selectedMonth"
-              :items="monthsReport"
-              label="Month"
+    </v-row>
+    <v-row dense class="mt-4">
+      <v-col cols="12" md="6">
+        <v-card :elevation="0" class="pa-6" rounded="xl">
+          <v-toolbar class="bg-white">
+            <h3>Stock by Category</h3>
+            <v-spacer></v-spacer>
+            <!-- <v-select
+            v-model="selectedMonth"
+            :items="monthsReport"
+            label="Month"
+            rounded="lg"
+            density="compact"
+            hide-details
+            max-width="170"
+          ></v-select> -->
+            {{ formatDate(new Date()) }}
+          </v-toolbar>
+
+          <div style="height: 275px">
+            <canvas ref="barChartCanvas"></canvas>
+          </div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-card :elevation="0" class="pa-6" rounded="xl">
+          <v-toolbar class="bg-white">
+            <h3>Monthly Purchase</h3>
+            <!-- vs. Sales -->
+            <v-spacer></v-spacer>
+            <v-select
+              v-model="selectedYear"
+              :items="years"
+              label="Year"
               rounded="lg"
               density="compact"
               hide-details
               max-width="170"
-            ></v-select> -->
-              {{ formatDate(new Date()) }}
-            </v-toolbar>
-
-            <div style="height: 275px">
-              <canvas ref="barChartCanvas"></canvas>
-            </div>
-          </v-card>
-        </v-col>
-        <v-col cols="12" md="6">
-          <v-card :elevation="0" class="pa-6" rounded="xl">
-            <v-toolbar class="bg-white">
-              <h3>Monthly Purchase</h3>
-              <!-- vs. Sales -->
-              <v-spacer></v-spacer>
-              <v-select
-                v-model="selectedYear"
-                :items="years"
-                label="Year"
-                rounded="lg"
-                density="compact"
-                hide-details
-                max-width="170"
-              ></v-select>
-            </v-toolbar>
-            <div style="height: 275px">
-              <canvas ref="chartCanvas"></canvas>
-            </div>
-          </v-card>
-        </v-col>
-      </v-row>
+            ></v-select>
+          </v-toolbar>
+          <div style="height: 275px">
+            <canvas ref="chartCanvas"></canvas>
+          </div>
+        </v-card>
+      </v-col>
     </v-row>
     <!-- {{ dashboardStore.monthlyPurchases.data }} -->
   </v-container>
@@ -125,7 +125,7 @@
   import { useCurrency } from '@/composables/useCurrency.js'
   import { useDate } from '@/composables/useDate'
 
-  const { formatCurrency, formatKHR } = useCurrency()
+  const { formatCurrency } = useCurrency()
   const { formatDate } = useDate()
   const dashboardStore = useDashboardStore()
   const barChartCanvas = ref(null)
@@ -141,23 +141,7 @@
     }
   }
 
-  const selectedMonth = ref(new Date().getMonth() + 1) // 1-indexed
   const selectedYear = ref(new Date().getFullYear())
-
-  const monthsReport = [
-    { title: 'January', value: 1 },
-    { title: 'February', value: 2 },
-    { title: 'March', value: 3 },
-    { title: 'April', value: 4 },
-    { title: 'May', value: 5 },
-    { title: 'June', value: 6 },
-    { title: 'July', value: 7 },
-    { title: 'August', value: 8 },
-    { title: 'September', value: 9 },
-    { title: 'October', value: 10 },
-    { title: 'November', value: 11 },
-    { title: 'December', value: 12 }
-  ]
 
   const currentYear = new Date().getFullYear()
   const years = computed(() => {

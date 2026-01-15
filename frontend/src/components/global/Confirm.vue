@@ -11,10 +11,10 @@
       />
       <v-card-actions class="pa-4">
         <v-spacer />
-        <v-btn elevation="0" ref="btnNo" @click.native="cancel" variant="tonal">
+        <v-btn elevation="0" ref="btnNo" @click="cancel" variant="tonal">
           {{ $t('btn.cancel') }}
         </v-btn>
-        <v-btn elevation="0" class="bg-red" @click.native="agree">
+        <v-btn elevation="0" class="bg-red" @click="agree">
           {{ $t('btn.yes') }}
         </v-btn>
       </v-card-actions>

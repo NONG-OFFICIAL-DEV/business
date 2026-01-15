@@ -47,13 +47,13 @@
 </template>
 
 <script setup>
-  import { ref, onMounted, computed } from 'vue'
+  import { computed } from 'vue'
   import { useAuthStore } from '@/stores/auth'
   import { useRouter } from 'vue-router'
   import { useAppUtils } from '@/composables/useAppUtils'
   import { useI18n } from 'vue-i18n'
   const { t } = useI18n()
-  const { confirm, notif } = useAppUtils()
+  const { notif } = useAppUtils()
   const props = defineProps({
     user: Object ,
     notifications_count: Number// user will be passed from parent (Layout.vue)

@@ -277,7 +277,7 @@
   // Composables & Utils
   // ------------------------------
   const { hasRole } = usePermission()
-  const { formatDate, formatDateTime, formatLocalDate } = useDate()
+  const { formatLocalDate } = useDate()
   const { formatCurrency, formatCurrencyNoSymbol } = useCurrency()
   const { t } = useI18n()
   const { confirm, notif } = useAppUtils()
@@ -504,7 +504,10 @@
       aiSuggestions = await res.data
       isLoading.value = false
     } catch (error) {
-      console.error('Failed to fetch AI suggestions:', error)
+      return notif('Failed to fetch AI suggestions:', error, {
+        type: 'error',
+        color: 'error'
+      })
     }
   }
 

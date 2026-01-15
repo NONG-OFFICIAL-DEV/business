@@ -30,6 +30,7 @@
         </v-col>
         <v-col cols="12" md="3">
           <strong>Purchase Date:</strong>
+          {{ formatDate(purchase.purchase_date) }}
         </v-col>
         <v-col cols="12" md="3">
           <strong>Status:</strong>
@@ -142,8 +143,8 @@
   import { useDate } from '@/composables/useDate'
   import { useCurrency } from '@/composables/useCurrency.js'
 
-  const { formatCurrency, formatKHR } = useCurrency()
-  const { formatDate, formatDateTime, addDays } = useDate()
+  const { formatCurrency } = useCurrency()
+  const { formatDate } = useDate()
   const route = useRoute()
   const purchaseStore = usePurchaseStore()
 

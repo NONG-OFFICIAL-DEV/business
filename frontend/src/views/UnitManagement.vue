@@ -55,7 +55,6 @@
       const res = unit.id
         ? await unitStore.updateUnit(unit)
         : await unitStore.addUnit(unit)
-      console.log(res)
 
       if (res.status == 200 || res.status == 201) {
         notif(
@@ -67,7 +66,7 @@
       }
       unitStore.fetchUnits()
       dialog.value = false
-    } catch (error) {
+    } catch {
       notif(t('messages.existName'), { type: 'error', color: 'primary' })
     }
   }
@@ -87,7 +86,6 @@
           })
           unitStore.fetchUnits()
         } catch (err) {
-          console.error('Delete failed:', err)
           notif(err.response?.data?.error || t('messages.delete_failed'), {
             type: 'error',
             color: 'error'
