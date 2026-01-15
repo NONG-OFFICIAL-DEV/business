@@ -147,6 +147,12 @@ const routes = [
         name: 'Notifications',
         component: () => import('@/views/Notification.vue'),
         meta: { requiresAuth: true }
+      },
+      {
+        path: '/settings/tax',
+        name: 'TaxSettings',
+        component: () => import('@/views/setting/SettingsTax.vue'),
+        meta: { requiresAuth: true }
       }
     ]
   },
