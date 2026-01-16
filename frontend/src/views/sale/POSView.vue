@@ -2,6 +2,7 @@
   import { ref, computed, onMounted } from 'vue'
   import { useSaleStore } from '@/stores/salePOSStore'
   import { useProductStore } from '@/stores/productStore'
+  import OrderCustomizationDialog from '../../components/pos/OrderCustomizationDialog.vue'
 
   const saleStore = useSaleStore()
   const productStore = useProductStore()
@@ -47,6 +48,18 @@
   const showQRDialog = ref(false)
   const qrCodeUrl = ref('')
 
+  const showCustomizeDialog = ref(false)
+  const selectedProduct = ref(null)
+
+  function openCustomizer(product) {
+    selectedProduct.value = product
+    showCustomizeDialog.value = true
+  }
+
+  function handleAddCustomizedProduct(orderData) {
+    // logic to push orderData to cart
+    cart.value.push(orderData)
+  }
   async function handleQRPayment() {
     try {
       // const saleData = {
@@ -346,7 +359,7 @@
             <v-card
               flat
               class="product-card rounded-xl"
-              @click="addToCart(product)"
+              @click="openCustomizer(product)"
             >
               <v-img :src="product.image_url" height="180" cover>
                 <div class="d-flex justify-end pa-2">
@@ -408,6 +421,11 @@
       </v-card>
     </v-dialog>
   </v-layout>
+  <OrderCustomizationDialog
+    v-model="showCustomizeDialog"
+    :product="selectedProduct"
+    @add-to-cart="handleAddCustomizedProduct"
+  />
 </template>
 
 <style scoped>
