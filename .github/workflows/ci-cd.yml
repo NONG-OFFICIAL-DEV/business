@@ -175,3 +175,8 @@ jobs:
 
             echo ">>> Run seeders (optional)"
             # docker compose exec backend php artisan db:seed --force
+            echo ">>> Create storage link"
+            docker compose exec -T backend php artisan storage:link || true
+
+            echo ">>> Fix permissions again"
+            docker compose exec -T backend chown -R www-data:www-data /var/www/html/storage
