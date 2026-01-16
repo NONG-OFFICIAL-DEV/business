@@ -176,10 +176,16 @@ jobs:
             echo ">>> Run seeders (optional)"
             # docker compose exec backend php artisan db:seed --force
 
+            echo ">>> Setup storage for Laravel"
             docker compose exec backend bash -c "
-              php artisan storage:link || true
+              # Remove old symlink if exists
+              rm -f public/storage
+              # Create storage symlink
+              php artisan storage:link
+              # Ensure products folder exists
               mkdir -p storage/app/public/products
+              # Fix permissions
               chown -R www-data:www-data storage bootstrap/cache
               chmod -R 775 storage bootstrap/cache
-              "
+            "
 
