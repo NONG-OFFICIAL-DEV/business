@@ -64,7 +64,7 @@ services:
     ports:
       - "82:82"
     volumes:
-      - ./backend/public:/var/www/html:ro 
+      - ./backend/public:/var/www/html:rw 
       - inventory_backend_storage:/var/www/html/storage:ro
     networks:
       - web
