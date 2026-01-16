@@ -19,7 +19,17 @@
                 item-title="name"
                 item-value="id"
                 :rules="[rules.required]"
-              />
+              >
+                <template #append-item>
+                  <v-divider />
+
+                  <v-list-item class="text-primary" @click="openCreateSupplier">
+                    <v-list-item-title>
+                      ➕ Create new supplier
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+              </v-select>
             </v-col>
             <v-col cols="12" sm="4">
               <v-text-field
@@ -37,7 +47,18 @@
                 item-value="id"
                 label="Category"
                 :rules="[rules.required]"
-              />
+              >
+                <template #append-item>
+                  <v-divider />
+
+                  <v-list-item class="text-primary" @click="openCreateCatetory">
+                    <v-list-item-title>
+                      <v-icon>mdi-plus</v-icon>
+                      Create new category
+                    </v-list-item-title>
+                  </v-list-item>
+                </template>
+              </v-select>
             </v-col>
           </v-row>
           <v-row>
@@ -105,6 +126,16 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+  <SupplierDialog
+    v-model="isDialogSupplierOpen"
+    :supplier="selectedSupplier"
+    @save="handleSave"
+  />
+  <CategoryDialog
+    v-model="isDialogCategoryOpen"
+    :category="selectedCategory"
+    @save="handleSaveCategory"
+  />
 </template>
 
 <script setup>
@@ -112,10 +143,20 @@
   import { useCategoryStore } from '@/stores/categoryStore'
   import { useUnitStore } from '@/stores/unitStore'
   import { useSupplierStore } from '@/stores/supplierStore'
+  import SupplierDialog from '@/components/SupplierDialog.vue'
+  import CategoryDialog from '@/components/CategoryDialog.vue'
+  import { useAppUtils } from '@/composables/useAppUtils'
+  import { useI18n } from 'vue-i18n'
 
   const unitStore = useUnitStore()
   const categoryStore = useCategoryStore()
   const supplierStore = useSupplierStore()
+  const isDialogSupplierOpen = ref(false)
+  const isDialogCategoryOpen = ref(false)
+  const selectedSupplier = ref(null)
+  const selectedCategory = ref(null)
+  const { notif } = useAppUtils()
+  const { t } = useI18n()
 
   const props = defineProps({
     isOpen: Boolean,
@@ -166,6 +207,32 @@
 
   const rules = {
     required: v => !!v || 'This field is required'
+  }
+  const openCreateSupplier = supplier => {
+    selectedSupplier.value = { ...supplier }
+    isDialogSupplierOpen.value = true
+  }
+  const openCreateCatetory = categories => {
+    selectedCategory.value = { ...categories }
+    isDialogCategoryOpen.value = true
+  }
+  const handleSave = async supplier => {
+    await supplierStore.addSupplier(supplier)
+    notif(t('messages.saved_success'), { type: 'success' })
+
+    isDialogSupplierOpen.value = false
+    supplierStore.fetchSuppliers({ status: 1, per_page: -1 })
+  }
+  const handleSaveCategory = async category => {
+    await categoryStore.addCategory(category)
+    notif(t('messages.saved_success'), {
+      type: 'success',
+      color: 'primary'
+    })
+    isDialogCategoryOpen.value = false
+    categoryStore.fetchCategories({
+      per_page: -1
+    })
   }
   // 🧹 Reset form
   const resetForm = () => {
