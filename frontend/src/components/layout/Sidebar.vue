@@ -77,7 +77,7 @@
 
 <script setup>
   import { ref, computed, watch } from 'vue'
-  import logo from '../../../public/logo.png'
+  import logo from '/logo.png'
 
   const props = defineProps({
     user: Object // user will be passed from parent (Layout.vue)

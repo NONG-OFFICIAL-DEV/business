@@ -41,7 +41,17 @@
               item-title="name"
               item-value="id"
               :rules="[v => !!v || 'Supplier is required']"
-            />
+            >
+              <template #append-item>
+                <v-divider />
+                <v-list-item class="text-primary" @click="openCreateSupplier">
+                  <v-list-item-title>
+                    <v-icon>mdi-plus</v-icon>
+                    Create new supplier
+                  </v-list-item-title>
+                </v-list-item>
+              </template>
+            </v-select>
           </v-col>
 
           <v-col cols="12" sm="6" md="3">
@@ -255,6 +265,11 @@
         </v-row>
       </v-card>
     </v-form>
+    <SupplierDialog
+      v-model="isDialogSupplierOpen"
+      :supplier="selectedSupplier"
+      @save="handleSave"
+    />
   </v-container>
 </template>
 
@@ -272,6 +287,7 @@
   import { usePurchaseCalculator } from '@/composables/usePurchaseCalculator'
   import { usePermission } from '@/composables/usePermission'
   import { PURCHASE_STATUSES } from '@/constants/purchaseStatuses.js'
+  import SupplierDialog from '@/components/SupplierDialog.vue'
 
   // ------------------------------
   // Composables & Utils
@@ -289,7 +305,8 @@
   const productStore = useProductStore()
   const purchaseStore = usePurchaseStore()
   const AIStore = useInventoryAIStore()
-
+  const isDialogSupplierOpen = ref(false)
+  const selectedSupplier = ref(null)
   // ------------------------------
   // Refs & Reactive State
   // ------------------------------
@@ -395,6 +412,17 @@
   // ------------------------------
   // Methods
   // ------------------------------
+  const openCreateSupplier = supplier => {
+    selectedSupplier.value = { ...supplier }
+    isDialogSupplierOpen.value = true
+  }
+  const handleSave = async supplier => {
+    await supplierStore.addSupplier(supplier)
+    notif(t('messages.saved_success'), { type: 'success' })
+
+    isDialogSupplierOpen.value = false
+    supplierStore.fetchSuppliers({ status: 1, per_page: -1 })
+  }
 
   async function loadInitialData() {
     await supplierStore.fetchSuppliers({ status: 1, per_page: -1 })

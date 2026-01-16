@@ -25,7 +25,8 @@
 
                   <v-list-item class="text-primary" @click="openCreateSupplier">
                     <v-list-item-title>
-                      ➕ Create new supplier
+                      <v-icon>mdi-plus</v-icon>
+                      Create new supplier
                     </v-list-item-title>
                   </v-list-item>
                 </template>
@@ -50,7 +51,6 @@
               >
                 <template #append-item>
                   <v-divider />
-
                   <v-list-item class="text-primary" @click="openCreateCatetory">
                     <v-list-item-title>
                       <v-icon>mdi-plus</v-icon>
