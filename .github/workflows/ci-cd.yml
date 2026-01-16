@@ -175,10 +175,11 @@ jobs:
 
             echo ">>> Run seeders (optional)"
             # docker compose exec backend php artisan db:seed --force
-            echo ">>> Create internal storage link"
-            # -T is used for non-interactive shells (CI/CD)
-            docker compose exec -T backend php artisan storage:link || true
 
-            echo ">>> Fix permissions for web server access"
-            docker compose exec -T backend chown -R www-data:www-data /var/www/html/storage
-            docker compose exec -T backend chmod -R 775 /var/www/html/storage
+            docker compose exec backend bash -c "
+              php artisan storage:link || true
+              mkdir -p storage/app/public/products
+              chown -R www-data:www-data storage bootstrap/cache
+              chmod -R 775 storage bootstrap/cache
+              "
+
