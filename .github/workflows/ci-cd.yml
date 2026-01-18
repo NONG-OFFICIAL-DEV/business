@@ -37,27 +37,6 @@ jobs:
           docker push $IMAGE_BACKEND:$IMAGE_TAG
 
       # -------------------
-      # Build & Push Frontend
-      # -------------------
-      # - name: Build & push frontend image
-      #   run: |
-      #     docker build -t $IMAGE_FRONTEND:latest -t $IMAGE_FRONTEND:$IMAGE_TAG ./frontend
-      #     docker push $IMAGE_FRONTEND:latest
-      #     docker push $IMAGE_FRONTEND:$IMAGE_TAG
-
-      # - name: Build frontend image
-      #   run: |
-      #     docker build \
-      #       --build-arg VITE_APP_MODE=Production \
-      #       --build-arg VITE_APP_API_BASE_URL=${{ secrets.API_URL }} \
-      #       --build-arg VITE_APP_I18N_LOCALE=en \
-      #       --build-arg VITE_APP_I18N_FALLBACK_LOCALE=en \
-      #       --build-arg VITE_APP_API_BASE_AI_URL=${{ secrets.AI_API_URL }} \
-      #       -t $IMAGE_FRONTEND:latest \
-      #       -t $IMAGE_FRONTEND:$IMAGE_TAG \
-      #       ./frontend
-
-      # -------------------
       # Build & Push Frontend (WITH ENV)
       # -------------------
       - name: Build & push frontend image
@@ -177,15 +156,15 @@ jobs:
             # docker compose exec backend php artisan db:seed --force
 
             echo ">>> Setup storage for Laravel"
-            docker compose exec backend bash -c "
-              # Remove old symlink if exists
-              rm -f public/storage
-              # Create storage symlink
-              php artisan storage:link
-              # Ensure products folder exists
-              mkdir -p storage/app/public/products
-              # Fix permissions
-              chown -R www-data:www-data storage bootstrap/cache
-              chmod -R 775 storage bootstrap/cache
-            "
+            # docker compose exec backend bash -c "
+            #   # Remove old symlink if exists
+            #   rm -f public/storage
+            #   # Create storage symlink
+            #   php artisan storage:link
+            #   # Ensure products folder exists
+            #   mkdir -p storage/app/public/products
+            #   # Fix permissions
+            #   chown -R www-data:www-data storage bootstrap/cache
+            #   chmod -R 775 storage bootstrap/cache
+            # "
 
