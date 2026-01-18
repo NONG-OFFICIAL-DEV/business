@@ -315,10 +315,12 @@
 
           <v-btn
             block
-            height="60"
-            color="success"
+            height="52"
+            color="primary"
             flat
-            class="text-h6 font-weight-bold"
+            rounded="lg"
+            class="font-weight-black"
+            :disabled="!cart.length"
             @click="emit('checkout')"
           >
             F10 - PAY NOW

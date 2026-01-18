@@ -166,6 +166,11 @@ const routes = [
     path: '/pos',
     name: 'POS',
     component: () => import('@/views/sale/POSView.vue')
+  },
+  {
+    path: '/mobile-menu',
+    name: 'MobileMenu',
+    component: () => import('@/views/mobile/MobileOrder.vue')
   }
 ]
 
