@@ -143,6 +143,12 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: '/menu-management',
+        name: 'MenuManagement',
+        component: () => import('@/views/sale/MenuManagement.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: '/notifications',
         name: 'Notifications',
         component: () => import('@/views/Notification.vue'),

@@ -9,6 +9,17 @@
         <v-img :src="logo" width="190" contain class="mx-auto" />
       </v-list-item>
     </v-list>
+    <v-select
+      v-model="selectedModule"
+      :items="[
+        { title: 'Coffee Store', value: 'coffee' },
+        { title: 'Mart Store', value: 'mart' }
+      ]"
+      label="Store"
+      density="compact"
+      class="mx-4 mb-3"
+    />
+
     <v-list
       v-model:opened="open"
       v-for="(link, i) in filteredMenu"
@@ -82,9 +93,36 @@
   const props = defineProps({
     user: Object // user will be passed from parent (Layout.vue)
   })
+  const selectedModule = ref('coffee') // default
 
   const rail = ref(false)
   const open = ref(['dashboard'])
+
+  const filteredMenu = computed(() => {
+    if (!props.user) return []
+
+    return menu.value
+      .map(link => {
+        const roleOk = !link.roles || link.roles.includes(props.user.role_id)
+        const moduleOk =
+          !link.modules || link.modules.includes(selectedModule.value)
+
+        if (roleOk && moduleOk) {
+          if (link.subLinks) {
+            const filteredSubs = link.subLinks.filter(
+              s =>
+                (!s.roles || s.roles.includes(props.user.role_id)) &&
+                (!s.modules || s.modules.includes(selectedModule.value))
+            )
+            return { ...link, subLinks: filteredSubs }
+          }
+          return link
+        }
+
+        return null
+      })
+      .filter(Boolean)
+  })
 
   const menu = ref([
     {
@@ -111,6 +149,7 @@
       title: 'Products',
       icon: 'mdi-package-variant',
       roles: [1, 2]
+      // modules: ['mart']
     },
     {
       path: '/stocks',
@@ -137,9 +176,9 @@
           newTab: true
         },
         {
-          path: '/#',
-          title: 'Users',
-          icon: 'mdi-account',
+          path: '/menu-management',
+          title: 'Menu',
+          icon: 'mdi-food',
           roles: [1]
         }
       ]
@@ -160,6 +199,19 @@
           title: 'Users',
           icon: 'mdi-account',
           roles: [1]
+        }
+      ]
+    },
+    {
+      title: 'Expenses',
+      icon: 'mdi-cash-minus',
+      roles: [1, 2, 3],
+      subLinks: [
+        {
+          path: '/expense-list',
+          title: 'Expenses List',
+          icon: 'mdi-account-cash',
+          roles: [1, 2, 3]
         }
       ]
     },
@@ -217,26 +269,26 @@
   ])
 
   // Filter menu based on user role
-  const filteredMenu = computed(() => {
-    if (!props.user) return []
+  // const filteredMenu = computed(() => {
+  //   if (!props.user) return []
 
-    return menu.value
-      .map(link => {
-        // Check if main link is allowed
-        if (!link.roles || link.roles.includes(props.user.role_id)) {
-          // If it has subLinks, filter subLinks as well
-          if (link.subLinks) {
-            const filteredSubs = link.subLinks.filter(
-              s => !s.roles || s.roles.includes(props.user.role_id)
-            )
-            return { ...link, subLinks: filteredSubs }
-          }
-          return link
-        }
-        return null
-      })
-      .filter(link => link !== null)
-  })
+  //   return menu.value
+  //     .map(link => {
+  //       // Check if main link is allowed
+  //       if (!link.roles || link.roles.includes(props.user.role_id)) {
+  //         // If it has subLinks, filter subLinks as well
+  //         if (link.subLinks) {
+  //           const filteredSubs = link.subLinks.filter(
+  //             s => !s.roles || s.roles.includes(props.user.role_id)
+  //           )
+  //           return { ...link, subLinks: filteredSubs }
+  //         }
+  //         return link
+  //       }
+  //       return null
+  //     })
+  //     .filter(link => link !== null)
+  // })
 
   watch(rail, newVal => {
     if (newVal) {

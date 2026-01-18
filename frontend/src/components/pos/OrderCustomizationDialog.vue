@@ -37,7 +37,8 @@
       qty: quantity.value,
       customizations: {
         cup: selectedCup.value,
-        sugar: selectedSugar.value
+        sugar: selectedSugar.value,
+        orderType: orderType.value
       },
       finalPrice: totalPrice.value
     }
@@ -108,7 +109,7 @@
             </div>
           </div>
 
-          <div class="d-flex align-center border rounded-lg px-1 py-1">
+          <div class="d-flex align-center bg-white rounded-pill border px-1">
             <v-btn
               icon="mdi-minus"
               variant="text"

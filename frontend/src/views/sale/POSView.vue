@@ -2,31 +2,44 @@
   import { ref, computed, onMounted } from 'vue'
   import { useSaleStore } from '@/stores/salePOSStore'
   import { useProductStore } from '@/stores/productStore'
-  import OrderCustomizationDialog from '../../components/pos/OrderCustomizationDialog.vue'
+  import { useCurrency } from '@/composables/useCurrency'
+  import OrderCustomizationDialog from '@/components/pos/OrderCustomizationDialog.vue'
+  import QRPaymentDialog from '@/components/pos/QRPaymentDialog.vue'
 
   const saleStore = useSaleStore()
   const productStore = useProductStore()
+  const { formatCurrency } = useCurrency()
+
   const search = ref('')
   const paymentMethod = ref('qr')
-
   const cart = ref([])
 
-  const filteredProducts = computed(() => {
-    if (productStore.products.data) {
-      return productStore.products.data.filter(p =>
-        p.name.toLowerCase().includes(search.value.toLowerCase())
-      )
-    }
-  })
+  const showCustomizeDialog = ref(false)
+  const selectedProduct = ref(null)
+  const showQRDialog = ref(false)
+
+  const stores = [
+    { id: 1, name: 'Mart' },
+    { id: 2, name: 'Coffee Store' },
+    { id: 3, name: 'Restaurant' }
+  ]
+
+  const selectedStore = ref(stores[1]) // Coffee Store
+
+  const filteredProducts = computed(() =>
+    productStore.products.data?.filter(p =>
+      p.name.toLowerCase().includes(search.value.toLowerCase())
+    )
+  )
 
   const subtotal = computed(() =>
     cart.value.reduce((s, i) => s + i.price * i.qty, 0)
   )
-
-  const tax = computed(() => subtotal.value * 0)
-  const discount = computed(() => (subtotal.value > 500 ? 0 : 0))
+  const tax = computed(() => 0)
+  const discount = computed(() => 0)
   const total = computed(() => subtotal.value + tax.value - discount.value)
 
+  // --- Cart Actions ---
   function addToCart(product) {
     const item = cart.value.find(i => i.id === product.id)
     if (item) item.qty++
@@ -41,15 +54,10 @@
   function increase(item) {
     item.qty++
   }
+
   function remove(item) {
     cart.value = cart.value.filter(i => i.id !== item.id)
   }
-
-  const showQRDialog = ref(false)
-  const qrCodeUrl = ref('')
-
-  const showCustomizeDialog = ref(false)
-  const selectedProduct = ref(null)
 
   function openCustomizer(product) {
     selectedProduct.value = product
@@ -57,54 +65,21 @@
   }
 
   function handleAddCustomizedProduct(orderData) {
-    // logic to push orderData to cart
-    cart.value.push(orderData)
-  }
-  async function handleQRPayment() {
-    try {
-      // const saleData = {
-      //   items: cart.value.map(i => ({
-      //     product_id: i.id,
-      //     qty: i.qty,
-      //     price: i.price
-      //   })),
-      //   total: cart.value.reduce((s, i) => s + i.qty * i.price, 0),
-      //   payment_method: 'qr'
-      // }
-
-      // // Step 1: Request QR code from backend
-      // const res = await saleStore.createQRPayment(saleData)
-      // qrCodeUrl.value = res.qr_code_url
-
-      // // Step 2: Show modal with QR
-      showQRDialog.value = true
-
-      // // Step 3: Poll backend to check if payment completed
-      // const interval = setInterval(async () => {
-      //   const status = await saleStore.checkQRStatus(res.payment_id)
-      //   if (status.paid) {
-      //     clearInterval(interval)
-      //     showQRDialog.value = false
-      //     alert(`Payment completed! Sale ID: ${status.sale_id}`)
-      //     cart.value = []
-      //     await saleStore.fetchProducts()
-      //   }
-      // }, 3000) // check every 3s
-    } catch {
-      alert('QR Payment failed')
-    }
+    const existingItem = cart.value.find(
+      item =>
+        item.id === orderData.id &&
+        JSON.stringify(item.customizations) ===
+          JSON.stringify(orderData.customizations)
+    )
+    if (existingItem) existingItem.qty += orderData.qty
+    else cart.value.push(orderData)
   }
 
+  // --- Checkout ---
   async function handleCheckout() {
     if (!cart.value.length) return alert('Cart is empty!')
 
-    if (paymentMethod.value === 'qr') {
-      // Step 1: Generate QR payment
-      await handleQRPayment()
-      return
-    }
-
-    // Step 2: Normal checkout (Cash/Card)
+    if (paymentMethod.value === 'qr') return (showQRDialog.value = true)
     await handleNormalCheckout()
   }
 
@@ -114,68 +89,114 @@
         items: cart.value.map(i => ({
           product_id: i.id,
           qty: i.qty,
-          price: i.price
+          price: i.price,
+          customizations: i.customizations || null
         })),
-        total_amount: cart.value.reduce((s, i) => s + i.qty * i.price, 0),
+        total_amount: total.value,
         payment_method: paymentMethod.value
       }
 
       await saleStore.checkout(saleData)
       cart.value = []
-      await productStore.fetchProducts() // refresh stock
+      await productStore.fetchProducts()
     } catch {
       alert('Checkout failed')
     }
   }
 
-  onMounted(async () => {
-    await productStore.fetchProducts()
-  })
+  // --- Fetch Products ---
+  onMounted(() => productStore.fetchProducts())
 </script>
 
 <template>
   <v-layout class="bg-grey-lighten-4">
-    <v-app-bar elevation="0" class="px-4 border-b" color="white">
-      <div class="d-flex align-center">
-        <v-icon icon="mdi-lightning-bolt" color="primary" class="mr-2" />
-        <v-app-bar-title
-          class="font-weight-black text-uppercase"
-          style="letter-spacing: 1px"
-        >
-          Quick
+    <!-- App Bar -->
+    <v-app-bar
+      elevation="0"
+      color="white"
+      class="px-4 border-b d-flex align-center"
+    >
+      <!-- LOGO -->
+      <div class="d-flex align-center mr-6">
+        <v-icon icon="mdi-lightning-bolt" color="primary" class="mr-1" />
+        <span class="font-weight-black text-h6">
+          QUICK
           <span class="text-primary">POS</span>
-        </v-app-bar-title>
+        </span>
       </div>
 
-      <v-spacer></v-spacer>
+      <!-- STORE SWITCH -->
+      <v-menu location="bottom">
+        <template #activator="{ props }">
+          <v-btn
+            v-bind="props"
+            variant="tonal"
+            color="primary"
+            class="rounded-pill px-4"
+            width="200"
+          >
+            <v-icon size="18" class="mr-2">mdi-store</v-icon>
+            <span class="font-weight-bold">{{ selectedStore.name }}</span>
+            <v-icon size="18" class="ml-2">mdi-chevron-down</v-icon>
+          </v-btn>
+        </template>
 
-      <v-responsive max-width="400">
+        <v-list rounded="lg">
+          <v-list-item
+            v-for="store in stores"
+            :key="store.id"
+            @click="selectedStore = store"
+            :active="selectedStore.id === store.id"
+          >
+            <v-list-item-title class="font-weight-bold">
+              {{ store.name }}
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+
+      <v-spacer />
+
+      <!-- SEARCH (MAIN ACTION) -->
+      <v-responsive width="250">
         <v-text-field
           v-model="search"
-          prepend-inner-icon="mdi-magnify"
-          label="Search products or scan barcode..."
+          prepend-inner-icon="mdi-barcode-scan"
+          placeholder="Scan barcode or search product..."
           hide-details
-          density="compact"
+          density="comfortable"
           variant="solo-filled"
           flat
-          rounded="pill"
-        ></v-text-field>
+          rounded="lg"
+          autofocus
+        />
       </v-responsive>
 
-      <v-btn
-        icon="mdi-history"
-        class="ml-2"
-        variant="tonal"
-        color="grey-darken-1"
-      ></v-btn>
-      <v-btn
-        icon="mdi-cog-outline"
-        variant="tonal"
-        color="grey-darken-1"
-        class="ml-2"
-      ></v-btn>
+      <v-spacer />
+
+      <!-- USER / SHIFT -->
+      <div class="d-flex align-center">
+        <v-chip color="success" variant="tonal" class="mr-3" size="small">
+          SHIFT ACTIVE
+        </v-chip>
+
+        <div class="text-right d-none d-md-block">
+          <div class="text-caption font-weight-bold">Alex Cashier</div>
+          <div class="text-caption text-grey">POS Operator</div>
+        </div>
+
+        <v-avatar size="42" class="ml-3 border">
+          <v-img
+            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex"
+            cover
+          />
+        </v-avatar>
+
+        <v-btn icon="mdi-logout" variant="text" color="error" class="ml-2" />
+      </div>
     </v-app-bar>
 
+    <!-- Sidebar / Cart -->
     <v-navigation-drawer
       location="end"
       width="380"
@@ -184,6 +205,7 @@
       class="border-l-sm bg-grey-lighten-5"
     >
       <div class="d-flex flex-column fill-height">
+        <!-- Current Order Header -->
         <div
           class="px-4 py-3 bg-white border-b d-flex align-center justify-space-between"
         >
@@ -205,13 +227,14 @@
             icon="mdi-close-circle-outline"
             size="small"
             @click="cart = []"
-          ></v-btn>
+          />
         </div>
 
+        <!-- Cart Items -->
         <div class="flex-grow-1 overflow-y-auto pa-3">
           <v-card
-            v-for="item in cart"
-            :key="item.id"
+            v-for="(item, index) in cart"
+            :key="index"
             flat
             rounded="lg"
             class="mb-2 border-sm"
@@ -229,14 +252,20 @@
                   >
                     {{ item.name }}
                   </span>
-                  <span class="font-weight-black">
-                    ${{ (item.price * item.qty).toFixed(2) }}
+                  <span class="text-subtitle-1 font-weight-black text-primary">
+                    {{ formatCurrency(item.price * item.qty) }}
                   </span>
                 </div>
 
-                <div class="d-flex align-center justify-space-between mt-1">
-                  <span class="text-grey text-caption">${{ item.price }}</span>
+                <div class="d-flex flex-wrap gap-1 mt-1">
+                  <v-chip size="x-small" variant="tonal">
+                    {{ item.customizations?.cup }} |
+                    {{ item.customizations?.sugar }}
+                  </v-chip>
+                </div>
 
+                <div class="d-flex align-center justify-space-between mt-2">
+                  <span class="text-grey text-caption">${{ item.price }}</span>
                   <div
                     class="d-flex align-center bg-grey-lighten-4 rounded-pill border"
                   >
@@ -262,58 +291,67 @@
           </v-card>
         </div>
 
+        <!-- Payment + Total -->
         <v-sheet elevation="16" class="pa-4 border-t" color="white">
-          <v-select
-            v-model="paymentMethod"
-            :items="[
-              {
-                title: 'Cash',
-                value: 'cash',
-                props: { prependIcon: 'mdi-cash' }
-              },
-              {
-                title: 'Card',
-                value: 'card',
-                props: { prependIcon: 'mdi-credit-card' }
-              },
-              {
-                title: 'QR Payment',
-                value: 'qr',
-                props: { prependIcon: 'mdi-qrcode' }
-              }
-            ]"
-            label="Payment Method"
-            density="compact"
-            variant="outlined"
-            rounded="lg"
-            hide-details
-            class="mb-4 text-caption"
-            color="primary"
-          >
-            <template v-slot:selection="{ item }">
-              <div class="d-flex align-center">
+          <v-row no-gutters class="mx-n1 mb-4">
+            <v-col
+              cols="4"
+              v-for="method in [
+                { id: 'qr', icon: 'mdi-qrcode-scan', label: 'QR' },
+                { id: 'cash', icon: 'mdi-cash', label: 'Cash' },
+                { id: 'card', icon: 'mdi-credit-card-outline', label: 'Debit' }
+              ]"
+              :key="method.id"
+              class="pa-1"
+            >
+              <v-card
+                flat
+                @click="paymentMethod = method.id"
+                :color="
+                  paymentMethod === method.id ? 'orange-lighten-5' : 'white'
+                "
+                :class="[
+                  'text-center py-2 rounded-lg border-sm transition-all',
+                  paymentMethod === method.id
+                    ? 'border-orange-darken-2'
+                    : 'border-grey-lighten-2'
+                ]"
+              >
                 <v-icon
-                  :icon="item.props.prependIcon"
-                  size="small"
-                  class="mr-2"
-                  color="primary"
+                  :icon="method.icon"
+                  size="20"
+                  :color="
+                    paymentMethod === method.id
+                      ? 'orange-darken-2'
+                      : 'grey-darken-1'
+                  "
+                  class="mb-1"
                 />
-                <span class="text-caption font-weight-bold">
-                  {{ item.title }}
-                </span>
-              </div>
-            </template>
-          </v-select>
+                <div
+                  :class="[
+                    'text-caption font-weight-bold',
+                    paymentMethod === method.id
+                      ? 'text-orange-darken-2'
+                      : 'text-grey-darken-1'
+                  ]"
+                  style="font-size: 0.65rem !important; line-height: 1"
+                >
+                  {{ method.label }}
+                </div>
+              </v-card>
+            </v-col>
+          </v-row>
+
           <div class="mb-3">
             <div class="d-flex justify-space-between text-caption mb-1">
               <span class="text-medium-emphasis">Subtotal</span>
-              <span>${{ subtotal.toFixed(2) }}</span>
+              <span>{{ formatCurrency(subtotal) }}</span>
             </div>
             <div
               class="d-flex justify-space-between text-h6 font-weight-black border-t-sm pt-2"
             >
               <span>Total</span>
-              <span class="text-primary">${{ total.toFixed(2) }}</span>
+              <span class="text-primary">{{ formatCurrency(total) }}</span>
             </div>
           </div>
 
@@ -332,6 +370,8 @@
         </v-sheet>
       </div>
     </v-navigation-drawer>
+
+    <!-- Products -->
     <v-main>
       <v-container fluid class="pa-6">
         <div class="d-flex overflow-x-auto pb-4 no-scrollbar">
@@ -373,7 +413,6 @@
                   </v-chip>
                 </div>
               </v-img>
-
               <v-card-text class="pa-4 bg-white">
                 <div
                   class="text-subtitle-2 font-weight-bold text-truncate mb-1"
@@ -390,42 +429,14 @@
       </v-container>
     </v-main>
 
-    <v-dialog
-      v-model="showQRDialog"
-      max-width="450"
-      transition="scale-transition"
-    >
-      <v-card rounded="xl" class="text-center pa-6">
-        <div class="text-h5 font-weight-black mb-1">Scan to Pay</div>
-        <div class="text-body-2 text-grey mb-6">
-          Total Amount: ${{ total.toFixed(2) }}
-        </div>
-
-        <v-sheet border rounded="xl" class="pa-4 mx-auto mb-6" max-width="300">
-          <v-img
-            src="https://www.masskh.com/wp-content/uploads/2023/11/photo1700496472-568x800.jpeg"
-            rounded="lg"
-            width="1000px"
-          />
-        </v-sheet>
-
-        <v-btn
-          block
-          color="primary"
-          size="large"
-          rounded="pill"
-          @click="showQRDialog = false"
-        >
-          Done / Close
-        </v-btn>
-      </v-card>
-    </v-dialog>
+    <!-- Dialogs -->
+    <OrderCustomizationDialog
+      v-model="showCustomizeDialog"
+      :product="selectedProduct"
+      @add-to-cart="handleAddCustomizedProduct"
+    />
+    <QRPaymentDialog v-model="showQRDialog" :total="total" />
   </v-layout>
-  <OrderCustomizationDialog
-    v-model="showCustomizeDialog"
-    :product="selectedProduct"
-    @add-to-cart="handleAddCustomizedProduct"
-  />
 </template>
 
 <style scoped>
@@ -434,13 +445,11 @@
     border: 1px solid transparent;
     cursor: pointer;
   }
-
   .product-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08) !important;
     border-color: rgb(var(--v-theme-primary));
   }
-
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
