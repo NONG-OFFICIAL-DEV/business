@@ -68,10 +68,13 @@ services:
       - inventory_backend_storage:/var/www/html/storage
     networks:
       - web
+      - internal_project_network
 
 networks:
   web:
     external: true
+  internal_project_network:
+    driver: bridge
 
 volumes:
   # backend_storage:
