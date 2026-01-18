@@ -176,6 +176,13 @@
           newTab: true
         },
         {
+          path: '/mobile-menu',
+          title: 'Mobile Menu',
+          icon: 'mdi-sale',
+          roles: [1],
+          newTab: true
+        },
+        {
           path: '/menu-management',
           title: 'Menu',
           icon: 'mdi-food',
