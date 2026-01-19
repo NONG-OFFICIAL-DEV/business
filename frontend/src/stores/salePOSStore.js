@@ -31,6 +31,11 @@ export const useSaleStore = defineStore('sales', {
     async checkout(saleData) {
       const res = await salesApi.create(saleData)
       return res
+    },
+
+    async saleReport() {
+      const res = await salesApi.report()
+      return res
     }
   }
 })

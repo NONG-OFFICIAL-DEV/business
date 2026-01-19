@@ -35,7 +35,6 @@
           </div>
 
           <v-divider class="mb-4" />
-
           <div
             v-for="item in cart"
             :key="item.id"

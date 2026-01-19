@@ -238,13 +238,13 @@
           title: 'Purchase',
           icon: 'mdi-cart-arrow-down',
           roles: [1, 2, 3]
+        },
+        {
+          path: '/sales-reports',
+          title: 'Sale Reports',
+          icon: 'mdi-cash-register',
+          roles: [1, 2, 3]
         }
-        // {
-        //   path: '/purchase-reports',
-        //   title: 'Sale',
-        //   icon: 'mdi-cash-register',
-        //   roles: [1, 2, 3]
-        // }
       ]
     },
     {

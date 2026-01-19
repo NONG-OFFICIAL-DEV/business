@@ -8,11 +8,17 @@
   import CartButton from '@/components/mobile/CartButton.vue'
   import CartView from '@/components/mobile/CartView.vue'
   import TrackingView from '@/components/mobile/TrackingView.vue'
+  import { useSaleStore } from '@/stores/salePOSStore'
+  import { useProductStore } from '@/stores/productStore'
 
   const tableNumber = ref('05')
+  const saleStore = useSaleStore()
+  const productStore = useProductStore()
+
   onMounted(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('table')) tableNumber.value = params.get('table')
+    productStore.fetchProducts()
   })
 
   const categories = ['All', 'Coffee', 'Tea', 'Pastries', 'Food']
@@ -22,76 +28,30 @@
   const { cart, totalItems, cartTotal, addToCart, updateQty, clearCart } =
     useCart()
 
-  const products = ref([
-    {
-      id: 1,
-      name: 'Caramel Macchiato',
-      price: 4.5,
-      image: 'https://images.unsplash.com/photo-1485808191679-5f86510681a2',
-      category: 'Coffee',
-      desc: 'Fresh espresso with caramel.'
-    },
-    {
-      id: 2,
-      name: 'Iced Matcha Latte',
-      price: 5.25,
-      image: 'https://images.unsplash.com/photo-1515823064-d6e0c04616a7',
-      category: 'Tea',
-      desc: 'Premium matcha with oat milk.'
-    },
-    {
-      id: 2,
-      name: 'Iced Matcha Latte',
-      price: 5.25,
-      image:
-        'https://i.pinimg.com/1200x/b8/9e/e1/b89ee14374a9fe089e456059f1c57961.jpg',
-      category: 'Food',
-      desc: 'Premium matcha with oat milk.'
-    },
-    {
-      id: 2,
-      name: 'Iced Matcha Latte',
-      price: 5.25,
-      image:
-        'https://i.pinimg.com/1200x/e7/df/6d/e7df6d197bb73f8177549c69d2229b00.jpg',
-      category: 'Food',
-      desc: 'Premium matcha with oat milk.'
-    },
-    {
-      id: 2,
-      name: 'Iced Matcha Latte',
-      price: 5.25,
-      image:
-        'https://i.pinimg.com/1200x/54/66/30/5466301c06c0f6ac47593cb1b81f0b23.jpg',
-      category: 'Food',
-      desc: 'Premium matcha with oat milk.'
-    },
-    {
-      id: 2,
-      name: 'Iced Matcha Latte',
-      price: 5.25,
-      image:
-        'https://i.pinimg.com/736x/06/41/47/0641478bdba67c0112bd08f3e689a755.jpg',
-      category: 'Food',
-      desc: 'Premium matcha with oat milk.'
-    },
-    {
-      id: 2,
-      name: 'Iced Matcha Latte',
-      price: 5.25,
-      image:
-        'https://i.pinimg.com/736x/e5/d6/67/e5d66743b20bf1330c4730df1cc8e50e.jpg',
-      category: 'Food',
-      desc: 'Premium matcha with oat milk.'
-    }
-  ])
 
-  function placeOrder() {
+  async function placeOrder() {
     isOrdering.value = true
     setTimeout(() => {
       isOrdering.value = false
       page.value = 'tracking'
     }, 2000)
+    try {
+      const saleData = {
+        items: cart.value.map(i => ({
+          product_id: i.id,
+          qty: i.qty,
+          price: i.price,
+          customizations: i.customizations || null
+        })),
+        total_amount: cartTotal.value,
+        payment_method: 'cash'
+      }
+
+      await saleStore.checkout(saleData)
+      await productStore.fetchProducts()
+    } catch {
+      alert('Checkout failed')
+    }
   }
   function handleReset() {
     clearCart()
@@ -100,8 +60,7 @@
   const search = ref('')
 
   const filteredProducts = computed(() => {
-    let list = products.value
-
+    let list = productStore.products.data || []
     if (selectedCategory.value !== 'All') {
       list = list.filter(p => p.category === selectedCategory.value)
     }

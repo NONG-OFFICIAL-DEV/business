@@ -14,7 +14,7 @@ defineEmits(['add', 'update'])
   <v-card flat rounded="xl" class="bg-white border-0 elevation-0">
     <div class="d-flex pa-2">
       <v-img
-        :src="product.image"
+        :src="product.image_url"
         width="90"
         height="90"
         cover

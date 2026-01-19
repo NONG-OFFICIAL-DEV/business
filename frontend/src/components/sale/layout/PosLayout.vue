@@ -1,6 +1,7 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { useProductStore } from '@/stores/productStore'
+  import { useSaleStore } from '@/stores/salePOSStore'
 
   import PosAppBar from './PosAppBar.vue'
   import PosCartDrawer from './PosCartDrawer.vue'
@@ -9,6 +10,7 @@
   import QRPaymentDialog from '@/components/pos/QRPaymentDialog.vue'
 
   const productStore = useProductStore()
+  const saleStore = useSaleStore()
 
   // State
   const search = ref('')
@@ -79,7 +81,24 @@
   async function handleCheckout() {
     if (!cart.value.length) return alert('Cart is empty!')
     if (paymentMethod.value === 'qr') showQRDialog.value = true
-    // Here you would send 'selectedStore.value.id' to your Laravel API
+    try {
+      const saleData = {
+        items: cart.value.map(i => ({
+          product_id: i.id,
+          qty: i.qty,
+          price: i.price,
+          customizations: i.customizations || null
+        })),
+        total_amount: total.value,
+        payment_method: paymentMethod.value
+      }
+
+      await saleStore.checkout(saleData)
+      cart.value = []
+      await productStore.fetchProducts()
+    } catch {
+      alert('Checkout failed')
+    }
   }
 
   onMounted(() => productStore.fetchProducts())
@@ -94,7 +113,7 @@
     />
 
     <PosCartDrawer
-    v-model:paymentMethod="paymentMethod"
+      v-model:paymentMethod="paymentMethod"
       :cart="cart"
       :total="total"
       :storeType="selectedStore.type"

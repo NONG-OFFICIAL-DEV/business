@@ -60,7 +60,7 @@
       >
         <div class="d-flex pa-3">
           <v-img
-            :src="item.image"
+            :src="item.image_url"
             width="80"
             height="80"
             cover

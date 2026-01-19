@@ -137,9 +137,9 @@ const routes = [
         props: true
       },
       {
-        path: '/sales',
+        path: '/sales-reports',
         name: 'Sales',
-        component: () => import('@/views/stocks/SalesManagement.vue'),
+        component: () => import('@/views/reports/SaleReport.vue'),
         meta: { requiresAuth: true }
       },
       {

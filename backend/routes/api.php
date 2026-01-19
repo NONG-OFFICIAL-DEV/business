@@ -78,6 +78,7 @@ Route::middleware('jwt.auth')->group(function () {
 
     Route::get('/reports/purchases', [PurchaseReportController::class, 'index']);
     Route::get('/reports/inventory', [PurchaseReportController::class, 'inventoryReport']);
+    Route::get('/reports/sales', [SaleController::class, 'getReport']);
 
     Route::apiResource('employees', EmployeeController::class);
 

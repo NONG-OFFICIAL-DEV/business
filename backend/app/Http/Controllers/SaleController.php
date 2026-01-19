@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Carbon\Carbon;
 class SaleController extends Controller
 {
     /**
@@ -80,5 +80,47 @@ class SaleController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function getReport(Request $request)
+    {
+        // Set date filters
+        $days = $request->input('days', 30);
+        $startDate = Carbon::now()->subDays($days);
+
+        // 1. Calculate Summary Metrics
+        $metricsData = Sale::where('created_at', '>=', $startDate)
+            ->selectRaw('SUM(total_amount) as revenue, COUNT(*) as count, AVG(total_amount) as avg')
+            ->first();
+
+        // 2. Get Chart Data (Daily Revenue)
+        $chartData = Sale::select(
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('SUM(total_amount) as total')
+        )
+            ->where('created_at', '>=', $startDate)
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // 3. Get Detailed List with Items count
+        // We use withCount to show how many items were in each sale
+        $sales = Sale::withCount('items')
+            ->where('created_at', '>=', $startDate)
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return response()->json([
+            'summary' => [
+                'total_revenue' => number_format($metricsData->revenue, 2),
+                'total_sales'   => $metricsData->count,
+                'avg_value'     => number_format($metricsData->avg, 2),
+            ],
+            'chart' => [
+                'labels' => $chartData->pluck('date'),
+                'values' => $chartData->pluck('total'),
+            ],
+            'table_data' => $sales
+        ]);
     }
 }

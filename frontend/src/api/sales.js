@@ -16,5 +16,10 @@ export default {
   async create(sale) {
     const res = await http.post(API_URL, sale)
     return res.data
+  },
+
+  async report() {
+    const res = await http.get(`/reports/sales`)
+    return res.data
   }
 }
