@@ -79,11 +79,18 @@
 
   function save() {
     const payload = {
-      ...form.value,
-      sizes: form.value.sizes.map(s => ({ name: s.name, price: s.price })),
-      price: form.value.sizes[0]?.price || 0,
-      image: image.value
+      name: form.value.name,
+      is_available: form.value.is_available,
+      has_variants: form.value.sizes.length > 0,
+      price: form.value.sizes.length > 0 ? 0 : form.value.price,
+      sizes: form.value.sizes.map(s => ({
+        name: s.name,
+        price: s.price
+      })),
+      image: image.value // File or null
     }
+
+    console.log(payload)
     emit('save', payload)
     close()
   }

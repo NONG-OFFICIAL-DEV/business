@@ -150,7 +150,7 @@
             type: 'success',
             color: 'primary'
           })
-          unitStore.fetchMenus()
+          menuStore.fetchMenus()
         } catch (err) {
           notif(err.response?.data?.error || t('messages.delete_failed'), {
             type: 'error',

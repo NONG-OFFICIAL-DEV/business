@@ -16,7 +16,7 @@ class Menu extends Model
         'status'
     ];
 
-   public static function store($request, $id = null)
+    public static function store($request, $id = null)
     {
         // Basic menu data
         $menuData = $request->only(
@@ -45,18 +45,27 @@ class Menu extends Model
         // Sync variants (sizes)
         $variants = $request->input('sizes', []);
 
-        if (!empty($variants)) {
+        // FIX: Decode JSON string if needed
+        if (is_string($variants)) {
+            $variants = json_decode($variants, true);
+        }
+
+        if (is_array($variants) && count($variants) > 0) {
             $menu->has_variants = true;
-            $menu->variants()->delete(); // Remove old variants
+            $menu->variants()->delete();
 
             foreach ($variants as $variant) {
-                $menu->variants()->create($variant);
+                $menu->variants()->create([
+                    'name'  => $variant['name'],
+                    'price' => $variant['price'],
+                ]);
             }
         } else {
             $menu->has_variants = false;
         }
 
-        $menu->save(); // IMPORTANT: persist has_variants
+        $menu->save();
+
 
         return response()->json([
             'success' => true,

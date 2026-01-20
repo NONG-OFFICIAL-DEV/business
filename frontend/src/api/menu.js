@@ -16,7 +16,7 @@ export const menuService = {
     Object.entries(data).forEach(([key, value]) => {
       if (key === 'image' && value) {
         formData.append('image', value)
-      } else if (key === 'variants' || key === 'recipes') {
+      } else if (key === 'sizes' || key === 'recipes') {
         formData.append(key, JSON.stringify(value))
       } else {
         formData.append(key, value)
@@ -33,7 +33,7 @@ export const menuService = {
     Object.entries(data).forEach(([key, value]) => {
       if (key === 'image' && value) {
         formData.append('image', value)
-      } else if (key === 'variants' || key === 'recipes') {
+      } else if (key === 'sizes' || key === 'recipes') {
         formData.append(key, JSON.stringify(value))
       } else {
         formData.append(key, value)
