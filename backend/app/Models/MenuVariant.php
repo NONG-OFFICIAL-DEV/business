@@ -7,4 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class MenuVariant extends Model
 {
     protected $fillable = ['menu_id', 'name', 'price'];
+
+    public function menu()
+    {
+        return $this->belongsTo(Menu::class);
+    }
 }

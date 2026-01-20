@@ -16,7 +16,7 @@ class Menu extends Model
         'status'
     ];
 
-    public static function store($request, $id = null)
+   public static function store($request, $id = null)
     {
         // Basic menu data
         $menuData = $request->only(
@@ -31,8 +31,6 @@ class Menu extends Model
             if (!$menu) {
                 return response()->json(['error' => 'Menu item not found'], 404);
             }
-
-            // Update menu data
             $menu->update($menuData);
         } else {
             $menu = self::create($menuData);
@@ -40,25 +38,25 @@ class Menu extends Model
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            if (!empty($menu->image)) {
-                $request->file('image')
-                    ->store('products', 'public');
-            }
             $menu->image = $request->file('image')->store('menus', 'public');
             $menu->save();
         }
 
         // Sync variants (sizes)
         $variants = $request->input('sizes', []);
-        $if (!empty($variants)) {
+
+        if (!empty($variants)) {
             $menu->has_variants = true;
             $menu->variants()->delete(); // Remove old variants
+
             foreach ($variants as $variant) {
                 $menu->variants()->create($variant);
             }
         } else {
             $menu->has_variants = false;
         }
+
+        $menu->save(); // IMPORTANT: persist has_variants
 
         return response()->json([
             'success' => true,
