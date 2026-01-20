@@ -6,9 +6,11 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\KitchenOrderController;
 use App\Http\Controllers\LossController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\PurchaseReportController;
@@ -53,7 +55,6 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('audit-logs', [AuditLogController::class, 'index']);
     Route::get('audit-logs/{id}', [AuditLogController::class, 'show']);
 
-    Route::apiResource('menus', MenuController::class);
 
     Route::apiResource('suppliers', SupplierController::class);
     Route::apiResource('categories', CategoryController::class);
@@ -97,3 +98,12 @@ Route::post('/telegram/webhook', [TelegramController::class, 'webhook']);
 
 // Link Telegram to logged-in user (JWT auth required)
 Route::middleware('jwt.auth')->post('/telegram/link', [TelegramController::class, 'linkTelegram']);
+
+Route::prefix('kitchen')->group(function () {
+    Route::get('/orders', [KitchenOrderController::class, 'index']);
+    Route::patch('/orders/{order}/start', [KitchenOrderController::class, 'start']);
+    Route::patch('/orders/{order}/ready', [KitchenOrderController::class, 'ready']);
+});
+
+Route::post('/orders', [OrderController::class, 'store']);
+Route::apiResource('menus', MenuController::class);

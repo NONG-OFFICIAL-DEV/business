@@ -10,15 +10,20 @@
   import TrackingView from '@/components/mobile/TrackingView.vue'
   import { useSaleStore } from '@/stores/salePOSStore'
   import { useProductStore } from '@/stores/productStore'
+  import { useOrderStore } from '@/stores/orderStore'
+  import { useMenuStore } from '@/stores/menuStore'
 
   const tableNumber = ref('05')
   const saleStore = useSaleStore()
   const productStore = useProductStore()
+  const orderStore = useOrderStore()
+  const menuStore = useMenuStore()
 
   onMounted(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('table')) tableNumber.value = params.get('table')
     productStore.fetchProducts()
+    menuStore.fetchMenus()
   })
 
   const categories = ['All', 'Coffee', 'Tea', 'Pastries', 'Food']
@@ -28,31 +33,63 @@
   const { cart, totalItems, cartTotal, addToCart, updateQty, clearCart } =
     useCart()
 
+  // async function placeOrder() {
+  //   isOrdering.value = true
+  //   setTimeout(() => {
+  //     isOrdering.value = false
+  //     page.value = 'tracking'
+  //   }, 2000)
+  //   try {
+  //     const saleData = {
+  //       items: cart.value.map(i => ({
+  //         table_id: 1,
+  //         menu_id: i.id,
+  //         qty: i.qty,
+  //         price: i.price,
+  //         customizations: i.customizations || null
+  //       })),
+  //       total_amount: cartTotal.value,
+  //       payment_method: 'cash'
+  //     }
 
+  //     await saleStore.checkout(saleData)
+  //     await productStore.fetchProducts()
+  //     await orderStore.createOrders(saleData)
+  //   } catch {
+  //     alert('Checkout failed')
+  //   }
+  // }
   async function placeOrder() {
     isOrdering.value = true
-    setTimeout(() => {
-      isOrdering.value = false
-      page.value = 'tracking'
-    }, 2000)
+
     try {
-      const saleData = {
+      // Prepare backend payload
+      const orderData = {
+        table_id: 1, // you can dynamically assign table if needed
         items: cart.value.map(i => ({
-          product_id: i.id,
-          qty: i.qty,
-          price: i.price,
-          customizations: i.customizations || null
-        })),
-        total_amount: cartTotal.value,
-        payment_method: 'cash'
+          menu_id: i.id,
+          quantity: i.qty,
+          note: i.customizations || null
+        }))
       }
 
-      await saleStore.checkout(saleData)
-      await productStore.fetchProducts()
-    } catch {
+      // Call API via order store
+      await orderStore.createOrder(orderData)
+      await menuStore.fetchMenus()
+
+      // Optionally refresh products / cart
+      // await productStore.fetchProducts()
+
+      // Go to tracking page
+      page.value = 'tracking'
+    } catch (err) {
+      console.error(err)
       alert('Checkout failed')
+    } finally {
+      isOrdering.value = false
     }
   }
+
   function handleReset() {
     clearCart()
     page.value = 'home'
@@ -60,7 +97,7 @@
   const search = ref('')
 
   const filteredProducts = computed(() => {
-    let list = productStore.products.data || []
+    let list = menuStore.menus.data || []
     if (selectedCategory.value !== 'All') {
       list = list.filter(p => p.category === selectedCategory.value)
     }
@@ -78,7 +115,6 @@
 <template>
   <v-app class="bg-grey-lighten-5">
     <AppHeader v-if="page === 'home'" :tableNumber="tableNumber" />
-
     <v-main>
       <template v-if="page === 'home'">
         <div class="sticky-nav bg-white shadow-sm">

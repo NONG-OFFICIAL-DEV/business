@@ -171,6 +171,11 @@ const routes = [
     path: '/mobile-menu',
     name: 'MobileMenu',
     component: () => import('@/views/mobile/MobileOrder.vue')
+  },
+  {
+    path: '/kitchen-kds',
+    name: 'KitchenKDS',
+    component: () => import('@/views/kitchen/ChefKDS.vue')
   }
 ]
 

@@ -183,6 +183,13 @@
           newTab: true
         },
         {
+          path: '/kitchen-kds',
+          title: 'Kitchen KDS',
+          icon: 'mdi-chef-hat',
+          roles: [1],
+          newTab: true
+        },
+        {
           path: '/menu-management',
           title: 'Menu',
           icon: 'mdi-food',
