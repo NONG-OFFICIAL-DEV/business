@@ -35,15 +35,6 @@ class Menu extends Model
             // Update menu data
             $menu->update($menuData);
         } else {
-            // Check for duplicate menu name in the same store
-            // $existingMenu = self::where('store_id', $menuData['store_id'])
-            //     ->where('name', $menuData['name'])
-            //     ->first();
-
-            // if ($existingMenu) {
-            //     return response()->json(['error' => 'Menu item already exists'], 400);
-            // }
-
             $menu = self::create($menuData);
         }
 
@@ -58,10 +49,15 @@ class Menu extends Model
         }
 
         // Sync variants (sizes)
-        $variants = $request->input('variants', []);
-        $menu->variants()->delete(); // Remove old variants
-        foreach ($variants as $variant) {
-            $menu->variants()->create($variant);
+        $variants = $request->input('sizes', []);
+        $if (!empty($variants)) {
+            $menu->has_variants = true;
+            $menu->variants()->delete(); // Remove old variants
+            foreach ($variants as $variant) {
+                $menu->variants()->create($variant);
+            }
+        } else {
+            $menu->has_variants = false;
         }
 
         return response()->json([

@@ -8,6 +8,45 @@
         </v-btn>
       </template>
     </custom-title>
+    <!-- Filters users actually expect -->
+    <v-card border flat class="pa-4 mb-4">
+      <v-row>
+        <v-col cols="12" md="3">
+          <v-text-field
+            v-model="filters.search"
+            label="Search order / customer"
+            prepend-inner-icon="mdi-magnify"
+            density="compact"
+            clearable
+          />
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-select
+            v-model="filters.status"
+            :items="statuses"
+            label="Status"
+            density="compact"
+            clearable
+          />
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-text-field
+            v-model="filters.from"
+            type="date"
+            label="From"
+            density="compact"
+          />
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-text-field
+            v-model="filters.to"
+            type="date"
+            label="To"
+            density="compact"
+          />
+        </v-col>
+      </v-row>
+    </v-card>
     <v-row>
       <v-col v-for="card in metrics" :key="card.title" cols="12" sm="6" md="3">
         <v-card border flat class="pa-4">
@@ -49,14 +88,13 @@
             :items="tableData.data"
             :search="search"
             hover
+            density="compact"
           >
-            <template v-slot:item.status="{ value }">
-              <v-chip :color="getStatusColor(value)" size="small">
-                {{ value }}
-              </v-chip>
+            <template v-slot:item.sale_date="{ item }">
+              {{ formatDate(item.sale_date) }}
             </template>
-            <template v-slot:item.amount="{ value }">
-              ${{ value }}
+            <template v-slot:item.total_amount="{ item }">
+              {{ formatCurrency(item.total_amount) }}
             </template>
           </v-data-table>
         </v-card>
@@ -66,9 +104,12 @@
 </template>
 
 <script setup>
-  import { ref, onMounted, watch } from 'vue'
+  import { ref, onMounted, reactive } from 'vue'
   import { useSaleStore } from '../../stores/salePOSStore'
   import { Line } from 'vue-chartjs'
+  import { useCurrency } from '@/composables/useCurrency'
+  import { useDate } from '@/composables/useDate'
+
   import {
     Chart as ChartJS,
     Title,
@@ -89,12 +130,14 @@
     LinearScale,
     PointElement
   )
+  const { formatCurrency } = useCurrency()
+  const { formatDate } = useDate()
 
   // Search logic
   const search = ref('')
   const saleStore = useSaleStore()
   const tableData = ref([])
-
+  const filters = reactive({ search: '', status: null, from: null, to: null })
   onMounted(async () => {
     // Fetch sales report data
     const reportData = await saleStore.saleReport()
@@ -132,31 +175,9 @@
   const headers = [
     { title: 'Order ID', key: 'id' },
     { title: 'Date', key: 'sale_date' },
-    { title: 'Amount', key: 'total_amount' },
-    { title: 'Status', key: 'status' }
+    { title: 'Amount', key: 'total_amount' }
+    // { title: 'Status', key: 'status' }
   ]
-
-  const salesData = ref([
-    {
-      id: '#1024',
-      date: '2026-01-18',
-      amount: 150.0,
-      status: 'Completed'
-    },
-    {
-      id: '#1025',
-      date: '2026-01-19',
-      amount: 85.5,
-      status: 'Pending'
-    },
-    {
-      id: '#1026',
-      date: '2026-01-20',
-      amount: 2100.0,
-      status: 'Completed'
-    }
-    // Add more rows as needed
-  ])
 
   // Chart Logic
   const chartData = {

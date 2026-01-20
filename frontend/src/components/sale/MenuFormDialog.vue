@@ -80,10 +80,10 @@
   function save() {
     const payload = {
       ...form.value,
+      sizes: form.value.sizes.map(s => ({ name: s.name, price: s.price })),
       price: form.value.sizes[0]?.price || 0,
       image: image.value
     }
-
     emit('save', payload)
     close()
   }

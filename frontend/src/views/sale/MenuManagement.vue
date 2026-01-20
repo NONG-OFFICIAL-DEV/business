@@ -60,31 +60,29 @@
             <div class="text-h6 font-weight-black text-primary mb-3">
               ${{ product.price }}
             </div>
-
-            <v-divider class="mb-3"></v-divider>
+          </v-card-text>
+          <v-divider />
+          <v-card-actions>
+            <v-spacer></v-spacer>
             <div class="d-flex gap-2">
               <v-btn
                 variant="tonal"
                 color="blue-darken-1"
                 size="small"
-                prepend-icon="mdi-pencil-outline"
+                icon="mdi-pencil-outline"
                 class="rounded-lg font-weight-bold"
                 @click="editMenu(product)"
-              >
-                Edit Menu
-              </v-btn>
+              ></v-btn>
               <v-btn
-                prepend-icon="mdi-delete-outline"
+                icon="mdi-delete-outline"
                 variant="tonal"
                 color="error"
                 size="small"
                 class="ms-1 rounded-lg"
                 @click="confirmDelete(product)"
-              >
-                Delete Menu
-              </v-btn>
+              ></v-btn>
             </div>
-          </v-card-text>
+          </v-card-actions>
         </v-card>
       </v-col>
     </v-row>
@@ -101,6 +99,11 @@
   import { ref, computed, onMounted } from 'vue'
   import { useMenuStore } from '@/stores/menuStore'
   import MenuFormDialog from '@/components/sale/MenuFormDialog.vue'
+  import { useAppUtils } from '@/composables/useAppUtils'
+  import { useI18n } from 'vue-i18n'
+
+  const { confirm, notif } = useAppUtils()
+  const { t } = useI18n()
 
   const selectedCategory = ref('All Items')
   const dialog = ref(false)
@@ -136,9 +139,26 @@
   }
 
   function confirmDelete(menu) {
-    if (confirm(`Delete ${menu.name}?`)) {
-      menuStore.deleteMenu(menu.id)
-    }
+    confirm({
+      title: 'Are you sure?',
+      message: `Are you sure you want to delete this menu "${menu.name}"?`,
+      options: { type: 'error', color: 'error', width: 500 },
+      agree: async () => {
+        try {
+          menuStore.deleteMenu(menu.id)
+          notif(t('messages.deleted_success'), {
+            type: 'success',
+            color: 'primary'
+          })
+          unitStore.fetchMenus()
+        } catch (err) {
+          notif(err.response?.data?.error || t('messages.delete_failed'), {
+            type: 'error',
+            color: 'error'
+          })
+        }
+      }
+    })
   }
 
   async function handleSave(data) {
@@ -147,6 +167,10 @@
     } else {
       await menuStore.saveMenu(data)
     }
+    notif(t('messages.saved_success'), {
+      type: 'success',
+      color: 'primary'
+    })
     menuStore.fetchMenus()
   }
 </script>
