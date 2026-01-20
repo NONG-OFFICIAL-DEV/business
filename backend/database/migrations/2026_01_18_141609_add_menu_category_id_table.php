@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('menus', function (Blueprint $table) {
-            $table->unsignedBigInteger('menu_category_id')->after('id');
+            $table->unsignedBigInteger('menu_category_id')->nullable()->after('id');
 
             // Add foreign key constraint
             $table->foreign('menu_category_id')
