@@ -1,6 +1,7 @@
 <script setup>
   import { ref, watch } from 'vue'
 
+  /* ================= PROPS / EMITS ================= */
   const props = defineProps({
     modelValue: Boolean,
     editMode: Boolean,
@@ -9,28 +10,30 @@
 
   const emit = defineEmits(['update:modelValue', 'save'])
 
+  /* ================= CONSTANTS ================= */
+  const SIZE_CATEGORIES = ['Coffee', 'Tea']
+
+  /* ================= DEFAULT FORM ================= */
   const getDefaultForm = () => ({
     name: '',
     category: 'Coffee',
     description: '',
     is_available: true,
-    image: null,
-    image_url: '',
-    sizes: [
-      { name: 'Small', price: 0 },
-      { name: 'Medium', price: 0 },
-      { name: 'Large', price: 0 }
-    ]
+    variants: [],
+    price: 0
   })
 
   const form = ref(getDefaultForm())
-  const imagePreview = ref(null)
   const image = ref(null)
+  const imagePreview = ref(null)
 
+  /* ================= WATCHERS ================= */
+
+  // Open dialog
   watch(
     () => props.modelValue,
-    isOpen => {
-      if (!isOpen) return
+    open => {
+      if (!open) return
 
       if (props.editMode && props.item) {
         form.value = JSON.parse(JSON.stringify(props.item))
@@ -42,35 +45,44 @@
     }
   )
 
-  function handleImageUpload(file) {
-    // const image = file?.[0]
-    // if (!image) return
+  // Category → auto manage sizes
+  watch(
+    () => form.value.category,
+    category => {
+      if (SIZE_CATEGORIES.includes(category)) {
+        if (form.value.variants.length === 0) {
+          form.value.variants = [
+            { name: 'Small', price: 0 },
+            { name: 'Medium', price: 0 },
+            { name: 'Large', price: 0 }
+          ]
+        }
+      } else {
+        form.value.variants = []
+      }
+    },
+    { immediate: true }
+  )
 
-    // form.value.image = image
-    // imagePreview.value = URL.createObjectURL(image)
+  /* ================= METHODS ================= */
+  function handleImageUpload(file) {
     if (!file) {
       imagePreview.value = null
       return
     }
 
-    // Vuetify may return File OR File[]
-    const fileExist = Array.isArray(file) ? file[0] : file
+    const realFile = Array.isArray(file) ? file[0] : file
+    if (!(realFile instanceof File)) return
 
-    // Extra safety
-    if (!(fileExist instanceof File)) {
-      imagePreview.value = null
-      return
-    }
-
-    imagePreview.value = URL.createObjectURL(file)
+    imagePreview.value = URL.createObjectURL(realFile)
   }
 
   function addSize() {
-    form.value.sizes.push({ name: '', price: 0 })
+    form.value.variants.push({ name: '', price: 0 })
   }
 
   function removeSize(index) {
-    form.value.sizes.splice(index, 1)
+    form.value.variants.splice(index, 1)
   }
 
   function close() {
@@ -78,220 +90,227 @@
   }
 
   function save() {
+    const hasVariants =
+      SIZE_CATEGORIES.includes(form.value.category) &&
+      form.value.variants.length > 0
+
     const payload = {
       name: form.value.name,
+      category: form.value.category,
+      description: form.value.description,
       is_available: form.value.is_available,
-      has_variants: form.value.sizes.length > 0,
-      price: form.value.sizes.length > 0 ? 0 : form.value.price,
-      sizes: form.value.sizes.map(s => ({
-        name: s.name,
-        price: s.price
-      })),
-      image: image.value // File or null
+      has_variants: hasVariants,
+      price: hasVariants ? 0 : Number(form.value.price || 0),
+      sizes: hasVariants
+        ? form.value.variants.map(v => ({
+            name: v.name,
+            price: Number(v.price)
+          }))
+        : [],
+      image: image.value
     }
 
-    console.log(payload)
     emit('save', payload)
     close()
   }
 </script>
+
 <template>
-  <v-dialog
-    :model-value="modelValue"
-    @update:model-value="val => emit('update:modelValue', val)"
-    max-width="850"
-    persistent
-  >
-    <v-card rounded="xl" class="pa-2">
-      <v-card-title class="font-weight-black text-h5 d-flex align-center pa-4">
-        <v-icon icon="mdi-food" class="mr-2" color="primary" />
-        {{ editMode ? 'Edit Menu Item' : 'New Menu Item' }}
+  <v-dialog :model-value="modelValue" max-width="850" persistent>
+    <v-card rounded="lg">
+      <v-card-title class="d-flex align-center bg-primary">
+        <span>
+          {{ editMode ? 'Edit Menu Item' : 'New Menu Item' }}
+        </span>
+
+        <v-spacer></v-spacer>
+
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          size="small"
+          color="white"
+          @click="close"
+        ></v-btn>
       </v-card-title>
-
-      <v-card-text class="pa-4">
-        <v-row no-gutters>
-          <v-col cols="12" md="4" class="pr-md-6 border-e">
-            <div class="d-flex flex-column align-center">
-              <v-avatar
-                size="200"
+      <v-card-text>
+        <v-row>
+          <!-- IMAGE -->
+          <v-col cols="12" md="4" class="text-center">
+            <v-hover v-slot="{ isHovering, props }">
+              <v-card
+                v-bind="props"
+                :elevation="isHovering ? 4 : 0"
+                class="mx-auto cursor-pointer position-relative mb-4 bg-grey-lighten-4 d-flex align-center justify-center"
                 rounded="xl"
-                class="mb-4 border-sm bg-grey-lighten-4"
+                height="220"
+                @click="$refs.fileInput.click()"
               >
-                <v-img v-if="imagePreview" :src="imagePreview" cover />
-                <v-icon v-else size="48" color="grey-lighten-1">
-                  mdi-image-outline
-                </v-icon>
-              </v-avatar>
+                <v-img
+                  v-if="imagePreview"
+                  :src="imagePreview"
+                  cover
+                  class="fill-height"
+                />
+                <div v-else class="d-flex flex-column align-center">
+                  <v-icon size="40" color="grey-darken-1">
+                    mdi-camera-plus-outline
+                  </v-icon>
+                  <span class="text-caption mt-2">Upload Photo</span>
+                </div>
 
-              <v-file-input
-                v-model="image"
-                label="Upload Image"
-                accept="image/*"
-                variant="solo-filled"
-                flat
-                density="compact"
-                rounded="lg"
-                prepend-icon=""
-                prepend-inner-icon="mdi-camera"
-                class="w-100 mb-2"
-                hide-details
-                @update:modelValue="handleImageUpload"
-              >
-                <template v-slot:selection="{ fileNames }">
-                  <template v-for="fileName in fileNames" :key="fileName">
-                    <v-chip
-                      size="small"
-                      label
-                      color="primary"
-                      class="text-truncate"
-                    >
-                      {{ fileName }}
-                    </v-chip>
-                  </template>
-                </template>
-              </v-file-input>
+                <v-overlay
+                  :model-value="isHovering"
+                  contained
+                  scrim="black"
+                  class="align-center justify-center"
+                >
+                  <v-btn size="small" variant="flat">Change Image</v-btn>
+                </v-overlay>
+              </v-card>
+            </v-hover>
 
+            <v-file-input
+              ref="fileInput"
+              v-model="image"
+              class="d-none"
+              accept="image/*"
+              @update:modelValue="handleImageUpload"
+            />
+
+            <v-sheet
+              border
+              rounded="lg"
+              class="pa-2 d-flex align-center justify-space-between"
+            >
+              <span class="text-body-2 font-weight-medium px-2">
+                Visibility
+              </span>
               <v-switch
                 v-model="form.is_available"
+                hide-details
                 color="success"
-                label="Available"
                 inset
                 density="compact"
-                hide-details
-                class="mt-2 font-weight-bold"
-              />
-            </div>
+              ></v-switch>
+            </v-sheet>
           </v-col>
 
-          <v-col cols="12" md="8" class="pl-md-6">
-            <v-row density="compact">
-              <v-col cols="8">
-                <v-text-field
-                  v-model="form.name"
-                  label="Menu Name"
-                  variant="outlined"
-                  rounded="lg"
-                  hide-details
-                  class="mb-3"
-                />
-              </v-col>
-              <v-col cols="4">
-                <v-select
-                  v-model="form.category"
-                  :items="['Coffee', 'Tea', 'Pastries', 'Lunch']"
-                  label="Category"
-                  variant="outlined"
-                  rounded="lg"
-                  hide-details
-                />
-              </v-col>
-              <v-col cols="12">
-                <v-textarea
-                  v-model="form.description"
-                  label="Description"
-                  rows="2"
-                  variant="outlined"
-                  rounded="lg"
-                  hide-details
-                />
-              </v-col>
-            </v-row>
+          <!-- FORM -->
+          <v-col cols="12" md="8">
+            <v-text-field v-model="form.name" label="Name" />
 
-            <div class="mt-4">
+            <v-select
+              v-model="form.category"
+              :items="['Coffee', 'Tea', 'Pastries', 'Lunch']"
+              label="Category"
+            />
+
+            <v-textarea
+              v-model="form.description"
+              label="Description"
+              rows="2"
+            />
+
+            <!-- VARIANTS -->
+            <v-col cols="12" class="pa-0" v-if="SIZE_CATEGORIES.includes(form.category)">
               <div class="d-flex align-center justify-space-between mb-2">
-                <div
-                  class="text-subtitle-2 font-weight-bold text-grey-darken-2"
-                >
-                  PRICING BY SIZE
+                <div class="d-flex align-center">
+                  <v-icon color="primary" class="mr-2">mdi-currency-usd</v-icon>
+                  <span class="text-subtitle-1 font-weight-bold">
+                    Pricing by Size
+                  </span>
                 </div>
                 <v-btn
-                  variant="text"
+                  prepend-icon="mdi-plus"
+                  variant="tonal"
                   color="primary"
                   size="small"
-                  prepend-icon="mdi-plus"
+                  rounded="pill"
                   @click="addSize"
-                  class="font-weight-black"
                 >
                   Add Size
                 </v-btn>
               </div>
 
-              <v-row dense v-for="(size, index) in form.sizes" :key="index">
-                <v-col cols="12" md="12" class="d-flex align-center">
-                  <v-text-field
-                    v-model="size.name"
-                    label="Size Name"
-                    variant="outlined"
-                    rounded="lg"
-                    hide-details
-                    class="flex-grow-1 me-3"
-                    density="compact"
-                  />
-                  <v-text-field
-                    v-model="size.price"
-                    label="Price"
-                    type="number"
-                    variant="outlined"
-                    rounded="lg"
-                    hide-details
-                    class="flex-grow-1 me-3"
-                    density="compact"
-                  />
-                  <v-btn
-                    icon="mdi-close-circle"
-                    variant="text"
-                    color="error"
-                    size="small"
-                    @click="removeSize(index)"
-                    v-if="form.sizes.length > 1"
-                  />
-                </v-col>
-              </v-row>
-            </div>
+              <v-sheet border rounded="lg" class="pa-4 bg-grey-lighten-5">
+                <v-row
+                  v-if="form.variants.length > 0"
+                  no-gutters
+                  class="mb-2 px-1 text-caption text-grey-darken-1 font-weight-bold"
+                >
+                  <v-col cols="6">SIZE NAME</v-col>
+                  <v-col cols="4" class="pl-2">PRICE</v-col>
+                  <v-col cols="2"></v-col>
+                </v-row>
+
+                <v-row
+                  v-for="(v, i) in form.variants"
+                  :key="i"
+                  align="center"
+                  class="mb-2"
+                  dense
+                >
+                  <v-col cols="6">
+                    <v-text-field
+                      v-model="v.name"
+                      placeholder="e.g. Regular"
+                      density="compact"
+                      hide-details
+                      variant="outlined"
+                      bg-color="white"
+                    />
+                  </v-col>
+
+                  <v-col cols="4">
+                    <v-text-field
+                      v-model="v.price"
+                      type="number"
+                      prefix="$"
+                      density="compact"
+                      hide-details
+                      variant="outlined"
+                      bg-color="white"
+                    />
+                  </v-col>
+
+                  <v-col cols="2" class="text-right">
+                    <v-btn
+                      icon="mdi-delete-outline"
+                      color="error"
+                      variant="text"
+                      size="small"
+                      :disabled="form.variants.length <= 1"
+                      @click="removeSize(i)"
+                    />
+                  </v-col>
+                </v-row>
+
+                <div
+                  v-if="form.variants.length === 0"
+                  class="text-center py-4 text-grey"
+                >
+                  No sizes added. Click "Add Size" to begin.
+                </div>
+              </v-sheet>
+            </v-col>
+
+            <!-- FIXED PRICE -->
+            <v-text-field
+              v-if="!SIZE_CATEGORIES.includes(form.category)"
+              v-model="form.price"
+              type="number"
+              label="Price"
+            />
           </v-col>
         </v-row>
       </v-card-text>
 
-      <v-divider />
-      <v-card-actions class="pa-4">
-        <v-btn
-          variant="text"
-          color="grey-darken-1"
-          rounded="lg"
-          @click="close"
-          class="px-6"
-        >
-          Cancel
-        </v-btn>
+      <v-card-actions>
         <v-spacer />
-        <v-btn
-          color="primary"
-          variant="flat"
-          rounded="lg"
-          width="180"
-          height="44"
-          class="font-weight-black"
-          @click="save"
-        >
-          SAVE CHANGES
-        </v-btn>
+        <v-btn variant="text" @click="close">Cancel</v-btn>
+        <v-btn color="primary" @click="save">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
-
-<style scoped>
-  /* Prevents the select and input fields from pushing out the card width */
-  .v-text-field :deep(input) {
-    font-size: 0.9rem;
-  }
-
-  /* Custom scrollbar for sizes section if it ever overflows */
-  .bg-grey-lighten-5::-webkit-scrollbar {
-    width: 4px;
-  }
-  .bg-grey-lighten-5::-webkit-scrollbar-thumb {
-    background: #e0e0e0;
-    border-radius: 10px;
-  }
-</style>

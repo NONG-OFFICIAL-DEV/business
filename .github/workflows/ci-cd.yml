@@ -150,7 +150,7 @@ jobs:
             # docker compose exec backend php artisan jwt:secret --force
 
             echo ">>> Run migrations (optional)"
-            # docker compose exec backend php artisan migrate --force
+            docker compose exec backend php artisan migrate --force
 
             echo ">>> Run seeders (optional)"
             # docker compose exec backend php artisan db:seed --force
