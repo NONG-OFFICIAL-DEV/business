@@ -12,7 +12,10 @@ class MenuController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Menu::query();
+        $query = Menu::with('variants')->when(
+            $request->has('has_variants'),
+            fn ($q) => $q->where('has_variants', true)
+        );
 
         // Filter by status if provided (?status=1 or ?status=0)
         if ($request->has('status')) {
