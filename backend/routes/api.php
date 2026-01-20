@@ -97,3 +97,9 @@ Route::post('/telegram/webhook', [TelegramController::class, 'webhook']);
 
 // Link Telegram to logged-in user (JWT auth required)
 Route::middleware('jwt.auth')->post('/telegram/link', [TelegramController::class, 'linkTelegram']);
+
+Route::prefix('kitchen')->group(function () {
+    Route::get('/orders', [KitchenOrderController::class, 'index']);
+    Route::patch('/orders/{order}/start', [KitchenOrderController::class, 'start']);
+    Route::patch('/orders/{order}/ready', [KitchenOrderController::class, 'ready']);
+});

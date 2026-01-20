@@ -17,6 +17,7 @@
     "prettier": "^3.2.5",
     "vue-chartjs": "^5.3.2",
     "vue-i18n": "^9.13.1",
+    "vuedraggable": "^4.1.0",
     "vuetify": "^3.11.2"
   },
   "devDependencies": {
