@@ -32,13 +32,12 @@
           </template>
         </draggable>
       </v-col>
-      {{ kitchenStore.orders }}
     </v-row>
   </v-container>
 </template>
 
 <script setup>
-  import { ref, computed, onMounted } from 'vue'
+  import { ref, computed, onMounted, onUnmounted } from 'vue'
   import draggable from 'vuedraggable'
   import OrderCard from '@/components/kitchen/OrderCard.vue'
   import { useKitchenStore } from '@/stores/kitchenStore'
@@ -46,9 +45,11 @@
   const kitchenStore = useKitchenStore()
 
   onMounted(() => {
-    kitchenStore.fetchOrders()
+    kitchenStore.startOrdersStream()
   })
-
+  onUnmounted(() => {
+    kitchenStore.stopOrdersStream()
+  })
   const columns = computed(() => [
     {
       title: '🆕 NEW',

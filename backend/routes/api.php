@@ -103,6 +103,7 @@ Route::prefix('kitchen')->group(function () {
     Route::get('/orders', [KitchenOrderController::class, 'index']);
     Route::patch('/orders/{order}/start', [KitchenOrderController::class, 'start']);
     Route::patch('/orders/{order}/ready', [KitchenOrderController::class, 'ready']);
+    Route::get('/orders/stream', [KitchenOrderController::class, 'stream']);
 });
 
 Route::post('/orders', [OrderController::class, 'store']);
