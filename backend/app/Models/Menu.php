@@ -79,6 +79,11 @@ class Menu extends Model
         return $this->hasMany(MenuVariant::class);
     }
 
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     // public function recipes()
     // {
     //     return $this->hasMany(MenuRecipe::class);

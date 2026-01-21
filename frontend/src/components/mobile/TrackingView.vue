@@ -1,17 +1,35 @@
 <script setup>
-  import { computed } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
+  import { useOrderStore } from '@/stores/orderStore'
 
   const props = defineProps({
-    cart: { type: Array, default: () => [] },
     tableNumber: String
   })
 
   defineEmits(['reset'])
 
+  const order = ref(null)
+  const loading = ref(true)
+
+  const orderStore = useOrderStore()
+
+  // Compute total safely
   const totalAmount = computed(() => {
-    return props.cart
+    if (!order.value || !order.value.items) return '0.00'
+    return order.value.items
       .reduce((sum, item) => sum + item.price * item.qty, 0)
       .toFixed(2)
+  })
+
+  onMounted(async () => {
+    try {
+      if (!props.tableNumber) return
+      order.value = await orderStore.fetchOrderByTable('T1')
+    } catch (e) {
+      console.error('Failed to load order', e)
+    } finally {
+      loading.value = false
+    }
   })
 </script>
 
@@ -19,7 +37,38 @@
   <v-container
     class="fill-height bg-grey-lighten-5 d-flex align-center justify-center"
   >
-    <div class="w-100 px-4" style="max-width: 450px">
+    <!-- Show loading state if needed -->
+    <div v-if="loading" class="text-center">
+      <v-progress-circular indeterminate color="primary" />
+    </div>
+
+    <!-- No active orders -->
+    <div
+      v-else-if="!order || order.items?.length === 0"
+      class="text-center px-6"
+    >
+      <v-avatar color="grey-lighten-4" size="120" class="mb-6">
+        <v-icon size="60" color="grey-lighten-1">mdi-tray-full</v-icon>
+      </v-avatar>
+      <h3 class="text-h5 font-weight-black mb-2">No active orders</h3>
+      <p class="text-body-2 text-medium-emphasis mb-6">
+        Looks like you haven't ordered anything yet. Let's find something
+        delicious!
+      </p>
+      <v-btn
+        color="#3b828e"
+        size="large"
+        block
+        rounded="pill"
+        class="text-none font-weight-bold"
+        @click="$emit('reset')"
+      >
+        View Menu
+      </v-btn>
+    </div>
+
+    <!-- Active order -->
+    <div v-else class="w-100 px-4" style="max-width: 450px">
       <div class="text-center mb-8">
         <v-avatar
           color="success"
@@ -33,7 +82,7 @@
         </h2>
         <p class="text-body-1 text-medium-emphasis">
           Sit back and relax, Table
-          <b>{{ tableNumber }}</b>
+          <b>{{ props.tableNumber }}</b>
           .
         </p>
       </div>
@@ -41,23 +90,89 @@
       <v-card flat class="rounded-xl border-sm mb-6 receipt-card">
         <div class="pa-5 bg-white">
           <div class="d-flex justify-space-between mb-6 px-2">
+            <!-- Ordered -->
             <div class="d-flex flex-column align-center">
-              <v-icon color="success">mdi-check-circle</v-icon>
-              <span class="text-caption font-weight-bold">Ordered</span>
+              <v-icon
+                :color="
+                  order.kitchen_status !== 'pending'
+                    ? 'success'
+                    : 'grey-lighten-1'
+                "
+              >
+                mdi-check-circle
+              </v-icon>
+              <span
+                class="text-caption font-weight-bold"
+                :class="
+                  order.kitchen_status !== 'pending'
+                    ? ''
+                    : 'text-grey-lighten-1'
+                "
+              >
+                Ordered
+              </span>
             </div>
-            <v-divider class="mt-3 mx-2" color="success" thickness="2" />
+
+            <v-divider
+              class="mt-3 mx-2"
+              :color="
+                order.kitchen_status === 'preparing'
+                  ? '#3b828e'
+                  : 'grey-lighten-1'
+              "
+              thickness="2"
+            />
+
+            <!-- Cooking -->
             <div class="d-flex flex-column align-center">
-              <v-icon color="#3b828e" class="chef-icon-animation">
+              <v-icon
+                :color="
+                  order.kitchen_status !== 'preparing'
+                    ? 'success'
+                    : 'grey-lighten-1'
+                "
+                class="chef-icon-animation"
+              >
                 mdi-fire
               </v-icon>
-              <span class="text-caption font-weight-bold text-teal-darken-2">
+              <span
+                class="text-caption font-weight-bold"
+                :class="
+                  order.kitchen_status === 'preparing'
+                    ? 'text-teal-darken-2'
+                    : 'grey-lighten-1'
+                "
+              >
                 Cooking
               </span>
             </div>
-            <v-divider class="mt-3 mx-2" />
-            <div class="d-flex flex-column align-center text-grey-lighten-1">
-              <v-icon>mdi-room-service</v-icon>
-              <span class="text-caption">Ready</span>
+
+            <v-divider
+              class="mt-3 mx-2"
+              :color="
+                order.kitchen_status === 'ready' ? 'success' : 'grey-lighten-1'
+              "
+            />
+
+            <!-- Ready -->
+            <div class="d-flex flex-column align-center">
+              <v-icon
+                :color="
+                  order.kitchen_status === 'ready'
+                    ? 'success'
+                    : 'grey-lighten-1'
+                "
+              >
+                mdi-room-service
+              </v-icon>
+              <span
+                class="text-caption font-weight-bold"
+                :class="
+                  order.kitchen_status === 'ready' ? '' : 'text-grey-lighten-1'
+                "
+              >
+                Ready
+              </span>
             </div>
           </div>
 
@@ -66,14 +181,12 @@
           </div>
 
           <div
-            v-for="item in cart"
+            v-for="item in order.items || []"
             :key="item.id"
             class="d-flex justify-space-between mb-3"
           >
             <div class="d-flex flex-column">
-              <span class="text-body-2 font-weight-bold">
-                {{ item.name }}
-              </span>
+              <span class="text-body-2 font-weight-bold">{{ item.name }}</span>
               <span class="text-caption text-grey">Qty: {{ item.qty }}</span>
             </div>
             <span class="text-body-2 font-weight-medium">
@@ -102,8 +215,8 @@
           class="rounded-pill font-weight-bold mb-4 text-none elevation-2"
           @click="$emit('reset')"
         >
-          <v-icon start>mdi-plus</v-icon>
-          Order more
+          <v-icon start>mdi-arrow-left</v-icon>
+          Back to Menu
         </v-btn>
 
         <v-btn
@@ -125,7 +238,6 @@
     color: #3b828e !important;
   }
 
-  /* Smooth pulse for success */
   .pulse-animation {
     animation: pulse 2.5s infinite;
   }
@@ -145,10 +257,9 @@
     }
   }
 
-  /* Chef icon "cooking" animation */
-  .chef-icon-animation {
+  /* .chef-icon-animation {
     animation: flicker 1.5s infinite;
-  }
+  } */
 
   @keyframes flicker {
     0%,
@@ -167,7 +278,6 @@
     border-top-width: 2px !important;
   }
 
-  /* Makes the card look like a receipt */
   .receipt-card {
     position: relative;
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));

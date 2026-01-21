@@ -14,7 +14,7 @@ class KitchenOrderController extends Controller
     {
         return Order::with([
             'table:id,table_number',
-            'items.menuItem:id,name'
+            'items.menu:id,name'
         ])
         ->whereIn('kitchen_status', ['pending', 'preparing', 'ready'])
         ->orderBy('created_at')
@@ -28,7 +28,7 @@ class KitchenOrderController extends Controller
                 'table' => $order->table,
                 'items' => $order->items->map(fn ($item) => [
                     'id' => $item->id,
-                    'name' => $item->menuItem->name,
+                    'name' => $item->menu->name,
                     'quantity' => $item->quantity,
                     'note' => $item->note
                 ])
@@ -61,7 +61,7 @@ class KitchenOrderController extends Controller
 
                 $orders = Order::with([
                     'table:id,table_number',
-                    'items.menuItem:id,name'
+                    'items.menu:id,name'
                 ])
                 ->whereIn('kitchen_status', ['pending', 'preparing', 'ready'])
                 ->orderBy('created_at')
@@ -75,7 +75,7 @@ class KitchenOrderController extends Controller
                         'table' => $order->table,
                         'items' => $order->items->map(fn ($item) => [
                             'id' => $item->id,
-                            'name' => $item->menuItem->name,
+                            'name' => $item->menu->name,
                             'quantity' => $item->quantity,
                             'note' => $item->note
                         ])

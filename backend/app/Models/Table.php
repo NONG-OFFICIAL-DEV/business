@@ -21,4 +21,15 @@ class Table extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    /**
+     * Get active order for this table
+     */
+    public function activeOrder()
+    {
+        return $this->hasOne(Order::class)
+            ->whereIn('kitchen_status', ['pending', 'preparing', 'ready'])
+            ->whereNotIn('status', ['cancelled', 'completed'])
+            ->latest();
+    }
 }

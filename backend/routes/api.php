@@ -106,5 +106,6 @@ Route::prefix('kitchen')->group(function () {
     Route::get('/orders/stream', [KitchenOrderController::class, 'stream']);
 });
 
+Route::get('/orders/by-table/{tableNumber}', [OrderController::class, 'getByTable']);
 Route::post('/orders', [OrderController::class, 'store']);
 Route::apiResource('menus', MenuController::class);

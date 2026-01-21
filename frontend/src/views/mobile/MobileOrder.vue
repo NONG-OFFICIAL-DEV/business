@@ -22,7 +22,7 @@
   onMounted(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('table')) tableNumber.value = params.get('table')
-    productStore.fetchProducts()
+    // productStore.fetchProducts()
     menuStore.fetchMenus()
   })
 
@@ -32,33 +32,8 @@
   const isOrdering = ref(false)
   const { cart, totalItems, cartTotal, addToCart, updateQty, clearCart } =
     useCart()
+  const viewProcess = ref(false)
 
-  // async function placeOrder() {
-  //   isOrdering.value = true
-  //   setTimeout(() => {
-  //     isOrdering.value = false
-  //     page.value = 'tracking'
-  //   }, 2000)
-  //   try {
-  //     const saleData = {
-  //       items: cart.value.map(i => ({
-  //         table_id: 1,
-  //         menu_id: i.id,
-  //         qty: i.qty,
-  //         price: i.price,
-  //         customizations: i.customizations || null
-  //       })),
-  //       total_amount: cartTotal.value,
-  //       payment_method: 'cash'
-  //     }
-
-  //     await saleStore.checkout(saleData)
-  //     await productStore.fetchProducts()
-  //     await orderStore.createOrders(saleData)
-  //   } catch {
-  //     alert('Checkout failed')
-  //   }
-  // }
   async function placeOrder() {
     isOrdering.value = true
 
@@ -90,6 +65,10 @@
     }
   }
 
+  function goToTracking() {
+    page.value = 'tracking'
+  }
+
   function handleReset() {
     clearCart()
     page.value = 'home'
@@ -114,7 +93,11 @@
 
 <template>
   <v-app class="bg-grey-lighten-5">
-    <AppHeader v-if="page === 'home'" :tableNumber="tableNumber" />
+    <AppHeader
+      v-if="page === 'home'"
+      @view-process="goToTracking"
+      :tableNumber="tableNumber"
+    />
     <v-main>
       <template v-if="page === 'home'">
         <div class="sticky-nav bg-white shadow-sm">
@@ -165,6 +148,7 @@
         v-if="page === 'tracking'"
         :cart="cart"
         :tableNumber="tableNumber"
+        v-model="viewProcess"
         @reset="handleReset"
       />
     </v-main>

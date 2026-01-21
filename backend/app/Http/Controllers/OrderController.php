@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Table;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -49,7 +50,7 @@ class OrderController extends Controller
         }
 
         // Load relations for response
-        $order->load('table', 'items.menuItem');
+        $order->load('table', 'items.menu');
 
         return response()->json([
             'success' => true,
@@ -78,5 +79,40 @@ class OrderController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * Get active order by table number
+     */
+    public function getByTable(string $tableNumber)
+    {
+        $table = Table::where('table_number', trim($tableNumber))
+            ->with(['activeOrder.items.menu'])
+            ->first();
+
+        if (!$table) {
+            return response()->json([
+                'error' => 'Table not found'
+            ], 404);
+        }
+
+        if (!$table->activeOrder) {
+            return response()->json(null, 204); // correct
+        }
+
+        return response()->json([
+            'order_id' => $table->activeOrder->id,
+            'order_no' => $table->activeOrder->order_no,
+            'status' => $table->activeOrder->status,
+            'kitchen_status' => $table->activeOrder->kitchen_status,
+            'items' => $table->activeOrder->items->map(fn($item) => [
+                'id' => $item->id,
+                'name' => $item->menu->name,
+                'price' => $item->menu->price,
+                'qty' => $item->quantity,
+                'status' => $item->status,
+                'note' => $item->note,
+            ])
+        ]);
     }
 }

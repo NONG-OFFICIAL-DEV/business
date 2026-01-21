@@ -28,7 +28,7 @@ class OrderItem extends Model
     /**
      * Item belongs to a menu item
      */
-    public function menuItem()
+    public function menu()
     {
         return $this->belongsTo(Menu::class ,'menu_id');
     }
