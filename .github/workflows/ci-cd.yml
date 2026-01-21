@@ -145,6 +145,11 @@ jobs:
 
             echo ">>> Wait for DB to be ready"
             sleep 20
+            echo ">>> Clear Laravel caches"
+            docker compose exec backend php artisan optimize:clear
+            docker compose exec backend php artisan route:clear
+            docker compose exec backend php artisan config:clear
+            docker compose exec backend php artisan cache:clear
 
             echo ">>> Generate JWT secret"
             # docker compose exec backend php artisan jwt:secret --force
