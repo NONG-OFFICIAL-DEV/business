@@ -6,7 +6,10 @@ export const useKitchenStore = defineStore('kitchen', {
     orders: [],
     loading: false,
     eventSource: null,
-    previousCount: 0 // ✅ track previous orders count
+    previousCount: 0, // ✅ track previous orders count
+    audio: null,
+    audioUnlocked: false,
+    isConnected: false
   }),
 
   getters: {
@@ -40,39 +43,64 @@ export const useKitchenStore = defineStore('kitchen', {
     async ordersStream() {
       await kitchenService.ordersStream()
     },
-    // 🔥 Start SSE
+    // 1. THIS IS THE KEY: Call this from a BUTTON CLICK in the UI
+    initAudio() {
+      if (!this.audio) {
+        this.audio = new Audio('/sounds/restaurant-bell.mp3')
+        this.audio.preload = 'auto'
+      }
+
+      // Unlocking the "Audio Context"
+      this.audio
+        .play()
+        .then(() => {
+          this.audio.pause()
+          this.audio.currentTime = 0
+          this.audioUnlocked = true
+          console.log('✅ Audio Unlocked and Ready')
+        })
+        .catch(err => {
+          console.error('❌ Audio Unlock Failed. User must click first.', err)
+        })
+    },
+
     startOrdersStream() {
       if (this.eventSource) return
 
       this.loading = true
       const backendUrl = import.meta.env.VITE_APP_API_BASE_URL
-      this.eventSource = new EventSource(`${backendUrl}kitchen/orders/stream`)
+      this.eventSource = new EventSource(`${backendUrl}/kitchen/orders/stream`)
 
-      // Ensure audio can play after user interaction
-      let audioAllowed = false
-      const audio = new Audio('/sounds/restaurant-bell.mp3')
-      const enableAudio = () => {
-        audioAllowed = true
+      this.eventSource.onopen = () => {
+        this.isConnected = true
+        this.loading = false
       }
-      document.addEventListener('click', enableAudio, { once: true })
 
       this.eventSource.addEventListener('orders', event => {
         const data = JSON.parse(event.data)
 
-        // 🔔 Play sound ONLY if user interacted and new order arrives
-        if (audioAllowed && data.length > this.previousCount) {
-          audio.play().catch(() => {})
+        // 🔔 LOGIC:
+        // 1. Must be unlocked
+        // 2. data.length must be more than previous
+        // 3. previousCount MUST NOT BE 0 (to avoid sound on page refresh)
+        if (
+          this.audioUnlocked &&
+          this.previousCount > 0 &&
+          data.length > this.previousCount
+        ) {
+          this.audio
+            .play()
+            .catch(e => console.warn('Playback blocked by browser logic', e))
         }
 
-        this.previousCount = data.length
         this.orders = data
-        this.loading = false
+        this.previousCount = data.length
       })
 
       this.eventSource.onerror = () => {
-        // console.error('SSE connection error')
+        this.isConnected = false
         this.stopOrdersStream()
-        // Optional: retry after a delay
+        // Retry connection
         setTimeout(() => this.startOrdersStream(), 5000)
       }
     },
@@ -81,6 +109,7 @@ export const useKitchenStore = defineStore('kitchen', {
       if (this.eventSource) {
         this.eventSource.close()
         this.eventSource = null
+        this.isConnected = false
       }
     }
   }
