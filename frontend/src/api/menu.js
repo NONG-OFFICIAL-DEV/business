@@ -30,6 +30,7 @@ export const menuService = {
 
   updateMenu(id, data) {
     const formData = new FormData()
+    formData.append('_method', 'PUT')
     Object.entries(data).forEach(([key, value]) => {
       if (key === 'image' && value) {
         formData.append('image', value)

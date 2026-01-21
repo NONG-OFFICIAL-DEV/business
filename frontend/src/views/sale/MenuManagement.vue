@@ -112,10 +112,6 @@
 
   const menuStore = useMenuStore()
 
-  onMounted(() => {
-    menuStore.fetchMenus()
-  })
-
   /* FILTER BY CATEGORY */
   const filteredProducts = computed(() => {
     if (selectedCategory.value === 'All Items') {
@@ -145,12 +141,12 @@
       options: { type: 'error', color: 'error', width: 500 },
       agree: async () => {
         try {
-          menuStore.deleteMenu(menu.id)
+          await menuStore.deleteMenu(menu.id)
           notif(t('messages.deleted_success'), {
             type: 'success',
             color: 'primary'
           })
-          menuStore.fetchMenus()
+          await menuStore.fetchMenus()
         } catch (err) {
           notif(err.response?.data?.error || t('messages.delete_failed'), {
             type: 'error',
@@ -171,8 +167,12 @@
       type: 'success',
       color: 'primary'
     })
-    menuStore.fetchMenus()
+    await menuStore.fetchMenus()
   }
+
+  onMounted(() => {
+    menuStore.fetchMenus()
+  })
 </script>
 
 <style scoped>

@@ -15,6 +15,7 @@
 
   /* ================= DEFAULT FORM ================= */
   const getDefaultForm = () => ({
+    id: null,
     name: '',
     category: 'Coffee',
     description: '',
@@ -95,6 +96,7 @@
       form.value.variants.length > 0
 
     const payload = {
+      id: form.value.id,
       name: form.value.name,
       category: form.value.category,
       description: form.value.description,
@@ -213,7 +215,11 @@
             />
 
             <!-- VARIANTS -->
-            <v-col cols="12" class="pa-0" v-if="SIZE_CATEGORIES.includes(form.category)">
+            <v-col
+              cols="12"
+              class="pa-0"
+              v-if="SIZE_CATEGORIES.includes(form.category)"
+            >
               <div class="d-flex align-center justify-space-between mb-2">
                 <div class="d-flex align-center">
                   <v-icon color="primary" class="mr-2">mdi-currency-usd</v-icon>

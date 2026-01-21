@@ -7,15 +7,8 @@ export const useMenuStore = defineStore('menu', () => {
   const loading = ref(false)
 
   async function fetchMenus() {
-    loading.value = true
-    try {
-      const { data } = await menuService.fetchMenus()
-      menus.value = data.data || []
-    } catch (err) {
-      console.error(err)
-    } finally {
-      loading.value = false
-    }
+    const { data } = await menuService.fetchMenus()
+    menus.value = data.data || []
   }
 
   async function saveMenu(menu) {
@@ -27,16 +20,7 @@ export const useMenuStore = defineStore('menu', () => {
   }
 
   async function deleteMenu(id) {
-    loading.value = true
-    try {
-      await menuService.deleteMenu(id)
-      menus.value = menus.value.filter(m => m.id !== id)
-    } catch (err) {
-      console.error(err)
-      throw err
-    } finally {
-      loading.value = false
-    }
+    await menuService.deleteMenu(id)
   }
 
   return { menus, loading, fetchMenus, saveMenu, deleteMenu }
