@@ -45,15 +45,23 @@ export const useKitchenStore = defineStore('kitchen', {
       if (this.eventSource) return
 
       this.loading = true
+      const backendUrl = import.meta.env.VITE_APP_API_BASE_URL
+      this.eventSource = new EventSource(`${backendUrl}/kitchen/orders/stream`)
 
-      this.eventSource = new EventSource('/api/kitchen/orders/stream')
+      // Ensure audio can play after user interaction
+      let audioAllowed = false
+      const audio = new Audio('/sounds/restaurant-bell.mp3')
+      const enableAudio = () => {
+        audioAllowed = true
+      }
+      document.addEventListener('click', enableAudio, { once: true })
 
       this.eventSource.addEventListener('orders', event => {
         const data = JSON.parse(event.data)
 
-        // 🔔 Play sound ONLY when new order arrives
-        if (data.length > this.previousCount) {
-          new Audio('/sounds/restaurant-bell.mp3').play()
+        // 🔔 Play sound ONLY if user interacted and new order arrives
+        if (audioAllowed && data.length > this.previousCount) {
+          audio.play().catch(() => {})
         }
 
         this.previousCount = data.length
@@ -62,12 +70,13 @@ export const useKitchenStore = defineStore('kitchen', {
       })
 
       this.eventSource.onerror = () => {
-        console.error('SSE connection error')
+        // console.error('SSE connection error')
         this.stopOrdersStream()
+        // Optional: retry after a delay
+        setTimeout(() => this.startOrdersStream(), 5000)
       }
     },
 
-    // 🛑 Stop SSE
     stopOrdersStream() {
       if (this.eventSource) {
         this.eventSource.close()
