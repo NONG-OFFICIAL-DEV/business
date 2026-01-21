@@ -1,6 +1,6 @@
 <template>
   <v-card class="mb-4 order-card" elevation="2" border>
-    <v-card-item
+    <!-- <v-card-item
       :class="['border-bottom py-2', getUrgencyBgColor(order.order_time)]"
     >
       <template v-slot:prepend>
@@ -10,7 +10,7 @@
           </span>
 
           <v-chip
-            size="small"
+            size="x-small"
             :color="getUrgencyColor(order.order_time)"
             variant="flat"
             class="font-weight-bold justify-center"
@@ -31,36 +31,65 @@
           {{ formatDateTime(order.order_time) }}
         </span>
       </v-card-title>
+    </v-card-item> -->
+    <v-card-item
+      :class="['pa-0', getUrgencyBgColor(order.order_time)]"
+      class="border-bottom"
+    >
+      <div class="d-flex align-stretch" style="height: 70px">
+        <div class="pa-3 d-flex flex-column justify-center flex-grow-1">
+          <span
+            class="text-caption font-weight-black text-grey-darken-1 line-height-1"
+          >
+            ORDER #{{ order.order_no.slice(-4) }}
+          </span>
+          <div class="d-flex align-center mt-1">
+            <v-icon size="small" class="mr-1" color="grey">
+              mdi-clock-outline
+            </v-icon>
+            <span class="text-subtitle-2 font-weight-bold mr-2">
+              <v-chip
+                size="x-small"
+                :color="getUrgencyColor(order.order_time)"
+                variant="flat"
+              >
+                {{ getElapsedTime(order.order_time) }} ago
+              </v-chip>
+            </span>
+          </div>
+        </div>
+
+        <div
+          class="bg-primary d-flex flex-column align-center justify-center px-6"
+        >
+          <span
+            class="text-caption font-weight-black text-white opacity-80 line-height-1"
+          >
+            Table
+          </span>
+          <span class="text-h6 font-weight-black text-white line-height-1">
+            {{ order.table.table_number }}
+          </span>
+        </div>
+      </div>
     </v-card-item>
 
     <v-divider />
 
     <v-card-text class="py-3">
-      <div class="d-flex align-center justify-space-between mb-1">
-        <span class="text-h6 font-weight-black text-primary">
-          Table {{ order.table.table_number }}
-        </span>
-      </div>
-
       <v-list density="compact" class="bg-transparent pa-0">
         <v-list-item v-for="(item, i) in order.items" :key="i" class="px-0">
-          <div class="d-flex align-start">
-            <v-avatar
-              color="grey-lighten-4"
-              size="32"
-              class="mr-3 font-weight-black"
-            >
-              {{ item.quantity }}
-            </v-avatar>
-            <div>
-              <div class="text-body-1 font-weight-medium">{{ item.name }}</div>
-              <div
-                v-if="item.note"
-                class="text-caption text-error font-weight-bold uppercase"
-              >
-                ⚠️ {{ item.note }}
-              </div>
-            </div>
+          <template v-slot:prepend>
+            <v-chip color="success" class="mr-3" size="small">
+              X {{ item.quantity }}
+            </v-chip>
+          </template>
+
+          <div>
+            <v-list-item-title class="text-subtitle-2" v-text="item.name"></v-list-item-title>
+            <v-list-item-subtitle v-if="item.note">
+              ⚠️ {{ item.note }}
+            </v-list-item-subtitle>
           </div>
         </v-list-item>
       </v-list>

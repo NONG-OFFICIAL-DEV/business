@@ -70,6 +70,10 @@ class MenuController extends Controller
     {
         $menu = Menu::findOrFail($id);
         $menu->delete();
-        return response()->json('Deleted successfully', 204);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Menu deleted successfully.',
+        ], 200);
     }
 }

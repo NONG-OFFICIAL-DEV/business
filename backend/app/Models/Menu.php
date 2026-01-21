@@ -39,7 +39,6 @@ class Menu extends Model
         // Handle image upload
         if ($request->hasFile('image')) {
             $menu->image = $request->file('image')->store('menus', 'public');
-            $menu->save();
         }
 
         // Sync variants (sizes)
@@ -52,6 +51,7 @@ class Menu extends Model
 
         if (is_array($variants) && count($variants) > 0) {
             $menu->has_variants = true;
+            $menu->save();
             $menu->variants()->delete();
 
             foreach ($variants as $variant) {
@@ -62,10 +62,10 @@ class Menu extends Model
             }
         } else {
             $menu->has_variants = false;
+            $menu->variants()->delete();
         }
 
-        $menu->save();
-
+        $menu->save(); // final save for menu fields including image & has_variants
 
         return response()->json([
             'success' => true,
