@@ -46,7 +46,7 @@ export const useKitchenStore = defineStore('kitchen', {
 
       this.loading = true
       const backendUrl = import.meta.env.VITE_APP_API_BASE_URL
-      this.eventSource = new EventSource(`${backendUrl}/kitchen/orders/stream`)
+      this.eventSource = new EventSource(`${backendUrl}kitchen/orders/stream`)
 
       // Ensure audio can play after user interaction
       let audioAllowed = false
