@@ -1,37 +1,5 @@
 <template>
   <v-card class="mb-4 order-card" elevation="2" border>
-    <!-- <v-card-item
-      :class="['border-bottom py-2', getUrgencyBgColor(order.order_time)]"
-    >
-      <template v-slot:prepend>
-        <div class="d-flex flex-column align-start">
-          <span class="text-subtitle-2 font-weight-black mr-2 text-no-wrap">
-            #{{ order.order_no }}
-          </span>
-
-          <v-chip
-            size="x-small"
-            :color="getUrgencyColor(order.order_time)"
-            variant="flat"
-            class="font-weight-bold justify-center"
-            style="min-width: 55px; height: 18px; font-size: 0.7rem"
-          >
-            {{ getElapsedTime(order.order_time) }}
-          </v-chip>
-        </div>
-      </template>
-
-      <v-card-title class="d-flex flex-column align-end">
-        <span
-          class="text-caption font-weight-medium text-uppercase text-grey-darken-2"
-        >
-          Order Time
-        </span>
-        <span class="text-subtitle-2 font-weight-bold">
-          {{ formatDateTime(order.order_time) }}
-        </span>
-      </v-card-title>
-    </v-card-item> -->
     <v-card-item
       :class="['pa-0', getUrgencyBgColor(order.order_time)]"
       class="border-bottom"
@@ -86,7 +54,10 @@
           </template>
 
           <div>
-            <v-list-item-title class="text-subtitle-2" v-text="item.name"></v-list-item-title>
+            <v-list-item-title
+              class="text-subtitle-2"
+              v-text="item.name"
+            ></v-list-item-title>
             <v-list-item-subtitle v-if="item.note">
               ⚠️ {{ item.note }}
             </v-list-item-subtitle>
@@ -95,6 +66,19 @@
       </v-list>
     </v-card-text>
 
+    <v-card-actions v-if="order.kitchen_status === 'ready'" class="pa-0">
+      <v-btn
+        block
+        color="success"
+        height="50"
+        variant="flat"
+        class="font-weight-black text-none"
+        @click.stop="$emit('served', order.id)"
+      >
+        <v-icon start>mdi-check-circle</v-icon>
+        BUMP / SERVED in {{ timeLabel }}
+      </v-btn>
+    </v-card-actions>
     <v-divider />
     <div class="bg-grey-lighten-4 py-1 d-flex justify-center cursor-move">
       <v-icon color="grey">mdi-drag-horizontal</v-icon>
@@ -103,9 +87,61 @@
 </template>
 
 <script setup>
+  import { ref, watch, onUnmounted, computed } from 'vue'
   import { useDate } from '@/composables/useDate'
   const { formatDateTime } = useDate()
-  defineProps({ order: Object })
+
+  const props = defineProps({
+    order: { type: Object, required: true }
+  })
+
+  const emit = defineEmits(['served'])
+
+  const AUTO_SERVE_MINUTES = 2
+
+  const remainingSeconds = ref(null)
+  let timer = null
+
+  const startTimer = () => {
+    clearTimer()
+
+    remainingSeconds.value = AUTO_SERVE_MINUTES * 60
+
+    timer = setInterval(() => {
+      remainingSeconds.value--
+
+      if (remainingSeconds.value <= 0) {
+        emit('served', props.order.id)
+        clearTimer()
+      }
+    }, 1000)
+  }
+
+  const clearTimer = () => {
+    if (timer) {
+      clearInterval(timer)
+      timer = null
+    }
+  }
+
+  watch(
+    () => props.order.kitchen_status,
+    status => {
+      if (status === 'ready') {
+        startTimer()
+      } else {
+        clearTimer()
+      }
+    },
+    { immediate: true }
+  )
+
+  const timeLabel = computed(() => {
+    if (remainingSeconds.value === null) return ''
+    const m = Math.floor(remainingSeconds.value / 60)
+    const s = remainingSeconds.value % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
+  })
 
   const getElapsedTime = time => {
     const diff = Math.floor((new Date() - new Date(time)) / 60000)
@@ -127,6 +163,7 @@
     if (diff > 8) return 'bg-orange-lighten-5'
     return 'bg-white'
   }
+  onUnmounted(clearTimer)
 </script>
 
 <style scoped>

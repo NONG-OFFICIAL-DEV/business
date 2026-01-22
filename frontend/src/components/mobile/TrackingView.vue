@@ -37,16 +37,8 @@
   <v-container
     class="fill-height bg-grey-lighten-5 d-flex align-center justify-center"
   >
-    <!-- Show loading state if needed -->
-    <div v-if="loading" class="text-center">
-      <v-progress-circular indeterminate color="primary" />
-    </div>
-
     <!-- No active orders -->
-    <div
-      v-else-if="!order || order.items?.length === 0"
-      class="text-center px-6"
-    >
+    <div v-if="!order || order.items?.length === 0" class="text-center px-6">
       <v-avatar color="grey-lighten-4" size="120" class="mb-6">
         <v-icon size="60" color="grey-lighten-1">mdi-tray-full</v-icon>
       </v-avatar>
