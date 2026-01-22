@@ -9,12 +9,12 @@ class CategoryMenu extends Model
 {
     use HasFactory;
 
-    protected $table = 'category_menus';
+    protected $table = 'menu_categories';
 
     protected $fillable = [
         'name',
-        'description',
-        'is_active',
+        'order',
+        'status',
     ];
 
     public function menus()

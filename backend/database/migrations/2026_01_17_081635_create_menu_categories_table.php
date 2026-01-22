@@ -14,8 +14,6 @@ return new class extends Migration
         Schema::create('menu_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->string('icon')->nullable(); // e.g., mdi-coffee
-            $table->boolean('has_variants')->default(false);
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->integer('order')->default(0);
             $table->timestamps();
