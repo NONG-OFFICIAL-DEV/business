@@ -18,10 +18,6 @@ export const useOrderStore = defineStore("order", {
     async fetchOrderByTable(tableNumber) {
       const { data } = await orderService.getOrderByTable(tableNumber);
       return data
-    },
-    async markServed(orderId) {
-     const res = await orderService.markServed(orderId);
-      return res
     }
   }
 });
