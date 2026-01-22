@@ -230,7 +230,7 @@
 
           <v-col class="text-end">
             <v-btn
-              v-if="hasRole(3)"
+              v-if="hasRole(3) || hasRole(1)"
               color="primary"
               @click="savePurchase(false)"
               :disabled="purchase.items.length <= 0 || !isValid"
@@ -250,7 +250,7 @@
 
             <!-- Manager buttons -->
             <v-btn
-              v-if="hasRole(2)"
+              v-if="hasRole(2) || hasRole(1)"
               color="primary"
               class="me-3"
               @click="approvePurchase"

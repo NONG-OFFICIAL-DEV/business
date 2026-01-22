@@ -53,4 +53,9 @@
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
   }
+  
+ .v-list-item__append {
+    display: initial !important;
+    align-items: unset !important;
+  }
 </style>

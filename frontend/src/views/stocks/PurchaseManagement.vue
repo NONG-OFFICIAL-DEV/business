@@ -7,7 +7,7 @@
         class="ms-4"
         icon="mdi-plus"
         @click="goToCreate"
-        v-if="isPurchaser"
+        v-if="isPurchaser || isManager || isAdmin"
       >
         New Purchase
       </BaseButton>
@@ -147,7 +147,7 @@
 
     <template #item.actions="{ item }">
       <v-btn
-        v-if="canEditPurchase(item) && (isPurchaser || isManager || isAdmin)"
+        v-if="canEditPurchase(item) || (isPurchaser || isManager || isAdmin)"
         icon="mdi-pencil"
         size="small"
         variant="text"

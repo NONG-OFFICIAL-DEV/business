@@ -171,6 +171,12 @@ const routes = [
         name: 'Staff',
         component: () => import('@/views/staff/StaffManagement.vue'),
         meta: { requiresAuth: true }
+      },
+      {
+        path: '/payroll',
+        name: 'Payroll',
+        component: () => import('@/views/staff/PayrollManagement.vue'),
+        meta: { requiresAuth: true }
       }
     ]
   },

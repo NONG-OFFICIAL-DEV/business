@@ -223,7 +223,6 @@
       ]
     }
   ])
-
 </script>
 <template>
   <v-navigation-drawer
@@ -231,7 +230,7 @@
     permanent
     elevation="0"
     class="border-right"
-    width="280"
+    width="260"
   >
     <!-- LOGO -->
     <div
@@ -423,14 +422,4 @@
     font-weight: 700;
     text-transform: uppercase;
   }
-
-  /* Scrollbar hidden for iPad smoothness */
-  .sidebar-list {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .sidebar-list::-webkit-scrollbar {
-    display: none;
-  }
-
 </style>
