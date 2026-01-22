@@ -54,6 +54,15 @@ class KitchenOrderController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function markServed(Order $order)
+    {
+        $order->update([
+            'status' => 'served'
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
     public function stream()
     {
         return response()->stream(function () {

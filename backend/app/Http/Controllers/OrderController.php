@@ -116,13 +116,4 @@ class OrderController extends Controller
         ]);
     }
 
-    public function markServed(Order $order)
-    {
-        $order->update([
-            'status' => 'served'
-        ]);
-
-        return response()->json(['success' => true]);
-    }
-
 }

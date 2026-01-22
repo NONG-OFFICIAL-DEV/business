@@ -104,7 +104,7 @@ Route::prefix('kitchen')->group(function () {
     Route::patch('/orders/{order}/start', [KitchenOrderController::class, 'start']);
     Route::patch('/orders/{order}/ready', [KitchenOrderController::class, 'ready']);
     Route::get('/orders/stream', [KitchenOrderController::class, 'stream']);
-    Route::put('/orders/mark-served', [KitchenOrderController::class, 'markServed']);
+    Route::put('/orders/mark-served/{order}', [KitchenOrderController::class, 'markServed']);
 });
 
 Route::get('/orders/by-table/{tableNumber}', [OrderController::class, 'getByTable']);
