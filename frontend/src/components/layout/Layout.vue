@@ -1,5 +1,5 @@
 <template>
-  <sidebar :rail="rail" :user="user" @update:rail="rail = $event" />
+  <sidebar :user="user" v-model:rail="rail" />
   <app-bar :user="user" @toggle="toggleRail" :notifications_count="notifications_count"/>
   <v-main>
     <v-container class="px-4" fluid>
@@ -37,3 +37,20 @@
     rail.value = !rail.value
   }
 </script>
+<style>
+    .v-navigation-drawer__content {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  /* Hide scrollbar for Webkit browsers */
+  .v-navigation-drawer__content::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for Firefox */
+  .v-navigation-drawer__content {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+</style>

@@ -159,6 +159,18 @@ const routes = [
         name: 'TaxSettings',
         component: () => import('@/views/setting/SettingsTax.vue'),
         meta: { requiresAuth: true }
+      },
+      {
+        path: '/expense-management',
+        name: 'Expense',
+        component: () => import('@/views/expenses/ExpenseManagement.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/staff-management',
+        name: 'Staff',
+        component: () => import('@/views/staff/StaffManagement.vue'),
+        meta: { requiresAuth: true }
       }
     ]
   },
