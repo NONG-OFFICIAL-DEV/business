@@ -8,9 +8,13 @@
   import PosProductGrid from './PosProductGrid.vue'
   import OrderCustomizationDialog from '@/components/pos/OrderCustomizationDialog.vue'
   import QRPaymentDialog from '@/components/pos/QRPaymentDialog.vue'
+  import { useMenuStore } from '@/stores/menuStore'
+  import { useCategoryMenuStore } from '@/stores/categoryMenu'
 
+  const categoryStore = useCategoryMenuStore()
   const productStore = useProductStore()
   const saleStore = useSaleStore()
+  const menuStore = useMenuStore()
 
   // State
   const search = ref('')
@@ -29,6 +33,13 @@
 
   // OPS Logic: Filter products based on selected store and search
   const filteredProducts = computed(() => {
+    if (selectedStore.value.type === 'hospitality') {
+      const data = menuStore.menus?.data || []
+      if (!search.value) return data
+      return data.filter(p =>
+        p.name.toLowerCase().includes(search.value.toLowerCase())
+      )
+    }
     const data = productStore.products.data || []
     return data
   })
@@ -101,7 +112,14 @@
     }
   }
 
-  onMounted(() => productStore.fetchProducts())
+  onMounted(() => {
+    if (selectedStore.value.type === 'hospitality') {
+      menuStore.fetchMenus()
+    } else {
+      productStore.fetchProducts()
+    }
+    categoryStore.fetchAll()
+  })
 </script>
 
 <template>
@@ -125,6 +143,8 @@
     <v-main>
       <PosProductGrid
         :products="filteredProducts"
+        :categories="categoryStore.items"
+        :mode="selectedStore.type"
         @select="openCustomizer"
         @quick-add="handleQuickAdd"
       />

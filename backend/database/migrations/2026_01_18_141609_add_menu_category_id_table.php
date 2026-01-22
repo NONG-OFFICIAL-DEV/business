@@ -16,10 +16,10 @@ return new class extends Migration
 
             // Add foreign key constraint
             $table->foreign('menu_category_id')
-                  ->references('id')
-                  ->on('menu_categories')
-                  ->onUpdate('cascade')
-                  ->onDelete('restrict');
+                    ->references('id')
+                    ->on('menu_categories')
+                    ->onUpdate('cascade')
+                    ->onDelete('set null');
         });
     }
 

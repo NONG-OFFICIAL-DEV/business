@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('menus', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->nullable();
             $table->string('name');
             $table->decimal('price', 10, 2);
             $table->string('image')->nullable();

@@ -1,11 +1,12 @@
 <script setup>
-  import { ref, watch } from 'vue'
+  import { ref, watch, computed } from 'vue'
 
   /* ================= PROPS / EMITS ================= */
   const props = defineProps({
     modelValue: Boolean,
     editMode: Boolean,
-    item: Object
+    item: Object,
+    categories: Object
   })
 
   const emit = defineEmits(['update:modelValue', 'save'])
@@ -17,7 +18,7 @@
   const getDefaultForm = () => ({
     id: null,
     name: '',
-    category: 'Coffee',
+    menu_category_id: null,
     description: '',
     is_available: true,
     variants: [],
@@ -48,9 +49,10 @@
 
   // Category → auto manage sizes
   watch(
-    () => form.value.category,
-    category => {
-      if (SIZE_CATEGORIES.includes(category)) {
+    () => form.value.menu_category_id,
+    menu_category_id => {
+      const category = props.categories.find(c => c.id === menu_category_id)
+      if (SIZE_CATEGORIES.includes(category?.name)) {
         if (form.value.variants.length === 0) {
           form.value.variants = [
             { name: 'Small', price: 0 },
@@ -77,6 +79,12 @@
 
     imagePreview.value = URL.createObjectURL(realFile)
   }
+  // Computed property for better performance and readability
+  const showSizeOptions = computed(() => {
+    return SIZE_CATEGORIES.includes(
+      props.categories.find(c => c.id === form.value.menu_category_id)?.name
+    )
+  })
 
   function addSize() {
     form.value.variants.push({ name: '', price: 0 })
@@ -92,13 +100,14 @@
 
   function save() {
     const hasVariants =
-      SIZE_CATEGORIES.includes(form.value.category) &&
-      form.value.variants.length > 0
+      SIZE_CATEGORIES.includes(
+        props.categories.find(c => c.id === form.value.menu_category_id)?.name
+      ) && form.value.variants.length > 0
 
     const payload = {
       id: form.value.id,
       name: form.value.name,
-      category: form.value.category,
+      menu_category_id: form.value.menu_category_id,
       description: form.value.description,
       is_available: form.value.is_available,
       has_variants: hasVariants,
@@ -201,11 +210,12 @@
           <!-- FORM -->
           <v-col cols="12" md="8">
             <v-text-field v-model="form.name" label="Name" />
-
             <v-select
-              v-model="form.category"
-              :items="['Coffee', 'Tea', 'Pastries', 'Lunch']"
+              v-model="form.menu_category_id"
+              :items="categories"
               label="Category"
+              item-title="name"
+              item-value="id"
             />
 
             <v-textarea
@@ -215,11 +225,7 @@
             />
 
             <!-- VARIANTS -->
-            <v-col
-              cols="12"
-              class="pa-0"
-              v-if="SIZE_CATEGORIES.includes(form.category)"
-            >
+            <v-col cols="12" class="pa-0" v-if="showSizeOptions">
               <div class="d-flex align-center justify-space-between mb-2">
                 <div class="d-flex align-center">
                   <v-icon color="primary" class="mr-2">mdi-currency-usd</v-icon>
@@ -303,7 +309,7 @@
 
             <!-- FIXED PRICE -->
             <v-text-field
-              v-if="!SIZE_CATEGORIES.includes(form.category)"
+              v-if="!showSizeOptions"
               v-model="form.price"
               type="number"
               label="Price"

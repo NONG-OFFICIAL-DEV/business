@@ -4,6 +4,7 @@ use App\Http\Controllers\AdjustmentController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CategoryMenuController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\KitchenOrderController;
@@ -110,3 +111,4 @@ Route::prefix('kitchen')->group(function () {
 Route::get('/orders/by-table/{tableNumber}', [OrderController::class, 'getByTable']);
 Route::post('/orders', [OrderController::class, 'store']);
 Route::apiResource('menus', MenuController::class);
+Route::apiResource('category-menus', CategoryMenuController::class);

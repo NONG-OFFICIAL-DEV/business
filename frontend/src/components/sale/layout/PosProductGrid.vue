@@ -2,25 +2,28 @@
   import { ref, computed } from 'vue'
 
   const props = defineProps({
-    products: Array
+    products: Array,
+    categories: Array,
+    mode: {
+      type: String,
+      default: 'retail' // 'retail' or 'hospitality'
+    }
   })
 
   const emit = defineEmits(['select', 'quick-add'])
   const selectedCategory = ref('All')
 
-  const categories = computed(() => [
-    'All',
-    ...new Set(props.products.map(p => p.category))
-  ])
-
   const displayProducts = computed(() => {
     if (selectedCategory.value === 'All') return props.products
-    return props.products.filter(p => p.category === selectedCategory.value)
+    if (selectedCategory.value === 'All') return props.products
+    return props.products.filter(
+      p => p.menu_category_id === selectedCategory.value
+    )
   })
 
   function handleProductClick(product) {
     // If Mart Item -> Quick Add
-    if (product.type === 'stock') {
+    if (product.has_variants === false) {
       emit('quick-add', product)
     }
     // If Coffee/Restaurant -> Customize
@@ -32,16 +35,20 @@
 
 <template>
   <v-container fluid class="pa-6">
-    <!-- <v-chip-group v-model="selectedCategory" mandatory class="mb-4">
+    <v-chip-group
+      v-model="selectedCategory"
+      mandatory
+      selected-class="bg-primary text-white"
+    >
+      <v-chip value="All" class="px-6">All Items</v-chip>
       <v-chip
         v-for="cat in categories"
-        :key="cat"
-        :value="cat"
-        variant="outlined"
+        :key="cat.name"
+        :value="cat.id"
       >
-        {{ cat }}
+        {{ cat.name }}
       </v-chip>
-    </v-chip-group> -->
+    </v-chip-group>
 
     <v-row>
       <v-col

@@ -13,7 +13,8 @@ class Menu extends Model
         'price',
         'image',
         'has_variants',
-        'status'
+        'status',
+        'menu_category_id',
     ];
 
     public static function store($request, $id = null)
@@ -23,7 +24,8 @@ class Menu extends Model
             'category_id',
             'name',
             'price',
-            'status'
+            'status',
+            'menu_category_id'
         );
 
         if ($id) {
@@ -91,6 +93,6 @@ class Menu extends Model
 
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(CategoryMenu::class, 'menu_category_id');
     }
 }
