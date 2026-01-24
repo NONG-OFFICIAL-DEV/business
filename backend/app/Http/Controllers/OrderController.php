@@ -14,7 +14,33 @@ class OrderController extends Controller
      */
     public function index()
     {
-        //
+        $orders = Order::with([
+            'table:id,table_number',
+            'items:id,order_id,menu_id,quantity,price,note',
+            'items.menu:id,name'
+        ])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json(
+            $orders->map(fn($order) => [
+                'order_id' => $order->id,
+                'order_no' => $order->order_no,
+                'table' => $order->table?->table_number,
+                'item_count' => $order->items->sum('quantity'),
+                // 'status' => $order->status,
+                'total' => $order->items->sum(fn($i) => $i->quantity * $i->price),
+                'created_at' => $order->created_at,
+                'items' => $order->items->map(fn($item) => [
+                    'id' => $item->id,
+                    'menu' => $item->menu->name,
+                    'qty' => $item->quantity,
+                    'price' => $item->price,
+                    'note' => $item->note,
+                    // 'kitchen_status' => $item->kitchen_status,
+                ]),
+            ])
+        );
     }
 
     /**
@@ -28,6 +54,7 @@ class OrderController extends Controller
             'items.*.menu_id' => 'required|exists:menus,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.note' => 'nullable|string|max:255',
+            'items.*.price' => 'nullable',
         ]);
 
         // Create order
@@ -44,6 +71,7 @@ class OrderController extends Controller
                 'order_id' => $order->id,
                 'menu_id' => $item['menu_id'],
                 'quantity' => $item['quantity'],
+                'price' => $item['price'] ?? null,
                 'note' => $item['note'] ?? null,
                 'status' => 'pending',
             ]);
@@ -115,5 +143,4 @@ class OrderController extends Controller
             ])
         ]);
     }
-
 }

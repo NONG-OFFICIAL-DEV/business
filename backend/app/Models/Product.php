@@ -103,4 +103,9 @@ class Product extends Model
     {
         return $this->belongsTo(Supplier::class);
     }
+
+    public function saleItems()
+    {
+        return $this->morphMany(SaleItem::class, 'sellable');
+    }
 }

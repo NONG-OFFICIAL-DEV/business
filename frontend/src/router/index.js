@@ -145,7 +145,7 @@ const routes = [
       {
         path: '/menu-management',
         name: 'MenuManagement',
-        component: () => import('@/views/sale/MenuManagement.vue'),
+        component: () => import('@/views/menus/MenuManagement.vue'),
         meta: { requiresAuth: true }
       },
       {
@@ -183,7 +183,25 @@ const routes = [
   {
     path: '/pos',
     name: 'POS',
-    component: () => import('@/views/sale/POSView.vue')
+    component: () => import('@/views/pos/layout/POSView.vue'),
+    children: [
+      {
+        path: '/dining-table',
+        component: () => import('@/views/pos/DiningTableView.vue')
+      },
+      {
+        path: '/kds',
+        component: () => import('@/views/pos/KitchenDisplayView.vue')
+      },
+      {
+        path: '/cashier',
+        component: () => import('@/views/pos/CashierView.vue')
+      },
+      {
+        path: '/reports',
+        component: () => import('@/views/pos/SalesReportView.vue')
+      }
+    ]
   },
   {
     path: '/mobile-menu',

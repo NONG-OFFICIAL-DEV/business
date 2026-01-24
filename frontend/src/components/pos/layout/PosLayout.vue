@@ -39,9 +39,15 @@
       return data.filter(p =>
         p.name.toLowerCase().includes(search.value.toLowerCase())
       )
+    } else {
+      const data = productStore.products?.data || []
+      if (!search.value) return data
+      return data.filter(p =>
+        p.name.toLowerCase().includes(search.value.toLowerCase())
+      )
     }
-    const data = productStore.products.data || []
-    return data
+    // const data = productStore.products.data || []
+    // return data
   })
 
   const total = computed(() =>
@@ -113,11 +119,11 @@
   }
 
   onMounted(() => {
-    if (selectedStore.value.type === 'hospitality') {
-      menuStore.fetchMenus()
-    } else {
-      productStore.fetchProducts()
-    }
+    // if (selectedStore.value.type === 'hospitality') {
+    menuStore.fetchMenus()
+    // } else {
+    productStore.fetchProducts()
+    // }
     categoryStore.fetchAll()
   })
 </script>
@@ -129,7 +135,53 @@
       v-model:store="selectedStore"
       :stores="stores"
     />
+    <v-navigation-drawer rail permanent v-if="selectedStore.name === 'Restaurant'">
+      <v-list nav>
+        <v-tooltip text="Dining Table" location="right">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-apps"
+              value="Dining Table"
+              to="/tables"
+            ></v-list-item>
+          </template>
+        </v-tooltip>
 
+        <v-tooltip text="Kitchen Display" location="right">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-silverware"
+              value="Menu"
+              to="/kds"
+            ></v-list-item>
+          </template>
+        </v-tooltip>
+
+        <v-tooltip text="Cashier Desk" location="right">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-cash-register"
+              value="cashier"
+              to="/cashier"
+            ></v-list-item>
+          </template>
+        </v-tooltip>
+
+        <v-tooltip text="Sales Reports" location="right">
+          <template v-slot:activator="{ props }">
+            <v-list-item
+              v-bind="props"
+              prepend-icon="mdi-chart-bar"
+              value="reports"
+              to="/reports"
+            ></v-list-item>
+          </template>
+        </v-tooltip>
+      </v-list>
+    </v-navigation-drawer>
     <PosCartDrawer
       v-model:paymentMethod="paymentMethod"
       :cart="cart"
@@ -141,13 +193,14 @@
     />
 
     <v-main>
-      <PosProductGrid
+      <!-- <PosProductGrid
         :products="filteredProducts"
         :categories="categoryStore.items"
         :mode="selectedStore.type"
         @select="openCustomizer"
         @quick-add="handleQuickAdd"
-      />
+      /> -->
+      <router-view />
     </v-main>
 
     <OrderCustomizationDialog

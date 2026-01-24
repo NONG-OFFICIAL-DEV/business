@@ -23,7 +23,7 @@
 
   function handleProductClick(product) {
     // If Mart Item -> Quick Add
-    if (product.has_variants === false) {
+    if (product.has_variants === false || props.mode === 'retail') {
       emit('quick-add', product)
     }
     // If Coffee/Restaurant -> Customize

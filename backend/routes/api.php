@@ -12,6 +12,7 @@ use App\Http\Controllers\LossController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\PurchaseReportController;
@@ -81,6 +82,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/reports/purchases', [PurchaseReportController::class, 'index']);
     Route::get('/reports/inventory', [PurchaseReportController::class, 'inventoryReport']);
     Route::get('/reports/sales', [SaleController::class, 'getReport']);
+    Route::get('/reports/sales/top-menus', [SaleController::class, 'topMenusReport']);
 
     Route::apiResource('employees', EmployeeController::class);
 
@@ -108,7 +110,14 @@ Route::prefix('kitchen')->group(function () {
     Route::put('/orders/mark-served/{order}', [KitchenOrderController::class, 'markServed']);
 });
 
+Route::patch('/order-items/{item}/status', [OrderController::class, 'updateStatus']);
 Route::get('/orders/by-table/{tableNumber}', [OrderController::class, 'getByTable']);
 Route::post('/orders', [OrderController::class, 'store']);
+Route::get('/orders', [OrderController::class, 'index']);
 Route::apiResource('menus', MenuController::class);
 Route::apiResource('category-menus', CategoryMenuController::class);
+
+Route::post('/payments', [PaymentController::class, 'store']);
+Route::get('/payments/sale/{saleId}', [PaymentController::class, 'bySale']);
+Route::get('/reports/payments/daily', [PaymentController::class, 'dailyReport']);
+Route::post('/payments/{id}/refund', [PaymentController::class, 'refund']);

@@ -215,6 +215,12 @@
           roles: [1]
         },
         {
+          path: '/settings/tax',
+          title: 'Invoice Customization',
+          icon: 'mdi-invoice-outline',
+          roles: [1]
+        },
+        {
           path: '/audit-logs',
           title: 'Activity Logs',
           icon: 'mdi-history',

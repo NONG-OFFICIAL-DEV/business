@@ -12,15 +12,6 @@ export const useKitchenStore = defineStore('kitchen', {
     isConnected: false
   }),
 
-  getters: {
-    pendingOrders: state =>
-      state.orders.filter(o => o.kitchen_status === 'pending'),
-
-    preparingOrders: state =>
-      state.orders.filter(o => o.kitchen_status === 'preparing'),
-
-    readyOrders: state => state.orders.filter(o => o.kitchen_status === 'ready')
-  },
 
   actions: {
     async fetchOrders() {

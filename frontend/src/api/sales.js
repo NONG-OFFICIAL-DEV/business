@@ -21,5 +21,12 @@ export default {
   async report() {
     const res = await http.get(`/reports/sales`)
     return res.data
+  },
+
+  async topMenusReport(startdate, enddate) {
+    const res = await http.get(`/reports/sales/top-menus`, {
+      params: { startdate, enddate }
+    })
+    return res.data
   }
 }

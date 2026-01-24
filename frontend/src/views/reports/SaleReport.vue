@@ -3,32 +3,15 @@
     <custom-title icon="mdi-sale">
       Sales Report
       <template #right>
+        <BaseButtonFilter class="me-4" @click="toggleFilterForm" />
         <v-btn color="primary" prepend-icon="mdi-download" @click="exportData">
           Export CSV
         </v-btn>
       </template>
     </custom-title>
     <!-- Filters users actually expect -->
-    <v-card border flat class="pa-4 mb-4">
+    <v-card border flat class="pa-4 mb-4" v-show="showFilterForm">
       <v-row>
-        <v-col cols="12" md="3">
-          <v-text-field
-            v-model="filters.search"
-            label="Search order / customer"
-            prepend-inner-icon="mdi-magnify"
-            density="compact"
-            clearable
-          />
-        </v-col>
-        <v-col cols="12" md="3">
-          <v-select
-            v-model="filters.status"
-            :items="statuses"
-            label="Status"
-            density="compact"
-            clearable
-          />
-        </v-col>
         <v-col cols="12" md="3">
           <v-text-field
             v-model="filters.from"
@@ -47,6 +30,7 @@
         </v-col>
       </v-row>
     </v-card>
+
     <v-row>
       <v-col v-for="card in metrics" :key="card.title" cols="12" sm="6" md="3">
         <v-card border flat class="pa-4">
@@ -100,6 +84,12 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-row>
+      Top Selling Items (To be implemented)
+    </v-row>
+    <v-row>
+      Top Menu Ordered (To be implemented)
+    </v-row>
   </v-container>
 </template>
 
@@ -138,11 +128,17 @@
   const saleStore = useSaleStore()
   const tableData = ref([])
   const filters = reactive({ search: '', status: null, from: null, to: null })
+  const showFilterForm = ref(false)
+
   onMounted(async () => {
     // Fetch sales report data
     const reportData = await saleStore.saleReport()
+    saleStore.topMenusReport(filters.from, filters.to)
     tableData.value = reportData.table_data
   })
+  const toggleFilterForm = () => {
+    showFilterForm.value = !showFilterForm.value
+  }
   // Summary Metrics
   const metrics = [
     {
@@ -155,18 +151,6 @@
       title: 'Total Orders',
       value: '1,240',
       trend: '+5% vs last month',
-      trendColor: 'success'
-    },
-    {
-      title: 'Avg. Order Value',
-      value: '$103.50',
-      trend: '-2% vs last month',
-      trendColor: 'error'
-    },
-    {
-      title: 'Conversion Rate',
-      value: '3.4%',
-      trend: '+0.4%',
       trendColor: 'success'
     }
   ]

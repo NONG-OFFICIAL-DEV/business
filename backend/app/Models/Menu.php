@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Menu extends Model
 {
 
+    protected $table = 'menus';
+
     protected $fillable = [
         'category_id',
         'name',
@@ -85,11 +87,11 @@ class Menu extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
-
-    // public function recipes()
-    // {
-    //     return $this->hasMany(MenuRecipe::class);
-    // }
+    
+    public function saleItems()
+    {
+        return $this->morphMany(SaleItem::class, 'sellable');
+    }
 
     public function category()
     {
