@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <custom-title icon="mid-paind">Unpaid Orders List</custom-title>
+    <custom-title icon="mdi-cash-clock">Unpaid Orders List</custom-title>
     <v-row dense>
       <v-col
         v-for="bill in orderStore.orders"
