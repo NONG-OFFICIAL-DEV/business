@@ -15,7 +15,8 @@ class Sale extends Model
         'tax_amount',
         'status',
         'cashier_id',
-        'payment_method'
+        'payment_method',
+        'order_id',
     ];
 
     protected $casts = [
@@ -43,6 +44,11 @@ class Sale extends Model
         });
     }
 
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+    
     public function payments()
     {
         return $this->hasMany(Payment::class);

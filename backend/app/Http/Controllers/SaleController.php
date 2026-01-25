@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Sale;
+use App\Services\SaleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -199,6 +201,7 @@ class SaleController extends Controller
         ]);
     }
     // app/Http/Controllers/SaleController.php
+    // for coffee and mart print during pay or print and pay emidatly
     public function invoice(Sale $sale)
     {
         // Load items (polymorphic: Product or Menu)
@@ -209,4 +212,56 @@ class SaleController extends Controller
 
         return view('sales.invoice', compact('sale', 'total'));
     }
+    
+    // Restaurant: PRINT BILL (no payment)
+    public function printBill(Order $order, SaleService $saleService)
+    {
+        $sale = $saleService->createFromOrder($order);
+
+        return redirect()->route('sales.invoice', $sale);
+    }
+
+    // Coffee / Mart: PAY & PRINT
+    public function payAndPrint(Request $request, Order $order, SaleService $saleService)
+    {
+        $sale = $saleService->createFromOrder($order);
+
+        $sale->payments()->create([
+            'method' => $request->method,
+            'amount' => $sale->total,
+        ]);
+
+        $sale->update([
+            'status' => 'completed',
+            'payment_status' => 'paid'
+        ]);
+
+        return redirect()->route('sales.invoice', $sale);
+    }
+
+    // Restaurant: PAY AFTER BILL
+    public function paySale(Request $request, Sale $sale)
+    {
+        $sale->payments()->create([
+            'method' => $request->method,
+            'amount' => $request->amount,
+        ]);
+
+        if ($sale->payments->sum('amount') >= $sale->total) {
+            $sale->update([
+                'status' => 'completed',
+                'payment_status' => 'paid'
+            ]);
+        }
+
+        return response()->json($sale->load('payments'));
+    }
+
+    // Invoice / Receipt
+    // public function invoice(Sale $sale)
+    // {
+    //     $sale->load('items.sellable', 'payments', 'order.table');
+
+    //     return view('sales.invoice', compact('sale'));
+    // }
 }
