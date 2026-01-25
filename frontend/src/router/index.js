@@ -190,6 +190,10 @@ const routes = [
         component: () => import('@/views/pos/DiningTableView.vue')
       },
       {
+        path: '/menu-list',
+        component: () => import('@/views/pos/MenuView.vue')
+      },
+      {
         path: '/kds',
         component: () => import('@/views/pos/KitchenDisplayView.vue')
       },

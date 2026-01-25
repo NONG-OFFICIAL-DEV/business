@@ -49,6 +49,14 @@
 <script setup>
   import { ref, computed } from 'vue'
 
+  import { usePosStore } from '@/stores/posStore'
+
+  const posStore = usePosStore()
+
+  function openTable(table) {
+    posStore.selectTable(table)
+    console.log('Selected table', table.number)
+  }
   /* -------------------------
   FAKE DATA (REALISTIC)
 --------------------------*/
@@ -104,17 +112,17 @@
   /* -------------------------
   CLICK LOGIC
 --------------------------*/
-  const openTable = table => {
-    if (table.status === 'available') {
-      console.log('Open menu for table', table.number)
-      // → open order/menu page
-    } else if (table.status === 'occupied') {
-      console.log('Open current bill', table.number)
-      // → open checkout / add items
-    } else {
-      console.log('Reserved table', table.number)
-    }
-  }
+  // const openTable = table => {
+  //   if (table.status === 'available') {
+  //     console.log('Open menu for table', table.number)
+  //     // → open order/menu page
+  //   } else if (table.status === 'occupied') {
+  //     console.log('Open current bill', table.number)
+  //     // → open checkout / add items
+  //   } else {
+  //     console.log('Reserved table', table.number)
+  //   }
+  // }
 </script>
 
 <style scoped>

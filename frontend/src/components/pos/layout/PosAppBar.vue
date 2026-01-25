@@ -1,11 +1,18 @@
 <script setup>
-defineProps({
-  search: String,
-  store: Object,
-  stores: Array
-})
+  import { ref,computed } from 'vue'
+  import { usePosStore } from '@/stores/posStore'
+  const posStore = usePosStore()
 
-const emit = defineEmits(['update:search', 'update:store'])
+  function selectStore(store) {
+    posStore.selectStore(store)
+  }
+  const store = computed(() => posStore.selectedStore)
+
+  defineProps({
+    search: String
+  })
+
+  const emit = defineEmits(['update:search', 'update:store'])
 </script>
 
 <template>
@@ -41,9 +48,9 @@ const emit = defineEmits(['update:search', 'update:store'])
 
       <v-list rounded="lg">
         <v-list-item
-          v-for="s in stores"
+          v-for="s in posStore.stores"
           :key="s.id"
-          @click="emit('update:store', s)"
+          @click="selectStore(s)"
           :active="store.id === s.id"
         >
           <v-list-item-title class="font-weight-bold">

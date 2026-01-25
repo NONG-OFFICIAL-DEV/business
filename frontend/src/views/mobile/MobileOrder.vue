@@ -8,21 +8,16 @@
   import CartButton from '@/components/mobile/CartButton.vue'
   import CartView from '@/components/mobile/CartView.vue'
   import TrackingView from '@/components/mobile/TrackingView.vue'
-  import { useSaleStore } from '@/stores/salePOSStore'
-  import { useProductStore } from '@/stores/productStore'
   import { useOrderStore } from '@/stores/orderStore'
   import { useMenuStore } from '@/stores/menuStore'
 
   const tableNumber = ref('05')
-  const saleStore = useSaleStore()
-  const productStore = useProductStore()
   const orderStore = useOrderStore()
   const menuStore = useMenuStore()
 
   onMounted(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('table')) tableNumber.value = params.get('table')
-    // productStore.fetchProducts()
     menuStore.fetchMenus()
   })
 
@@ -51,10 +46,6 @@
       // Call API via order store
       await orderStore.createOrder(orderData)
       await menuStore.fetchMenus()
-
-      // Optionally refresh products / cart
-      // await productStore.fetchProducts()
-
       // Go to tracking page
       page.value = 'tracking'
     } catch (err) {

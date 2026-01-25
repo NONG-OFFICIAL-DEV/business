@@ -74,77 +74,19 @@
 <script setup>
   import { onMounted, ref } from 'vue'
   import { useOrderStore } from '../../stores/orderStore'
+  import { usePosStore } from '../../stores/posStore'
 
   const orderStore = useOrderStore()
+  const posStore = usePosStore()
 
   onMounted(() => {
     orderStore.fetchAllOrders()
   })
-  const unpaidBills = ref([
-    {
-      id: 101,
-      order_no: 'ORD-101',
-      table_no: 3,
-      customer_name: null, // dine-in
-      total: 18.75,
-      currency: 'USD',
-      items: [
-        { name: 'Latte', qty: 2, price: 3.5 },
-        { name: 'Beef Burger', qty: 1, price: 8.75 }
-      ]
-    },
-    {
-      id: 102,
-      order_no: 'ORD-102',
-      table_no: 5,
-      customer_name: null,
-      total: 24.5,
-      currency: 'USD',
-      items: [
-        { name: 'Americano', qty: 1, price: 2.5 },
-        { name: 'Fried Rice', qty: 2, price: 11 }
-      ]
-    },
-    {
-      id: 103,
-      order_no: 'ORD-103',
-      table_no: null,
-      customer_name: 'Takeaway',
-      total: 9.25,
-      currency: 'USD',
-      items: [
-        { name: 'Cappuccino', qty: 1, price: 3.75 },
-        { name: 'Croissant', qty: 1, price: 5.5 }
-      ]
-    },
-    {
-      id: 103,
-      order_no: 'ORD-103',
-      table_no: null,
-      customer_name: 'Takeaway',
-      total: 9.25,
-      currency: 'USD',
-      items: [
-        { name: 'Cappuccino', qty: 1, price: 3.75 },
-        { name: 'Croissant', qty: 1, price: 5.5 }
-      ]
-    }
-  ])
+
+  function selectBill(bill) {
+    posStore.selectBill(bill)
+  }
 
   const selectedBill = ref(null)
-  const paymentMethod = ref('Cash')
 
-  const selectBill = bill => {
-    selectedBill.value = bill
-  }
-
-  const pay = () => {
-    alert(
-      `Paid Order #${selectedBill.value.order_no} via ${paymentMethod.value}`
-    )
-    // later:
-    // 1. call API
-    // 2. print invoice
-    // 3. remove from unpaidBills
-  }
 </script>
