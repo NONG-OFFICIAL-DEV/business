@@ -19,7 +19,7 @@
       </div>
 
       <div v-if="isHospitality && table" class="text-caption">
-        Table {{ table.number }}
+        Table T-{{ table.table_number }}
       </div>
 
       <div v-else class="text-caption">Items Count {{ count }}</div>

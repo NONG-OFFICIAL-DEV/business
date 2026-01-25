@@ -177,6 +177,10 @@ const routes = [
         name: 'Payroll',
         component: () => import('@/views/staff/PayrollManagement.vue'),
         meta: { requiresAuth: true }
+      },
+      {
+        path: '/dining-table',
+        component: () => import('@/views/pos/DiningTableView.vue')
       }
     ]
   },
@@ -186,7 +190,7 @@ const routes = [
     component: () => import('@/views/pos/layout/POSView.vue'),
     children: [
       {
-        path: '/dining-table',
+        path: '/dining-table-view',
         component: () => import('@/views/pos/DiningTableView.vue')
       },
       {

@@ -1,16 +1,22 @@
 <script setup>
-import { useCurrency } from '@/composables/useCurrency'
+  import { useCurrency } from '@/composables/useCurrency'
 
-const { formatCurrency } = useCurrency()
+  const { formatCurrency } = useCurrency()
 
-defineProps({
-  items: Array
-})
+  defineProps({
+    items: Array,
+    billPayment: {
+      type: Object,
+      default: null
+    }
+  })
 
-defineEmits(['update-qty'])
+  defineEmits(['update-qty'])
 </script>
 
 <template>
+    <!-- {{ items }} -->
+
   <v-card
     v-for="item in items"
     :key="item.id"
@@ -22,11 +28,10 @@ defineEmits(['update-qty'])
       <v-avatar size="48" rounded="md" class="bg-grey-lighten-4 border">
         <v-img :src="item.image_url" cover />
       </v-avatar>
-
       <div class="ml-3 flex-grow-1">
         <div class="d-flex justify-space-between">
           <span class="font-weight-bold text-truncate">
-            {{ item.name }}
+            {{ item.name }} or {{ item.menu }}
           </span>
           <span class="font-weight-black text-primary">
             {{ formatCurrency(item.price * item.qty) }}
@@ -54,7 +59,10 @@ defineEmits(['update-qty'])
             {{ formatCurrency(item.price) }}
           </span>
 
-          <div class="d-flex align-center bg-grey-lighten-4 rounded-pill border">
+          <div
+            class="d-flex align-center bg-grey-lighten-4 rounded-pill border"
+            v-if="!item.menu_id"
+          >
             <v-btn
               icon="mdi-minus"
               size="x-small"
@@ -70,6 +78,11 @@ defineEmits(['update-qty'])
               variant="text"
               @click="$emit('update-qty', item.id, item.qty + 1)"
             />
+          </div>
+          <div v-else>
+            <span class="px-2 font-weight-bold text-caption">
+            X  {{ item.qty }}
+            </span>
           </div>
         </div>
       </div>

@@ -84,6 +84,12 @@
           roles: [1]
         },
         {
+          path: '/dining-table',
+          title: 'Dining table',
+          icon: 'mdi-table-chair',
+          roles: [1]
+        },
+        {
           path: '/products',
           title: 'Product List',
           icon: 'mdi-package-variant',

@@ -1,16 +1,26 @@
 <script setup>
-import { useCurrency } from '@/composables/useCurrency'
-const { formatCurrency } = useCurrency()
+  import { useCurrency } from '@/composables/useCurrency'
+  const { formatCurrency } = useCurrency()
+  import { usePosStore } from '@/stores/posStore'
+  const posStore = usePosStore()
 
-defineProps({
-  subtotal: Number,
-  total: Number,
-  paymentMethod: String,
-  paymentMethods: Array,
-  disabled: Boolean
-})
+  defineProps({
+    subtotal: Number,
+    total: Number,
+    paymentMethod: String,
+    paymentMethods: Array,
+    disabled: Boolean
+  })
 
-defineEmits(['select-payment', 'checkout'])
+  const emit = defineEmits(['select-payment', 'checkout', 'print-bill'])
+
+  const handleClick = () => {
+    if (posStore.isPrintBill) {
+      emit('print-bill')
+    } else {
+      emit('checkout')
+    }
+  }
 </script>
 
 <template>
@@ -59,11 +69,17 @@ defineEmits(['select-payment', 'checkout'])
       color="primary"
       flat
       rounded="lg"
-      class="font-weight-black"
+      class="font-weight-black text-none"
       :disabled="disabled"
-      @click="$emit('checkout')"
+      @click="handleClick()"
     >
-      PAY NOW
+      <v-icon start size="22" class="me-2">
+        {{
+          posStore.isPrintBill ? 'mdi-printer-check' : 'mdi-credit-card-check'
+        }}
+      </v-icon>
+
+      {{ posStore.isPrintBill ? 'PRINT & PAY' : 'CONFIRM PAYMENT' }}
     </v-btn>
   </v-sheet>
 </template>

@@ -25,7 +25,7 @@
       tooltip: 'Dining Table',
       icon: 'mdi-apps',
       value: 'Dining Table',
-      to: '/dining-table'
+      to: '/dining-table-view'
     },
     {
       tooltip: 'Menu List',

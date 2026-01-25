@@ -9,9 +9,20 @@ class Table extends Model
 {
     use HasFactory;
 
+
     protected $fillable = [
         'table_number',
-        'is_available'
+        'capacity',
+        'status',
+        'store_id',
+        'area',
+        'note',
+        'is_active',
+        'current_order_id',
+        'assigned_staff_id',
+        'floor',
+        'position',
+        'qr_code'
     ];
 
     /**
@@ -22,6 +33,10 @@ class Table extends Model
         return $this->hasMany(Order::class);
     }
 
+    public function currentOrder()
+    {
+        return $this->belongsTo(Order::class, 'current_order_id');
+    }
     /**
      * Get active order for this table
      */

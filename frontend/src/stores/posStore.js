@@ -27,6 +27,7 @@ export const usePosStore = defineStore('pos', () => {
   const selectedTable = ref(null)
   /** SELECTED BILL (for unpaid orders) */
   const selectedBill = ref([])
+  const isPrintBill = ref(false)
 
   /** COMPUTED TOTAL */
   const total = computed(() =>
@@ -50,8 +51,10 @@ export const usePosStore = defineStore('pos', () => {
   }
 
   function selectBill(bill) {
-    selectedBill.value = bill
-    clearCart()
+    console.log(bill.items);
+    isPrintBill.value = true
+    cart.value = bill.items
+    // clearCart()
   }
 
   function addToCart(item) {
@@ -100,6 +103,7 @@ export const usePosStore = defineStore('pos', () => {
     selectedStore,
     selectTable,
     selectBill,
+    isPrintBill,
     selectedBill,
     addToCart,
     updateQty,

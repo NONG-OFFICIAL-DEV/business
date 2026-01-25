@@ -23,6 +23,7 @@ use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\TableController;
 use App\Http\Controllers\TelegramController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -121,3 +122,14 @@ Route::post('/payments', [PaymentController::class, 'store']);
 Route::get('/payments/sale/{saleId}', [PaymentController::class, 'bySale']);
 Route::get('/reports/payments/daily', [PaymentController::class, 'dailyReport']);
 Route::post('/payments/{id}/refund', [PaymentController::class, 'refund']);
+
+Route::prefix('tables')->group(function () {
+    Route::get('/', [TableController::class, 'index']);
+    Route::post('/', [TableController::class, 'store']);
+    Route::get('{table}', [TableController::class, 'show']);
+    Route::put('{table}', [TableController::class, 'update']);
+    Route::delete('{table}', [TableController::class, 'destroy']);
+
+    // POS / KDS
+    Route::patch('{table}/status', [TableController::class, 'updateStatus']);
+});

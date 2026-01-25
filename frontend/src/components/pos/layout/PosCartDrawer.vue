@@ -7,6 +7,7 @@
   import HospitalityCartItems from './cardDrawer/HospitalityCartItems.vue'
   import RetailCartTable from './cardDrawer/RetailCartTable.vue'
   import CartFooter from './cardDrawer/CartFooter.vue'
+  const emit = defineEmits(['checkout', 'print-bill'])
 
   /* Store */
   const posStore = usePosStore()
@@ -17,6 +18,7 @@
   )
 
   const cartItems = computed(() => posStore.cart)
+  const selectedBillPay = computed(() => posStore.selectedBill)
   const table = computed(() => posStore.selectedTable)
 
   /* Actions */
@@ -37,11 +39,13 @@
   }
 
   const checkout = () => {
-    // later: validate / send to backend
-    console.log('Checkout', {
+    emit('checkout', {
       cart: posStore.cart,
       payment: posStore.paymentMethod
     })
+  }
+  const handlePrintBill = () => {
+    emit('print-bill')
   }
 </script>
 <template>
@@ -54,6 +58,7 @@
   >
     <div class="d-flex flex-column fill-height">
       <!-- HEADER -->
+      <!-- {{ selectedBillPay }} -->
       <CartHeader
         :is-hospitality="isHospitality"
         :table="table"
@@ -68,6 +73,7 @@
           :items="cartItems"
           @update-qty="updateQty"
         />
+        <!-- :billPayment="selectedBillPay" -->
 
         <RetailCartTable
           v-else
@@ -86,8 +92,8 @@
         :disabled="!cartItems.length"
         @select-payment="selectPayment"
         @checkout="checkout"
+        @print-bill="handlePrintBill"
       />
     </div>
   </v-navigation-drawer>
 </template>
-

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Menu extends Model
@@ -87,7 +87,7 @@ class Menu extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
-    
+
     public function saleItems()
     {
         return $this->morphMany(SaleItem::class, 'sellable');
@@ -96,5 +96,18 @@ class Menu extends Model
     public function category()
     {
         return $this->belongsTo(CategoryMenu::class, 'menu_category_id');
+    }
+
+    // App\Models\Menu.php
+    protected $appends = ['image_url'];
+
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::get(
+            fn() =>
+            $this->image
+                ? asset('storage/' . $this->image)
+                : null
+        );
     }
 }

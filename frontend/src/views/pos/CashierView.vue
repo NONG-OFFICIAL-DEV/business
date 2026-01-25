@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <v-container fluid class="pa-0">
     <custom-title icon="mdi-cash-clock">Unpaid Orders List</custom-title>
     <v-row dense>
       <v-col
@@ -23,7 +23,6 @@
           <div
             :class="['type-stripe', bill.table_no ? 'bg-primary' : 'bg-orange']"
           ></div>
-<!-- {{ bill }} -->
           <v-card-text class="pa-4">
             <div class="d-flex justify-space-between align-start mb-2">
               <div>
@@ -65,6 +64,11 @@
                 size="small"
               />
             </div>
+            <!-- <v-divider class="mb-3 border-opacity-25" />
+            <div class="d-flex align-center text-caption text-grey">
+              <v-icon size="14" class="me-1">mdi-clock-outline</v-icon>
+              {{ formatTimeAgo(bill.created_at) }}
+            </div> -->
           </v-card-text>
         </v-card>
       </v-col>
@@ -75,7 +79,9 @@
   import { onMounted, ref } from 'vue'
   import { useOrderStore } from '../../stores/orderStore'
   import { usePosStore } from '../../stores/posStore'
+  import { useDate } from '@/composables/useDate'
 
+  const { formatTimeAgo } = useDate()
   const orderStore = useOrderStore()
   const posStore = usePosStore()
 
@@ -88,5 +94,4 @@
   }
 
   const selectedBill = ref(null)
-
 </script>

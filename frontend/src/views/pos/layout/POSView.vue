@@ -5,6 +5,7 @@
   import { useMenuStore } from '@/stores/menuStore'
   import { useCategoryMenuStore } from '@/stores/categoryMenu'
   import { usePosStore } from '@/stores/posStore'
+  import { useOrderStore } from '@/stores/orderStore'
 
   import PosAppBar from '@/components/pos/layout/PosAppBar.vue'
   import PosCartDrawer from '@/components/pos/layout/PosCartDrawer.vue'
@@ -19,7 +20,7 @@ STORES
   const saleStore = useSaleStore()
   const menuStore = useMenuStore()
   const categoryStore = useCategoryMenuStore()
-
+  const orderStore = useOrderStore()
   /* -------------------------
 LOCAL STATE
 --------------------------*/
@@ -53,13 +54,6 @@ ACTIONS
     posStore.addToCart(orderData)
   }
 
-  function handleUpdateQty({ item, change }) {
-    posStore.updateQty(
-      item.id,
-      posStore.cart.find(i => i === item).qty + change
-    )
-  }
-
   function openCustomizer(product) {
     selectedProduct.value = product
     showCustomizeDialog.value = true
@@ -78,28 +72,62 @@ ACTIONS
 
   async function handleCheckout() {
     if (!posStore.cart.length) return alert('Cart is empty!')
+
     try {
-      const saleData = {
-        items: posStore.cart.map(i => ({
-          product_id: i.id,
-          qty: i.qty,
-          price: i.price,
-          customizations: i.customizations || null
-        })),
-        total_amount: total.value,
-        payment_method: posStore.paymentMethod
+      if (posStore.selectedStore.type === 'retail') {
+        // Retail / Mart
+        const saleData = {
+          items: posStore.cart.map(i => ({
+            product_id: i.id,
+            qty: i.qty,
+            price: i.price,
+            customizations: i.customizations || null
+          })),
+          total_amount: total.value,
+          payment_method: posStore.paymentMethod
+        }
+
+        //for mart sale direcly or order
+        await saleStore.checkout(saleData)
       }
 
-      if (posStore.paymentMethod === 'qr') showQRDialog.value = true
+      // Handle QR payment dialog
+      if (posStore.paymentMethod === 'qr') {
+        showQRDialog.value = true
+      }
 
-      await saleStore.checkout(saleData)
+      // If hospitality, also create order for table
+      if (posStore.selectedStore.type === 'hospitality') {
+        const orderData = {
+          table_id: posStore.selectedTable?.id || 1,
+          items: posStore.cart.map(i => ({
+            menu_id: i.id,
+            quantity: i.qty,
+            price: i.price,
+            note: 'Test'
+            // customizations:i.customizations
+          }))
+        }
+        await orderStore.createOrder(orderData)
+        await menuStore.fetchMenus()
+      }
+
+      // Clear cart and refresh products
       posStore.clearCart()
       await productStore.fetchProducts()
-    } catch {
+    } catch (error) {
+      console.error(error)
       alert('Checkout failed!')
     }
   }
 
+  const handlePrintBill = () => {
+    const saleId = 2
+    window.open(`/sales/${saleId}/invoice`, '_blank')
+    // Restaurant flow
+    console.log('test')
+    // printBillOnly()
+  }
   /* -------------------------
 ON MOUNT
 --------------------------*/
@@ -111,18 +139,18 @@ ON MOUNT
 </script>
 
 <template>
-    <!-- APPBAR -->
-    <PosAppBar v-model:search="search" />
-    <!-- SIDEBAR MENU -->
-    <SidebarMenu v-if="posStore.selectedStore.name == 'Restaurant'"/>
-    <!-- CART DRAWER -->
-    <PosCartDrawer
-      @checkout="handleCheckout"
-    />
-
-    <!-- MAIN VIEW -->
-    <v-main>
+  <!-- APPBAR -->
+  <PosAppBar v-model:search="search" />
+  <!-- SIDEBAR MENU -->
+  <SidebarMenu v-if="posStore.selectedStore.name == 'Restaurant'" />
+  <!-- CART DRAWER -->
+  <PosCartDrawer @checkout="handleCheckout" @print-bill="handlePrintBill" />
+  <!-- MAIN VIEW -->
+  <v-main>
+    <v-container class="px-4" fluid>
       <router-view v-slot="{ Component }" :key="$route.fullPath">
+        {{ posStore.selectedStore.type }}
+
         <component
           :is="Component"
           :filtered-products="filteredProducts"
@@ -130,14 +158,15 @@ ON MOUNT
           @select="openCustomizer"
         />
       </router-view>
-    </v-main>
+    </v-container>
+  </v-main>
 
-    <!-- DIALOGS -->
-    <OrderCustomizationDialog
-      v-model="showCustomizeDialog"
-      :product="selectedProduct"
-      @add-to-cart="handleAddProductToCart"
-    />
+  <!-- DIALOGS -->
+  <OrderCustomizationDialog
+    v-model="showCustomizeDialog"
+    :product="selectedProduct"
+    @add-to-cart="handleAddProductToCart"
+  />
 
-    <QRPaymentDialog v-model="showQRDialog" :total="total" />
+  <QRPaymentDialog v-model="showQRDialog" :total="total" />
 </template>

@@ -17,7 +17,7 @@ class OrderController extends Controller
         $orders = Order::with([
             'table:id,table_number',
             'items:id,order_id,menu_id,quantity,price,note',
-            'items.menu:id,name'
+            'items.menu:id,name,image'
         ])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -28,20 +28,21 @@ class OrderController extends Controller
                 'order_no' => $order->order_no,
                 'table' => $order->table?->table_number,
                 'item_count' => $order->items->sum('quantity'),
-                // 'status' => $order->status,
                 'total' => $order->items->sum(fn($i) => $i->quantity * $i->price),
                 'created_at' => $order->created_at,
                 'items' => $order->items->map(fn($item) => [
                     'id' => $item->id,
-                    'menu' => $item->menu->name,
+                    'menu_id' => $item->menu_id,
+                    'menu_name' => $item->menu->name,
+                    'image_url' => $item->menu->image_url,
                     'qty' => $item->quantity,
                     'price' => $item->price,
                     'note' => $item->note,
-                    // 'kitchen_status' => $item->kitchen_status,
                 ]),
             ])
         );
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -76,6 +77,13 @@ class OrderController extends Controller
                 'status' => 'pending',
             ]);
         }
+        // 3. Update table status
+        $table = Table::findOrFail($request->table_id);
+        $table->update([
+            'status' => 'occupied',
+            'current_order_id' => $order->id,
+        ]);
+
 
         // Load relations for response
         $order->load('table', 'items.menu');
