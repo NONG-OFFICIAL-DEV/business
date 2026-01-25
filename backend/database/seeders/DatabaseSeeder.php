@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             // RoleSeeder::class,
             // UserSeeder::class,
             // PurchaseStatusSeeder::class,
-            TableSeeder::class,
+            // TableSeeder::class,
             // Add other seeders here
         ]);
         // \App\Models\User::firstOrCreate(

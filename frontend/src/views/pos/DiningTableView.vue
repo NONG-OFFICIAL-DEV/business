@@ -5,12 +5,13 @@
   import { usePermission } from '@/composables/usePermission'
   import { useDiningTableStore } from '@/stores/diningTableStore'
   import { usePosStore } from '@/stores/posStore'
+  import { useAppUtils } from '@/composables/useAppUtils'
 
   // ------------------------------
   // Composables & Utils
   // ------------------------------
   const { isAdmin, isManager, isPurchaser } = usePermission()
-
+  const { confirm, notif } = useAppUtils()
   const posStore = usePosStore()
   const tableStore = useDiningTableStore()
 
@@ -41,9 +42,23 @@
   }
 
   /* Delete */
-  const deleteTable = async table => {
-    if (!confirm(`Delete table ${table.table_number}?`)) return
-    await tableStore.deleteTable(table.id)
+  const deleteTable = async tableId => {
+    confirm({
+      title: 'Are you sure?',
+      message: 'Are you sure you want to delete this Dining Table?',
+      options: {
+        type: 'error',
+        color: 'error',
+        width: 500
+      },
+      agree: async () => {
+        await tableStore.deleteTable(tableId)
+        notif(t('messages.deleted_success'), {
+          type: 'success',
+          color: 'primary'
+        })
+      }
+    })
     await tableStore.fetchTables()
   }
 
