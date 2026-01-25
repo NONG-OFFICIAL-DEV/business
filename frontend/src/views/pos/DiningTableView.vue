@@ -6,6 +6,8 @@
   import { useDiningTableStore } from '@/stores/diningTableStore'
   import { usePosStore } from '@/stores/posStore'
   import { useAppUtils } from '@/composables/useAppUtils'
+  import { useI18n } from 'vue-i18n'
+  const { t } = useI18n()
 
   // ------------------------------
   // Composables & Utils
@@ -57,9 +59,9 @@
           type: 'success',
           color: 'primary'
         })
+        await tableStore.fetchTables()
       }
     })
-    await tableStore.fetchTables()
   }
 
   /* Save (create / update) */
