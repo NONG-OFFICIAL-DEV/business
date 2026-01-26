@@ -1,22 +1,19 @@
 <script setup>
-  import { useCurrency } from '@/composables/useCurrency'
+import { useCurrency } from '@/composables/useCurrency'
 
-  const { formatCurrency } = useCurrency()
+const { formatCurrency } = useCurrency()
 
-  defineProps({
-    items: Array,
-    billPayment: {
-      type: Object,
-      default: null
-    }
-  })
+defineProps({
+  items: {
+    type: Array,
+    required: true
+  }
+})
 
-  defineEmits(['update-qty'])
+defineEmits(['update-qty'])
 </script>
 
 <template>
-    <!-- {{ items }} -->
-
   <v-card
     v-for="item in items"
     :key="item.id"
@@ -28,11 +25,13 @@
       <v-avatar size="48" rounded="md" class="bg-grey-lighten-4 border">
         <v-img :src="item.image_url" cover />
       </v-avatar>
+
       <div class="ml-3 flex-grow-1">
         <div class="d-flex justify-space-between">
           <span class="font-weight-bold text-truncate">
-            {{ item.name }} or {{ item.menu }}
+            {{ item.menu_name || item.name }}
           </span>
+
           <span class="font-weight-black text-primary">
             {{ formatCurrency(item.price * item.qty) }}
           </span>
@@ -40,7 +39,7 @@
 
         <!-- Customizations -->
         <div
-          v-if="Object.keys(item.customizations || {}).length"
+          v-if="item.customizations && Object.keys(item.customizations).length"
           class="d-flex flex-wrap gap-1 mt-1"
         >
           <v-chip
@@ -59,9 +58,10 @@
             {{ formatCurrency(item.price) }}
           </span>
 
+          <!-- Editable qty ONLY for cart -->
           <div
+            v-if="item.editable !== false"
             class="d-flex align-center bg-grey-lighten-4 rounded-pill border"
-            v-if="!item.menu_id"
           >
             <v-btn
               icon="mdi-minus"
@@ -79,9 +79,11 @@
               @click="$emit('update-qty', item.id, item.qty + 1)"
             />
           </div>
+
+          <!-- Read-only qty (bill) -->
           <div v-else>
             <span class="px-2 font-weight-bold text-caption">
-            X  {{ item.qty }}
+              × {{ item.qty }}
             </span>
           </div>
         </div>

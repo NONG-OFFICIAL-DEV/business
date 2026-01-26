@@ -36,9 +36,8 @@
         <span class="text-primary">POS</span>
       </span>
     </div>
-
     <!-- STORE SWITCH -->
-    <v-menu location="bottom" :disabled="!isAdmin || !isManager">
+    <v-menu location="bottom" :disabled="!isAdmin && !isManager">
       <template #activator="{ props }">
         <v-btn
           v-bind="props"

@@ -30,11 +30,16 @@ export const usePosStore = defineStore('pos', () => {
   const isPrintBill = ref(false)
 
   /** COMPUTED TOTAL */
-  const total = computed(() =>
-    cart.value.reduce((sum, i) => sum + i.price * i.qty, 0)
-  )
+  /** ACTIVE ITEMS TO CALCULATE TOTAL */
+  const activeItems = computed(() => {
+    return isPrintBill.value ? selectedBill.value : cart.value
+  })
 
-  const subtotal = computed(() => total.value) // placeholder, can add taxes/discounts
+  /** COMPUTED TOTALS */
+  const subtotal = computed(() =>
+    activeItems.value.reduce((sum, i) => sum + i.price * i.qty, 0)
+  )
+  const total = computed(() => subtotal.value) // placeholder for taxes/discounts
 
   /** -------------------
    * ACTIONS
@@ -52,11 +57,14 @@ export const usePosStore = defineStore('pos', () => {
 
   function selectBill(bill) {
     isPrintBill.value = true
-    cart.value = bill.items
-    // clearCart()
+    selectedBill.value = bill.items
+    clearCart()
   }
 
   function addToCart(item) {
+    isPrintBill.value = false
+    selectedBill.value = []
+
     const existing = cart.value.find(
       i =>
         i.id === item.id &&
@@ -110,6 +118,7 @@ export const usePosStore = defineStore('pos', () => {
     clearCart,
     setPaymentMethod,
     paymentMethod,
-    paymentMethods
+    paymentMethods,
+    activeItems
   }
 })

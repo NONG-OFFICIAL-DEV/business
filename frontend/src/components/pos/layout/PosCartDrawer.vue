@@ -21,6 +21,19 @@
   const selectedBillPay = computed(() => posStore.selectedBill)
   const table = computed(() => posStore.selectedTable)
 
+  const displayItems = computed(() => {
+    if (posStore.isPrintBill) {
+      return posStore.selectedBill.map(i => ({
+        ...i,
+        editable: false
+      }))
+    }
+    return posStore.cart.map(i => ({
+      ...i,
+      editable: true
+    }))
+  })
+
   /* Actions */
   const updateQty = (itemId, qty) => {
     posStore.updateQty(itemId, qty)
@@ -62,7 +75,7 @@
       <CartHeader
         :is-hospitality="isHospitality"
         :table="table"
-        :count="cartItems.length"
+        :count="displayItems.length"
         @clear="clearCart"
       />
 
@@ -70,7 +83,7 @@
       <div class="flex-grow-1 overflow-y-auto pa-3">
         <HospitalityCartItems
           v-if="isHospitality"
-          :items="cartItems"
+          :items="displayItems"
           @update-qty="updateQty"
         />
         <!-- :billPayment="selectedBillPay" -->
@@ -89,7 +102,7 @@
         :total="posStore.total"
         :payment-method="posStore.paymentMethod"
         :payment-methods="posStore.paymentMethods"
-        :disabled="!cartItems.length"
+        :disabled="!cartItems.length && !selectedBillPay.length"
         @select-payment="selectPayment"
         @checkout="checkout"
         @print-bill="handlePrintBill"
