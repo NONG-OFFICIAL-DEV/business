@@ -9,7 +9,6 @@
         sm="4"
         md="4"
         lg="3"
-        xl="1"
       >
         <v-card
           @click="selectBill(bill)"

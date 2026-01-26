@@ -21,7 +21,7 @@ export const usePosStore = defineStore('pos', () => {
     { id: 'card', icon: 'mdi-credit-card-outline', label: 'Card' }
   ]
 
-  const selectedStore = ref(stores[1]) // default store
+  const selectedStore = ref(stores[2]) // default store
 
   /** SELECTED TABLE (Hospitality only) */
   const selectedTable = ref(null)
@@ -51,7 +51,6 @@ export const usePosStore = defineStore('pos', () => {
   }
 
   function selectBill(bill) {
-    console.log(bill.items);
     isPrintBill.value = true
     cart.value = bill.items
     // clearCart()

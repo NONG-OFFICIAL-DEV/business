@@ -1,7 +1,9 @@
 <script setup>
-  import { ref,computed } from 'vue'
+  import { ref, computed } from 'vue'
   import { usePosStore } from '@/stores/posStore'
+  import { usePermission } from '../../../composables/usePermission'
   const posStore = usePosStore()
+  const { isAdmin, isManager } = usePermission()
 
   function selectStore(store) {
     posStore.selectStore(store)
@@ -9,10 +11,15 @@
   const store = computed(() => posStore.selectedStore)
 
   defineProps({
-    search: String
+    search: String,
+    user: Object
   })
 
-  const emit = defineEmits(['update:search', 'update:store'])
+  const emit = defineEmits(['update:search', 'update:store', 'logout'])
+
+  function handleLogout() {
+    emit('logout')
+  }
 </script>
 
 <template>
@@ -31,7 +38,7 @@
     </div>
 
     <!-- STORE SWITCH -->
-    <v-menu location="bottom">
+    <v-menu location="bottom" :disabled="!isAdmin || !isManager">
       <template #activator="{ props }">
         <v-btn
           v-bind="props"
@@ -87,7 +94,9 @@
       </v-chip>
 
       <div class="text-right d-none d-md-block">
-        <div class="text-caption font-weight-bold">Alex Cashier</div>
+        <div class="text-caption font-weight-bold text-capitalize">
+          {{ user?.username }}
+        </div>
         <div class="text-caption text-grey">POS Operator</div>
       </div>
 
@@ -98,7 +107,13 @@
         />
       </v-avatar>
 
-      <v-btn icon="mdi-logout" variant="text" color="error" class="ml-2" />
+      <v-btn
+        icon="mdi-logout"
+        variant="text"
+        color="error"
+        class="ml-2"
+        @click="handleLogout"
+      />
     </div>
   </v-app-bar>
 </template>

@@ -6,6 +6,10 @@
   import { useCategoryMenuStore } from '@/stores/categoryMenu'
   import { usePosStore } from '@/stores/posStore'
   import { useOrderStore } from '@/stores/orderStore'
+  import { useAuthStore } from '@/stores/auth'
+  import { useRouter } from 'vue-router'
+  import { useAppUtils } from '@/composables/useAppUtils'
+  import { useI18n } from 'vue-i18n'
 
   import PosAppBar from '@/components/pos/layout/PosAppBar.vue'
   import PosCartDrawer from '@/components/pos/layout/PosCartDrawer.vue'
@@ -15,12 +19,16 @@
   /* -------------------------
 STORES
 --------------------------*/
+  const { t } = useI18n()
+  const { notif } = useAppUtils()
   const posStore = usePosStore()
   const productStore = useProductStore()
   const saleStore = useSaleStore()
   const menuStore = useMenuStore()
   const categoryStore = useCategoryMenuStore()
   const orderStore = useOrderStore()
+  const authStore = useAuthStore()
+  const router = useRouter()
   /* -------------------------
 LOCAL STATE
 --------------------------*/
@@ -28,6 +36,7 @@ LOCAL STATE
   const selectedProduct = ref(null)
   const showCustomizeDialog = ref(false)
   const showQRDialog = ref(false)
+  const user = ref(null)
 
   /* -------------------------
 COMPUTED
@@ -128,19 +137,34 @@ ACTIONS
     console.log('test')
     // printBillOnly()
   }
+  const handleLogout = async () => {
+    await authStore.logout()
+    // notif(t('messages.logout_sucess'), {
+    //   type: 'success',
+    //   color: 'primary'
+    // })
+    router.push({ name: 'Login' })
+  }
   /* -------------------------
-ON MOUNT
---------------------------*/
-  onMounted(() => {
-    menuStore.fetchMenus()
-    productStore.fetchProducts()
-    categoryStore.fetchAll()
+  ON MOUNT
+  --------------------------*/
+  onMounted(async () => {
+    await menuStore.fetchMenus()
+    await productStore.fetchProducts()
+    await categoryStore.fetchAll()
+    try {
+      await authStore.fetchMe()
+      user.value = authStore.me
+    } catch {
+      await authStore.logout()
+      router.push({ name: 'Login' })
+    }
   })
 </script>
 
 <template>
   <!-- APPBAR -->
-  <PosAppBar v-model:search="search" />
+  <PosAppBar v-model:search="search" :user="user" @logout="handleLogout" />
   <!-- SIDEBAR MENU -->
   <SidebarMenu v-if="posStore.selectedStore.name == 'Restaurant'" />
   <!-- CART DRAWER -->
@@ -150,7 +174,7 @@ ON MOUNT
     <v-container class="px-4" fluid>
       <router-view v-slot="{ Component }" :key="$route.fullPath">
         {{ posStore.selectedStore.type }}
-
+        {{ posStore.selectedStore.name }}
         <component
           :is="Component"
           :filtered-products="filteredProducts"

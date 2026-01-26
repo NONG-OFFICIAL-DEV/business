@@ -403,6 +403,7 @@
 <style scoped>
   :deep(.v-list-group__items .v-list-item) {
     padding-inline-start: 16px !important;
+    background-color:rgb(233, 226, 226) !important;
   }
 
   .sub-item :deep(.v-list-item-title) {

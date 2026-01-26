@@ -118,7 +118,13 @@
       })
 
       if (success) {
-        router.push('/dashboard')
+        if (success.data.user.role_id === 5) {
+          router.push('/menu-list')
+        } else if (success.data.user.role_id === 4) {
+          router.push('/dining-table-view')
+        } else {
+          router.push('/dashboard')
+        }
         notif(t('messages.login_sucess'), {
           type: 'success',
           color: 'primary'
