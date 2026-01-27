@@ -187,8 +187,7 @@
           } else if (newStatus === 'ready') {
             await kitchenStore.markReady(orderId)
           }
-        } catch (err) {
-          console.error('Failed to update order status', err)
+        } catch {
           // revert if needed
           evt.added.element.kitchen_status = evt.from.dataset.status
         }

@@ -12,7 +12,6 @@
   import { useOrderStore } from '@/stores/orderStore'
   import { usePaymentStore } from '@/stores/payment'
   import { useAuthStore } from '@/stores/auth'
-
   /* COMPONENTS */
   import PosAppBar from '@/components/pos/layout/PosAppBar.vue'
   import SidebarMenu from '@/components/pos/layout/SidebarMenu.vue'
@@ -139,11 +138,15 @@ ACTIONS
     }
   }
 
-  function handlePrintBill() {
+  async function handlePrintBill() {
     // Print the selected bill
-    const saleId = 2 // TODO: Replace with real sale ID
-    const url = paymentStore.printInvoice(saleId)
-    window.open(url, '_blank')
+    const selectOrderId = posStore.orderId
+    const res = await saleStore.printBillForPayment(selectOrderId)
+    if(res.status == 200){
+      orderStore.fetchAllOrders()
+      window.open(res.data.invoice_url, '_blank')
+    }
+    console.log(res.status)
   }
 
   async function handleLogout() {

@@ -89,7 +89,10 @@
   })
 
   function selectBill(bill) {
+    // console.log(bill.order_id);
+    
     posStore.selectBill(bill)
+    posStore.orderId = bill.order_id
   }
 
   const selectedBill = ref(null)

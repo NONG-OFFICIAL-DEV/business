@@ -58,7 +58,6 @@ export const useDiningTableStore = defineStore('diningTable', {
     },
     async showQRCode(tableId) {
       const res = await tableService.showQRCode(tableId)
-      console.log(res)
       return res.data
     }
   }

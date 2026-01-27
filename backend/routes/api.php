@@ -122,6 +122,7 @@ Route::post('/payments', [PaymentController::class, 'store']);
 Route::get('/payments/sale/{saleId}', [PaymentController::class, 'bySale']);
 Route::get('/reports/payments/daily', [PaymentController::class, 'dailyReport']);
 Route::post('/payments/{id}/refund', [PaymentController::class, 'refund']);
+Route::post('/orders/{order}/print-bill', [SaleController::class, 'printBill']);
 
 Route::prefix('tables')->group(function () {
     Route::get('/', [TableController::class, 'index']);

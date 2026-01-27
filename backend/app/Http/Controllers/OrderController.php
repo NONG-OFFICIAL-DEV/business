@@ -19,6 +19,7 @@ class OrderController extends Controller
             'items:id,order_id,menu_id,quantity,price,note',
             'items.menu:id,name,image'
         ])
+            ->where('status', '!=', 'paid')
             ->orderBy('created_at', 'desc')
             ->get();
 

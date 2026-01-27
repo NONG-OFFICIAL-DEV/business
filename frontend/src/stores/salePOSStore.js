@@ -40,6 +40,10 @@ export const useSaleStore = defineStore('sales', {
     async topMenusReport(startdate, enddate) {
       const res = await salesApi.topMenusReport(startdate, enddate)
       return res
+    },
+    async printBillForPayment(orderId) {
+      const res = await salesApi.printBillForPayment(orderId)
+      return res
     }
   }
 })

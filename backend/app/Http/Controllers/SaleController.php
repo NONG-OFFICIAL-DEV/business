@@ -11,6 +11,7 @@ use App\Services\SaleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SaleController extends Controller
 {
@@ -202,23 +203,45 @@ class SaleController extends Controller
     }
     // app/Http/Controllers/SaleController.php
     // for coffee and mart print during pay or print and pay emidatly
+    // public function invoice(Sale $sale)
+    // {
+    //     // Load items (polymorphic: Product or Menu)
+    //     $sale->load('items.sellable');
+
+    //     // Calculate total
+    //     $total = $sale->items->sum(fn($item) => $item->quantity * $item->price);
+
+    //     return view('sales.invoice', compact('sale', 'total'));
+    // }
+
     public function invoice(Sale $sale)
     {
-        // Load items (polymorphic: Product or Menu)
         $sale->load('items.sellable');
-
-        // Calculate total
         $total = $sale->items->sum(fn($item) => $item->quantity * $item->price);
 
-        return view('sales.invoice', compact('sale', 'total'));
+        // Set options for better performance and image loading
+        $pdf = Pdf::loadView('sales.invoice', compact('sale', 'total'))
+            ->setPaper([0, 0, 226, 600], 'portrait') // 80mm width (approx 226pt)
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true, // Allows loading images from URL
+                'defaultFont' => 'sans-serif'
+            ]);
+
+        return $pdf->download("invoice-{$sale->id}.pdf");
     }
-    
-    // Restaurant: PRINT BILL (no payment)
+
+    // Restaurant: PRINT BILL And Pay after
     public function printBill(Order $order, SaleService $saleService)
     {
         $sale = $saleService->createFromOrder($order);
 
-        return redirect()->route('sales.invoice', $sale);
+        return response()->json([
+            'message' => 'Sale created successfully',
+            'sale_id' => $sale->id,
+            'invoice_url' => url("/sales/{$sale->id}/invoice")
+        ]);
+        // return redirect()->route('sales.invoice', $sale);
     }
 
     // Coffee / Mart: PAY & PRINT
@@ -256,12 +279,4 @@ class SaleController extends Controller
 
         return response()->json($sale->load('payments'));
     }
-
-    // Invoice / Receipt
-    // public function invoice(Sale $sale)
-    // {
-    //     $sale->load('items.sellable', 'payments', 'order.table');
-
-    //     return view('sales.invoice', compact('sale'));
-    // }
 }

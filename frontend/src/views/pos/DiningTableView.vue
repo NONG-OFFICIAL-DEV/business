@@ -107,12 +107,6 @@
     if (status === 'reserved') return 'warning'
     return 'success'
   }
-
-  const tableBorder = status => {
-    if (status === 'occupied') return 'border-error'
-    if (status === 'reserved') return 'border-warning'
-    return 'border-success'
-  }
 </script>
 <template>
   <v-container fluid class="pa-0">

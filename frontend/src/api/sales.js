@@ -28,5 +28,10 @@ export default {
       params: { startdate, enddate }
     })
     return res.data
+  },
+
+  async printBillForPayment(orderId) {
+    const res = await http.post(`/orders/${orderId}/print-bill`)
+    return res
   }
 }

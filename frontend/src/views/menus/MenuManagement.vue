@@ -192,7 +192,7 @@
       notif(t('messages.saved_success'), { type: 'success', color: 'primary' })
       await menuStore.fetchMenus()
       dialog.value = false
-    } catch (err) {
+    } catch {
       notif(t('messages.save_failed'), { type: 'error' })
     }
   }
@@ -227,7 +227,7 @@
       notif(t('messages.saved_success'), { type: 'success' })
       categoryDialog.value = false
       await categoryStore.fetchAll()
-    } catch (err) {
+    } catch {
       notif(t('messages.save_failed'), { type: 'error' })
     }
   }

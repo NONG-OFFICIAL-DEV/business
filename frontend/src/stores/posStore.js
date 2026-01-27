@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed, reactive } from 'vue'
+import { ref, computed } from 'vue'
 
 export const usePosStore = defineStore('pos', () => {
   /** CART STATE */
@@ -7,6 +7,7 @@ export const usePosStore = defineStore('pos', () => {
 
   /** PAYMENT METHOD */
   const paymentMethod = ref('qr') // default to QR
+  const orderId = ref(null) // default to QR
 
   /** STORES / SELECTED */
   const stores = [
@@ -119,6 +120,7 @@ export const usePosStore = defineStore('pos', () => {
     setPaymentMethod,
     paymentMethod,
     paymentMethods,
-    activeItems
+    activeItems,
+    orderId
   }
 })
