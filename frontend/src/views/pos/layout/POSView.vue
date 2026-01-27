@@ -143,7 +143,7 @@ ACTIONS
     const selectOrderId = posStore.orderId
     const res = await saleStore.printBillForPayment(selectOrderId)
     if(res.status == 200){
-      orderStore.fetchAllOrders()
+      await orderStore.fetchAllOrders()
       window.open(res.data.invoice_url, '_blank')
     }
     console.log(res.status)
