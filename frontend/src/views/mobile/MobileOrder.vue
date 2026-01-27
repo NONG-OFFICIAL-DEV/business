@@ -1,6 +1,7 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { useCart } from '@/composables/useCart'
+  import { useRoute } from 'vue-router'
 
   import AppHeader from '@/components/mobile/AppHeader.vue'
   import CategoryTabs from '@/components/mobile/CategoryTabs.vue'
@@ -10,15 +11,25 @@
   import TrackingView from '@/components/mobile/TrackingView.vue'
   import { useOrderStore } from '@/stores/orderStore'
   import { useMenuStore } from '@/stores/menuStore'
+  import { useDiningTableStore } from '../../stores/diningTableStore'
 
-  const tableNumber = ref('05')
+  // const tableNumber = ref('05')
   const orderStore = useOrderStore()
   const menuStore = useMenuStore()
+  const diningTableStore = useDiningTableStore()
+  const route = useRoute()
+  const token = route.params.token
+  const tableNumber = ref()
+  const tableId = ref()
 
-  onMounted(() => {
+  onMounted(async () => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('table')) tableNumber.value = params.get('table')
-    menuStore.fetchMenus()
+    await menuStore.fetchMenus()
+    const res = await diningTableStore.getTableNumberByToken(token)
+    tableNumber.value = res.table.table_number
+    tableId.value = res.table.id
+    // console.log(res.table.table_number)
   })
 
   const categories = ['All', 'Coffee', 'Tea', 'Pastries', 'Food']
@@ -31,11 +42,10 @@
 
   async function placeOrder() {
     isOrdering.value = true
-
     try {
       // Prepare backend payload
       const orderData = {
-        table_id: 1, // you can dynamically assign table if needed
+        table_id: tableId.value,
         items: cart.value.map(i => ({
           menu_id: i.id,
           quantity: i.qty,
@@ -50,7 +60,6 @@
       page.value = 'tracking'
     } catch (err) {
       console.error(err)
-      alert('Checkout failed')
     } finally {
       isOrdering.value = false
     }
@@ -139,6 +148,7 @@
         v-if="page === 'tracking'"
         :cart="cart"
         :tableNumber="tableNumber"
+        :tableId="tableId"
         v-model="viewProcess"
         @reset="handleReset"
       />

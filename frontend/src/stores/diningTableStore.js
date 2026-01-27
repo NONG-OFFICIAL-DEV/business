@@ -50,6 +50,16 @@ export const useDiningTableStore = defineStore('diningTable', {
     async updateTableStatus(id, status) {
       const res = await tableService.updateStatus(id, status)
       return res.data
+    },
+
+    async getTableNumberByToken(token) {
+      const res = await tableService.getTableNumberByToken(token)
+      return res.data
+    },
+    async showQRCode(tableId) {
+      const res = await tableService.showQRCode(tableId)
+      console.log(res)
+      return res.data
     }
   }
 })

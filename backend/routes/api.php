@@ -112,7 +112,7 @@ Route::prefix('kitchen')->group(function () {
 });
 
 Route::patch('/order-items/{item}/status', [OrderController::class, 'updateStatus']);
-Route::get('/orders/by-table/{tableNumber}', [OrderController::class, 'getByTable']);
+Route::get('/orders/by-table/{tableId}', [OrderController::class, 'getByTable']);
 Route::post('/orders', [OrderController::class, 'store']);
 Route::get('/orders', [OrderController::class, 'index']);
 Route::apiResource('menus', MenuController::class);
@@ -129,7 +129,9 @@ Route::prefix('tables')->group(function () {
     Route::get('{table}', [TableController::class, 'show']);
     Route::put('{table}', [TableController::class, 'update']);
     Route::delete('{table}', [TableController::class, 'destroy']);
-
+    Route::get('/{id}/qrcode', [TableController::class, 'getQrCode']);
     // POS / KDS
     Route::patch('{table}/status', [TableController::class, 'updateStatus']);
+    Route::get('/table-by-token/{token}', [TableController::class, 'getTableByToken']);
+
 });

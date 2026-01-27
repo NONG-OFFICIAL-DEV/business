@@ -11,9 +11,10 @@ export const useOrderStore = defineStore("order", {
   actions: {
     async createOrder(payload) {
       this.loading = true;
-      const { data } = await orderService.createOrder(payload);
-      this.orders = data;
+      const res = await orderService.createOrder(payload);
+      this.orders = res;
       this.loading = false;
+      return res
     },
     async fetchOrderByTable(tableNumber) {
       const { data } = await orderService.getOrderByTable(tableNumber);

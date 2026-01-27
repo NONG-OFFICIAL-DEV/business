@@ -24,5 +24,13 @@ export default {
   // POS / KDS
   updateStatus(id, status) {
     return http.patch(`/tables/${id}/status`, { status })
+  },
+  // POS / KDS
+  getTableNumberByToken(token) {
+    return http.get(`/tables/table-by-token/${token}`)
+  },
+
+  showQRCode(tableId) {
+    return http.get(`/tables/${tableId}/qrcode`)
   }
 }

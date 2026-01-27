@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Menu;
 use App\Models\Table;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class TableController extends Controller
 {
@@ -43,6 +46,7 @@ class TableController extends Controller
 
         $data['status'] = 'available';
         $data['is_active'] = true;
+        $data['qr_token'] = Str::random(10);
 
         $table = Table::create($data);
 
@@ -116,6 +120,35 @@ class TableController extends Controller
         return response()->json([
             'message' => 'Status updated',
             'data' => $table
+        ]);
+    }
+
+    public function getQrCode($tableId)
+    {
+        $table = Table::findOrFail($tableId);
+
+        // Make sure token exists
+        if (!$table->qr_token) {
+            $table->qr_token = \Illuminate\Support\Str::random(10);
+            $table->save();
+        }
+
+        // Correct URL for the QR code
+        $url = 'https://inventory.nongofficial.store/mobile-menu/' . $table->qr_token;
+
+        $qr = QrCode::size(250)->generate($url);
+
+        return response($qr)->header('Content-Type', 'image/svg+xml');
+    }
+
+    public function getTableByToken($token)
+    {
+        $table = Table::where('qr_token', $token)->firstOrFail();
+        $menuItems = Menu::all();
+
+        return response()->json([
+            'table' => $table,
+            'menuItems' => $menuItems
         ]);
     }
 }

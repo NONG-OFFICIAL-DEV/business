@@ -16,7 +16,7 @@
       <v-card-text class="pa-8 text-center bg-grey-lighten-4">
         <div class="qr-wrapper bg-white pa-4 rounded-xl shadow-sm mb-6">
           <div class="qr-placeholder d-flex align-center justify-center">
-            <v-icon size="200" color="grey-lighten-2">mdi-qrcode</v-icon>
+             <div v-if="qrCode" v-html="qrCode" class="mx-auto"></div>
           </div>
         </div>
 
@@ -58,8 +58,10 @@
 </template>
 
 <script setup>
-  import { computed } from 'vue'
+  import { ref, computed, watch } from 'vue'
+  import { useDiningTableStore } from '../../stores/diningTableStore'
 
+  const diningTables = useDiningTableStore()
   const props = defineProps({
     modelValue: Boolean,
     tableSelect: Object
@@ -72,6 +74,25 @@
     set: val => emit('update:modelValue', val)
   })
 
+  const qrCode = ref(null)
+
+  // Watch tableSelect and fetch QR when table changes
+  watch(
+    () => props.tableSelect, // <- plain getter
+    async newTable => {
+      // <- async callback is fine
+      if (newTable?.id) {
+        try {
+          const res = await diningTables.showQRCode(newTable.id) // call your service
+          qrCode.value = res // make sure to use res.data (SVG from Laravel)
+          console.log('QR code fetched:', qrCode.value)
+        } catch (err) {
+          console.error('Failed to fetch QR code', err)
+        }
+      }
+    },
+    { immediate: true }
+  )
   function close() {
     internalValue.value = false
   }

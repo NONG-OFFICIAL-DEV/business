@@ -120,9 +120,9 @@ class OrderController extends Controller
     /**
      * Get active order by table number
      */
-    public function getByTable(string $tableNumber)
+    public function getByTable(string $tableId)
     {
-        $table = Table::where('table_number', trim($tableNumber))
+        $table = Table::where('id', trim($tableId))
             ->with(['activeOrder.items.menu'])
             ->first();
 

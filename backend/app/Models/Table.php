@@ -22,7 +22,8 @@ class Table extends Model
         'assigned_staff_id',
         'floor',
         'position',
-        'qr_code'
+        'qr_code',
+        'qr_token'
     ];
 
     /**
@@ -46,5 +47,12 @@ class Table extends Model
             ->whereIn('kitchen_status', ['pending', 'preparing', 'ready'])
             ->whereNotIn('status', ['cancelled', 'completed'])
             ->latest();
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($table) {
+            $table->qr_token = bin2hex(random_bytes(8)); // Generates a random secure string
+        });
     }
 }

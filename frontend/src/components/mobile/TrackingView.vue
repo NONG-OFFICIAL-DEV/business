@@ -3,7 +3,8 @@
   import { useOrderStore } from '@/stores/orderStore'
 
   const props = defineProps({
-    tableNumber: String
+    tableNumber: String,
+    tableId: Number
   })
 
   defineEmits(['reset'])
@@ -24,7 +25,7 @@
   onMounted(async () => {
     try {
       if (!props.tableNumber) return
-      order.value = await orderStore.fetchOrderByTable('T1')
+      order.value = await orderStore.fetchOrderByTable(props.tableId)
     } catch (e) {
       console.error('Failed to load order', e)
     } finally {

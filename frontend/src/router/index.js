@@ -212,9 +212,10 @@ const routes = [
     ]
   },
   {
-    path: '/mobile-menu',
+    path: '/mobile-menu/:token',
     name: 'MobileMenu',
-    component: () => import('@/views/mobile/MobileOrder.vue')
+    component: () => import('@/views/mobile/MobileOrder.vue'),
+    props: true
   },
   {
     path: '/kitchen-kds',
