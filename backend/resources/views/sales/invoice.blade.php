@@ -70,7 +70,7 @@
     </style>
 </head>
 
-<body>
+<body onload="window.print()">
     <div class="center">
         <img src="https://i.pinimg.com/736x/fd/9c/fc/fd9cfc4eb0b0498a45b73343f1aa04ed.jpg" class="logo"><br>
         <span class="bold" style="font-size: 16px;">MY POS STORE</span><br>
