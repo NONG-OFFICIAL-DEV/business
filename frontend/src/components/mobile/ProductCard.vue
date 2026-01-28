@@ -1,74 +1,92 @@
 <script setup>
 defineProps({
-  product: Object,
-  qty: {
-    type: Number,
-    default: 0
-  }
+  items: Array,
+  cart: Array
 })
+const emit = defineEmits(['add', 'update'])
 
-defineEmits(['add', 'update'])
+const getQty = (cart, id) => {
+  return cart.find(i => i.id === id)?.qty || 0
+}
 </script>
 
 <template>
-  <v-card flat rounded="xl" class="bg-white border-0 elevation-0">
-    <div class="d-flex pa-2">
-      <v-img
-        :src="product.image_url"
-        width="90"
-        height="90"
-        cover
-        class="rounded-xl flex-grow-0"
-      />
+  <v-row class="pa-2">
+    <v-col 
+      v-for="p in items" 
+      :key="p.id" 
+      cols="6" 
+      class="pa-2"
+    >
+      <v-card flat rounded="xl" class="pa-3 product-card">
+        <v-img
+          :src="p.image_url"
+          aspect-ratio="1"
+          cover
+          class="rounded-circle mx-auto mb-3"
+          width="100"
+        />
 
-      <div class="ml-3 flex-grow-1 d-flex flex-column justify-center">
-        <div class="text-body-2 font-weight-bold mb-0">
-          {{ product.name }}
+        <div class="text-subtitle-2 font-weight-bold text-center mb-1">
+          {{ p.name }}
         </div>
-
-        <div class="text-caption text-grey-darken-1 mb-2 line-clamp-2">
-          {{ product.desc }}
-        </div>
-
-        <div class="d-flex justify-space-between align-center">
-          <span class="text-subtitle-2 font-weight-black text-teal-darken-2">
-            ${{ product.price }}
+<!-- 
+        <div class="d-flex align-center justify-center mb-3">
+          <v-icon icon="mdi-leaf" color="green-lighten-1" size="14" class="mr-1" />
+          <span class="text-caption text-grey-lighten-1 font-weight-bold">
+            {{ p.calories }} kcal.
           </span>
+        </div> -->
 
-          <div
+        <div class="d-flex justify-space-between align-center px-1">
+          <span class="text-subtitle-1 font-weight-black">${{ p.price }}</span>
+
+          <div v-if="getQty(cart, p.id) === 0">
+            <v-btn
+              icon="mdi-plus"
+              size="30"
+              color="success"
+              elevation="1"
+              variant="flat"
+              @click="emit('add', p)"
+            />
+          </div>
+
+          <div 
+            v-else 
             class="d-flex align-center border rounded-pill px-1 bg-grey-lighten-5"
           >
             <v-btn
               icon="mdi-minus"
-              size="32"
+              size="24"
               variant="text"
-              :color="qty <= 1 ? 'error' : 'default'"
-              @click="$emit('update', product.id, -1)"
-              :disabled="qty === 0"
+              density="comfortable"
+              @click="emit('update', p.id, -1)"
             />
-
-            <span class="px-3 font-weight-bold">{{ qty }}</span>
-
+            <span class="mx-2 text-caption font-weight-bold">
+              {{ getQty(cart, p.id) }}
+            </span>
             <v-btn
               icon="mdi-plus"
-              size="32"
+              size="24"
               variant="text"
-              color="primary"
-              @click="$emit('add', product)"
+              density="comfortable"
+              color="success"
+              @click="emit('update', p.id, 1)"
             />
           </div>
         </div>
-      </div>
-    </div>
-  </v-card>
+      </v-card>
+    </v-col>
+  </v-row>
 </template>
 
 <style scoped>
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.2;
+.product-card {
+  background: white;
+  transition: transform 0.2s ease;
+}
+.product-card:active {
+  transform: scale(0.98);
 }
 </style>

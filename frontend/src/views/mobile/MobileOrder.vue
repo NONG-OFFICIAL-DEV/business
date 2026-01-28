@@ -102,110 +102,112 @@
     <v-main>
       <transition name="fade-slide" mode="out-in">
         <div>
-        <div v-if="page === 'home'" :key="'home'">
-          <div class="sticky-nav bg-white shadow-sm">
-            <CategoryTabs
-              :categories="categories"
-              v-model="selectedCategory"
-              v-model:search="search"
-            />
-          </div>
+          <div v-if="page === 'home'" :key="'home'">
+            <div class="sticky-nav bg-white shadow-sm">
+              <CategoryTabs
+                :categories="categories"
+                v-model="selectedCategory"
+                v-model:search="search"
+              />
+            </div>
 
-          <v-container class="pb-16">
-            <v-row>
-              <template
-                v-if="
-                  loadingStore.isLoading && loadingStore.mode === 'skeleton'
-                "
-              >
-                <v-col
-                  v-for="n in 6"
-                  :key="`skeleton-${n}`"
-                  cols="12"
-                  class="py-1"
+            <v-container class="pb-16">
+              <v-row>
+                <template
+                  v-if="
+                    loadingStore.isLoading && loadingStore.mode === 'skeleton'
+                  "
                 >
-                  <v-skeleton-loader
-                    type="list-item-avatar-two-line"
-                    class="rounded-xl"
-                    height="100"
-                  ></v-skeleton-loader>
-                </v-col>
-              </template>
-              <template v-else-if="filteredProducts.length === 0">
-                <v-col
-                  cols="12"
-                  class="d-flex flex-column align-center justify-center py-12"
-                >
-                  <v-avatar color="#3b828e10" size="100" class="mb-6">
-                    <v-icon size="48" color="#3b828e">
-                      mdi-book-search-outline
-                    </v-icon>
-                  </v-avatar>
-
-                  <h3 class="text-h6 font-weight-black mb-1">
-                    No dishes found
-                  </h3>
-                  <p
-                    class="text-body-2 text-medium-emphasis text-center px-10 mb-6"
-                  >
-                    We couldn't find any items matching
-                    <br />
-                    Try checking your spelling or search for something else!
-                  </p>
-
-                  <v-btn
-                    variant="tonal"
-                    color="#3b828e"
-                    rounded="pill"
-                    class="text-none font-weight-bold px-6"
-                    prepend-icon="mdi-refresh"
-                    @click="$emit('update:search', '')"
-                  >
-                    Clear search
-                  </v-btn>
-                </v-col>
-              </template>
-              <template v-else>
-                <transition-group name="list-stagger">
                   <v-col
-                    v-for="p in filteredProducts"
-                    :key="p.id"
+                    v-for="n in 6"
+                    :key="`skeleton-${n}`"
                     cols="12"
                     class="py-1"
                   >
+                    <v-skeleton-loader
+                      type="list-item-avatar-two-line"
+                      class="rounded-xl"
+                      height="100"
+                    ></v-skeleton-loader>
+                  </v-col>
+                </template>
+                <template v-else-if="filteredProducts.length === 0">
+                  <v-col
+                    cols="12"
+                    class="d-flex flex-column align-center justify-center py-12"
+                  >
+                    <v-avatar color="#3b828e10" size="100" class="mb-6">
+                      <v-icon size="48" color="#3b828e">
+                        mdi-book-search-outline
+                      </v-icon>
+                    </v-avatar>
+
+                    <h3 class="text-h6 font-weight-black mb-1">
+                      No dishes found
+                    </h3>
+                    <p
+                      class="text-body-2 text-medium-emphasis text-center px-10 mb-6"
+                    >
+                      We couldn't find any items matching
+                      <br />
+                      Try checking your spelling or search for something else!
+                    </p>
+
+                    <v-btn
+                      variant="tonal"
+                      color="#3b828e"
+                      rounded="pill"
+                      class="text-none font-weight-bold px-6"
+                      prepend-icon="mdi-refresh"
+                      @click="$emit('update:search', '')"
+                    >
+                      Clear search
+                    </v-btn>
+                  </v-col>
+                </template>
+                <template v-else>
+                  <transition-group name="list-stagger">
+                    <!-- <v-col
+                      v-for="p in filteredProducts"
+                      :key="p.id"
+                      cols="12"
+                      class="py-1"
+                    > -->
                     <ProductCard
-                      :product="p"
+                      :items="filteredProducts"
+                      :cart="cart"
                       @add="addToCart"
-                      :qty="cart.find(i => i.id === p.id)?.qty || 0"
                       @update="updateQty"
                     />
-                  </v-col>
-                </transition-group>
-              </template>
-            </v-row>
-          </v-container>
+                    <!-- :qty="cart.find(i => i.id === p.id)?.qty || 0" -->
+                    <!-- </v-col> -->
+                  </transition-group>
+                </template>
+              </v-row>
+            </v-container>
+          </div>
+
+          <CartView
+            v-if="page === 'cart'"
+            :cart="cart"
+            :total="cartTotal"
+            :tableNumber="tableNumber"
+            :loading="isOrdering"
+            @back="page = 'home'"
+            @update="updateQty"
+            @submit="placeOrder"
+            @clear="clearCart"
+          />
+
+          <TrackingView
+            v-if="page === 'tracking'"
+            :cart="cart"
+            :tableNumber="tableNumber"
+            :tableId="tableId"
+            v-model="viewProcess"
+            @reset="handleReset"
+          />
         </div>
-
-        <CartView
-          v-if="page === 'cart'"
-          :cart="cart"
-          :total="cartTotal"
-          :tableNumber="tableNumber"
-          :loading="isOrdering"
-          @back="page = 'home'"
-          @update="updateQty"
-          @submit="placeOrder"
-          @clear="clearCart"
-        />
-
-        <TrackingView
-          v-if="page === 'tracking'"
-          :cart="cart"
-          :tableNumber="tableNumber"
-          :tableId="tableId"
-          v-model="viewProcess"
-          @reset="handleReset"
-        /></div>
       </transition>
     </v-main>
     <transition name="pop">
