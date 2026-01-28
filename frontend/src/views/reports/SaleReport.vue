@@ -9,9 +9,9 @@
         </v-btn>
       </template>
     </custom-title>
-    <v-card flat class="pa-4 mb-4" v-show="showFilterForm">
+    <v-card flat class="pa-4 mb-4 rounded-xl border" v-show="showFilterForm">
       <v-row align="center">
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="3">
           <v-select
             v-model="selectedRange"
             :items="rangeOptions"
@@ -24,16 +24,18 @@
         </v-col>
 
         <v-fade-transition>
-          <v-col cols="12" md="4" v-if="selectedRange === 'custom'">
+          <v-col cols="12" md="5" v-if="selectedRange === 'custom'">
             <div class="d-flex ga-2">
               <v-date-input
                 v-model="filters.from"
+                label="From"
                 density="compact"
                 hide-details
                 variant="outlined"
               />
               <v-date-input
                 v-model="filters.to"
+                label="To"
                 density="compact"
                 hide-details
                 variant="outlined"
@@ -42,15 +44,24 @@
           </v-col>
         </v-fade-transition>
 
-        <v-col cols="12" md="4" class="text-right">
+        <v-spacer></v-spacer>
+        <v-col
+          cols="12"
+          md="4"
+          v-if="showGranularity"
+          class="d-flex justify-md-end align-center"
+        >
           <v-fade-transition>
-            <div v-if="showGranularity">
-              <span class="text-caption mr-2 text-grey">Group by:</span>
+            <div class="d-flex align-center">
+              <span class="text-caption mr-2 text-grey text-no-wrap">
+                Group by:
+              </span>
               <v-btn-toggle
                 v-model="granularity"
-                color="primary"
+                color="#3b828e"
                 density="compact"
                 mandatory
+                variant="outlined"
               >
                 <v-btn value="day">Day</v-btn>
                 <v-btn value="week" v-if="isRangeLongerThanWeek">Week</v-btn>
@@ -58,6 +69,21 @@
               </v-btn-toggle>
             </div>
           </v-fade-transition>
+        </v-col>
+
+        <v-col cols="12" class="d-flex justify-end pt-4">
+          <v-btn
+            color="primary"
+            size="large"
+            rounded="pill"
+            elevation="0"
+            class="text-none"
+            >
+            <!-- :loading="loadingStore.isLoading"
+            @click="applyFilters" -->
+            <v-icon start>mdi-filter-check</v-icon>
+            Apply Filters
+          </v-btn>
         </v-col>
       </v-row>
     </v-card>
