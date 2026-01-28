@@ -118,18 +118,39 @@
                     loadingStore.isLoading && loadingStore.mode === 'skeleton'
                   "
                 >
-                  <v-col
-                    v-for="n in 6"
-                    :key="`skeleton-${n}`"
-                    cols="12"
-                    class="py-1"
-                  >
-                    <v-skeleton-loader
-                      type="list-item-avatar-two-line"
-                      class="rounded-xl"
-                      height="100"
-                    ></v-skeleton-loader>
-                  </v-col>
+                  <v-row class="ma-0 w-100">
+                    <v-col
+                      v-for="n in 6"
+                      :key="`skeleton-${n}`"
+                      cols="6"
+                      class="pa-2"
+                    >
+                      <v-card flat rounded="xl" class="pa-3 bg-white">
+                        <v-skeleton-loader
+                          class="rounded-circle mx-auto mb-2"
+                          height="100"
+                          width="100"
+                        ></v-skeleton-loader>
+
+                        <v-skeleton-loader
+                          type="text"
+                          class="mx-auto mb-4"
+                          width="80%"
+                        ></v-skeleton-loader>
+
+                        <div class="d-flex justify-space-between align-center">
+                          <v-skeleton-loader
+                            type="text"
+                            width="40%"
+                          ></v-skeleton-loader>
+                          <v-skeleton-loader
+                            type="avatar"
+                            size="32"
+                          ></v-skeleton-loader>
+                        </div>
+                      </v-card>
+                    </v-col>
+                  </v-row>
                 </template>
                 <template v-else-if="filteredProducts.length === 0">
                   <v-col
@@ -166,22 +187,12 @@
                   </v-col>
                 </template>
                 <template v-else>
-                  <transition-group name="list-stagger">
-                    <!-- <v-col
-                      v-for="p in filteredProducts"
-                      :key="p.id"
-                      cols="12"
-                      class="py-1"
-                    > -->
-                    <ProductCard
-                      :items="filteredProducts"
-                      :cart="cart"
-                      @add="addToCart"
-                      @update="updateQty"
-                    />
-                    <!-- :qty="cart.find(i => i.id === p.id)?.qty || 0" -->
-                    <!-- </v-col> -->
-                  </transition-group>
+                  <ProductCard
+                    :items="filteredProducts"
+                    :cart="cart"
+                    @add="addToCart"
+                    @update="updateQty"
+                  />
                 </template>
               </v-row>
             </v-container>
@@ -222,12 +233,14 @@
 </template>
 
 <style scoped>
+  /* Update your style section */
   .sticky-nav {
+    position: -webkit-sticky; /* Support for Safari */
     position: sticky;
     top: 0;
-    z-index: 100;
-    /* Soft shadow to separate from product cards */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    z-index: 10;
+    background: white;
+    width: 100%;
   }
 
   /* Ensure the main area has enough space for the floating cart button */

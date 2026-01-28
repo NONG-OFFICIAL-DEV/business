@@ -65,7 +65,6 @@ html {
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
   -webkit-text-size-adjust: 100%;
-  overflow-x: hidden;
 }
 
 body {
