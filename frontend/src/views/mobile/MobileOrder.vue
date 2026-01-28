@@ -90,7 +90,6 @@
 
     return list
   })
-  // loadingStore.start('skeleton')
 </script>
 
 <template>
@@ -101,81 +100,122 @@
       :tableNumber="tableNumber"
     />
     <v-main>
-      <template v-if="page === 'home'">
-        <div class="sticky-nav bg-white shadow-sm">
-          <CategoryTabs
-            :categories="categories"
-            v-model="selectedCategory"
-            v-model:search="search"
-          />
+      <transition name="fade-slide" mode="out-in">
+        <div>
+        <div v-if="page === 'home'" :key="'home'">
+          <div class="sticky-nav bg-white shadow-sm">
+            <CategoryTabs
+              :categories="categories"
+              v-model="selectedCategory"
+              v-model:search="search"
+            />
+          </div>
+
+          <v-container class="pb-16">
+            <v-row>
+              <template
+                v-if="
+                  loadingStore.isLoading && loadingStore.mode === 'skeleton'
+                "
+              >
+                <v-col
+                  v-for="n in 6"
+                  :key="`skeleton-${n}`"
+                  cols="12"
+                  class="py-1"
+                >
+                  <v-skeleton-loader
+                    type="list-item-avatar-two-line"
+                    class="rounded-xl"
+                    height="100"
+                  ></v-skeleton-loader>
+                </v-col>
+              </template>
+              <template v-else-if="filteredProducts.length === 0">
+                <v-col
+                  cols="12"
+                  class="d-flex flex-column align-center justify-center py-12"
+                >
+                  <v-avatar color="#3b828e10" size="100" class="mb-6">
+                    <v-icon size="48" color="#3b828e">
+                      mdi-book-search-outline
+                    </v-icon>
+                  </v-avatar>
+
+                  <h3 class="text-h6 font-weight-black mb-1">
+                    No dishes found
+                  </h3>
+                  <p
+                    class="text-body-2 text-medium-emphasis text-center px-10 mb-6"
+                  >
+                    We couldn't find any items matching
+                    <br />
+                    Try checking your spelling or search for something else!
+                  </p>
+
+                  <v-btn
+                    variant="tonal"
+                    color="#3b828e"
+                    rounded="pill"
+                    class="text-none font-weight-bold px-6"
+                    prepend-icon="mdi-refresh"
+                    @click="$emit('update:search', '')"
+                  >
+                    Clear search
+                  </v-btn>
+                </v-col>
+              </template>
+              <template v-else>
+                <transition-group name="list-stagger">
+                  <v-col
+                    v-for="p in filteredProducts"
+                    :key="p.id"
+                    cols="12"
+                    class="py-1"
+                  >
+                    <ProductCard
+                      :product="p"
+                      @add="addToCart"
+                      :qty="cart.find(i => i.id === p.id)?.qty || 0"
+                      @update="updateQty"
+                    />
+                  </v-col>
+                </transition-group>
+              </template>
+            </v-row>
+          </v-container>
         </div>
 
-        <v-container class="pb-16">
-          <v-row>
-            <template v-if="loadingStore.isLoading && loadingStore.mode === 'skeleton'">
-              <v-col
-                v-for="n in 6"
-                :key="`skeleton-${n}`"
-                cols="12"
-                class="py-1"
-              >
-                <v-skeleton-loader
-                  type="list-item-avatar-two-line"
-                  class="rounded-xl"
-                  height="100"
-                ></v-skeleton-loader>
-              </v-col>
-            </template>
-            <v-col
-              v-for="p in filteredProducts"
-              :key="p.id"
-              cols="12"
-              class="py-1"
-            >
-              <ProductCard
-                :product="p"
-                @add="addToCart"
-                :qty="cart.find(i => i.id === p.id)?.qty || 0"
-                @update="updateQty"
-              />
-            </v-col>
-          </v-row>
+        <CartView
+          v-if="page === 'cart'"
+          :cart="cart"
+          :total="cartTotal"
+          :tableNumber="tableNumber"
+          :loading="isOrdering"
+          @back="page = 'home'"
+          @update="updateQty"
+          @submit="placeOrder"
+          @clear="clearCart"
+        />
 
-          <!-- <div v-if="filteredProducts.length === 0" class="text-center py-10">
-            <v-icon size="48" color="grey-lighten-1">mdi-magnify-close</v-icon>
-            <p class="text-grey mt-2">No items found matching your search.</p>
-          </div> -->
-        </v-container>
-      </template>
-
-      <CartView
-        v-if="page === 'cart'"
-        :cart="cart"
-        :total="cartTotal"
-        :tableNumber="tableNumber"
-        :loading="isOrdering"
-        @back="page = 'home'"
-        @update="updateQty"
-        @submit="placeOrder"
-        @clear="clearCart"
-      />
-
-      <TrackingView
-        v-if="page === 'tracking'"
-        :cart="cart"
-        :tableNumber="tableNumber"
-        :tableId="tableId"
-        v-model="viewProcess"
-        @reset="handleReset"
-      />
+        <TrackingView
+          v-if="page === 'tracking'"
+          :cart="cart"
+          :tableNumber="tableNumber"
+          :tableId="tableId"
+          v-model="viewProcess"
+          @reset="handleReset"
+        /></div>
+      </transition>
     </v-main>
-
-    <CartButton
-      v-if="cart.length && page === 'home'"
-      :totalItems="totalItems"
-      :totalPrice="cartTotal"
-      @open="page = 'cart'"
-    />
+    <transition name="pop">
+      <CartButton
+        v-if="cart.length && page === 'home'"
+        :totalItems="totalItems"
+        :totalPrice="cartTotal"
+        @open="page = 'cart'"
+      />
+    </transition>
   </v-app>
 </template>
 
@@ -191,5 +231,60 @@
   /* Ensure the main area has enough space for the floating cart button */
   .pb-16 {
     padding-bottom: 120px !important;
+  }
+  /* 1. Page Switch: Fade and Slight Slide */
+  .fade-slide-enter-active,
+  .fade-slide-leave-active {
+    transition: all 0.3s ease;
+  }
+
+  .fade-slide-enter-from {
+    opacity: 0;
+    transform: translateX(20px); /* Slides in from right */
+  }
+
+  .fade-slide-leave-to {
+    opacity: 0;
+    transform: translateX(-20px); /* Slides out to left */
+  }
+
+  /* 2. List Filtering: Smooth items sliding */
+  .list-stagger-enter-active,
+  .list-stagger-leave-active {
+    transition: all 0.4s ease;
+  }
+
+  .list-stagger-enter-from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  .list-stagger-leave-to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  /* 3. Floating Cart Button: Pop up effect */
+  .pop-enter-active {
+    animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .pop-leave-active {
+    animation: pop-in 0.2s reverse;
+  }
+
+  @keyframes pop-in {
+    0% {
+      transform: scale(0.5) translateY(100px);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* Ensures list items move smoothly when one is removed */
+  .list-stagger-move {
+    transition: transform 0.4s ease;
   }
 </style>
