@@ -27,7 +27,9 @@ export default {
   },
   // POS / KDS
   getTableNumberByToken(token) {
-    return http.get(`/tables/table-by-token/${token}`)
+    return http.get(`/tables/table-by-token/${token}`, {
+      meta: { loader: 'nothing' }
+    })
   },
 
   showQRCode(tableId) {

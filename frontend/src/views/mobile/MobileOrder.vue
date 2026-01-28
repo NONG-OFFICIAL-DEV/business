@@ -12,6 +12,7 @@
   import { useOrderStore } from '@/stores/orderStore'
   import { useMenuStore } from '@/stores/menuStore'
   import { useDiningTableStore } from '../../stores/diningTableStore'
+  import { useLoadingStore } from '@/stores/loading'
 
   // const tableNumber = ref('05')
   const orderStore = useOrderStore()
@@ -21,7 +22,7 @@
   const token = route.params.token
   const tableNumber = ref()
   const tableId = ref()
-
+  const loadingStore = useLoadingStore()
   onMounted(async () => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('table')) tableNumber.value = params.get('table')
@@ -89,6 +90,7 @@
 
     return list
   })
+  // loadingStore.start('skeleton')
 </script>
 
 <template>
@@ -110,6 +112,20 @@
 
         <v-container class="pb-16">
           <v-row>
+            <template v-if="loadingStore.isLoading && loadingStore.mode === 'skeleton'">
+              <v-col
+                v-for="n in 6"
+                :key="`skeleton-${n}`"
+                cols="12"
+                class="py-1"
+              >
+                <v-skeleton-loader
+                  type="list-item-avatar-two-line"
+                  class="rounded-xl"
+                  height="100"
+                ></v-skeleton-loader>
+              </v-col>
+            </template>
             <v-col
               v-for="p in filteredProducts"
               :key="p.id"
@@ -125,10 +141,10 @@
             </v-col>
           </v-row>
 
-          <div v-if="filteredProducts.length === 0" class="text-center py-10">
+          <!-- <div v-if="filteredProducts.length === 0" class="text-center py-10">
             <v-icon size="48" color="grey-lighten-1">mdi-magnify-close</v-icon>
             <p class="text-grey mt-2">No items found matching your search.</p>
-          </div>
+          </div> -->
         </v-container>
       </template>
 

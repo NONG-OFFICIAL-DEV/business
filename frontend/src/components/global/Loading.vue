@@ -1,6 +1,6 @@
 <template>
   <v-overlay
-    :model-value="isLoading"
+    :model-value="loadingStore.isLoading && loadingStore.mode === 'overlay'"
     class="align-center justify-center"
     persistent
   >
@@ -13,13 +13,7 @@
   </v-overlay>
 </template>
 
-<script>
-  import { mapState } from 'pinia'
+<script setup>
   import { useLoadingStore } from '@/stores/loading'
-  export default {
-    name: 'CommonOverlay',
-    computed: {
-      ...mapState(useLoadingStore, ['isLoading'])
-    }
-  }
+  const loadingStore = useLoadingStore()
 </script>

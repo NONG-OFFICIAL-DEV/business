@@ -4,7 +4,9 @@ const API_BASE = '/menus' // adjust according to your backend route
 
 export const menuService = {
   fetchMenus() {
-    return http.get(API_BASE)
+    return http.get(API_BASE, {
+      meta: { loader: 'skeleton' }
+    })
   },
 
   fetchMenu(id) {

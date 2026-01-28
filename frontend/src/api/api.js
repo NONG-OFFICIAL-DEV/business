@@ -11,18 +11,18 @@ const api = axios.create({
 
 // Get store instance
 const loadingStore = useLoadingStore()
-
 // Request Interceptor
 api.interceptors.request.use(async config => {
+  const loaderType = config.meta?.loader || 'overlay'
   try {
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    loadingStore.setLoading(true)
+    loadingStore.start(loaderType)
     return config
   } catch (error) {
-    loadingStore.setLoading(false)
+    useLoadingStore().stop()
     return Promise.reject(error)
   }
 })
@@ -30,12 +30,12 @@ api.interceptors.request.use(async config => {
 // Response Interceptor
 api.interceptors.response.use(
   response => {
-    loadingStore.setLoading(false)
+    useLoadingStore().stop()
     return response
   },
 
   error => {
-    loadingStore.setLoading(false)
+    useLoadingStore().stop()
     return Promise.reject(error)
   }
 )
