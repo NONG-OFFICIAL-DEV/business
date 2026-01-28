@@ -70,6 +70,7 @@ html {
 
 body {
   font-family: 'Poppins', sans-serif;
+  touch-action: manipulation;
 }
 
 thead tr th {
