@@ -11,6 +11,11 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+html,
+body {
+  touch-action: manipulation;
+}
+
 /* Typography override */
 .text-h1,
 .text-h2,
@@ -26,4 +31,9 @@
 .text-caption,
 .text-overline {
   font-family: "Poppins", sans-serif;
+}
+
+.v-field input,
+.v-field textarea {
+  font-size: 16px !important;
 }

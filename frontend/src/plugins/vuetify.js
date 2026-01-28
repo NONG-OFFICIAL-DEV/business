@@ -8,6 +8,9 @@ import * as labs from 'vuetify/labs/components'
 import { VDateInput } from 'vuetify/labs/VDateInput'
 
 const vuetify = createVuetify({
+  display: {
+    mobileBreakpoint: 'sm'
+  },
   components: {
     VDateInput,
     ...components,
@@ -23,7 +26,7 @@ const vuetify = createVuetify({
       prependIcon: '',
       appendInnerIcon: '$calendar',
       format: 'DD-MM-YYYY',
-      hideActions:true
+      hideActions: true
     },
 
     VSelect: {
@@ -54,7 +57,7 @@ const vuetify = createVuetify({
       density: 'comfortable',
       color: 'primary'
     },
-    
+
     VDataTableServer: {
       class: 'rounded-lg'
     }
