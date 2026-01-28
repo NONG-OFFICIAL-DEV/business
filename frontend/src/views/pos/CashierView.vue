@@ -30,6 +30,10 @@
                 >
                   ORDER #{{ bill.order_id }}
                 </div>
+                <div class="d-flex align-center text-caption text-grey">
+                  <v-icon size="14" class="me-1">mdi-clock-outline</v-icon>
+                  {{ formatTimeAgo(bill.created_at) }}
+                </div>
                 <div class="text-h5 font-weight-black mt-1">
                   {{ bill.table ? 'Table ' + bill.table : 'Takeaway' }}
                 </div>
@@ -63,11 +67,6 @@
                 size="small"
               />
             </div>
-            <!-- <v-divider class="mb-3 border-opacity-25" />
-            <div class="d-flex align-center text-caption text-grey">
-              <v-icon size="14" class="me-1">mdi-clock-outline</v-icon>
-              {{ formatTimeAgo(bill.created_at) }}
-            </div> -->
           </v-card-text>
         </v-card>
       </v-col>
@@ -90,7 +89,7 @@
 
   function selectBill(bill) {
     // console.log(bill.order_id);
-    
+
     posStore.selectBill(bill)
     posStore.orderId = bill.order_id
   }

@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, watch } from 'vue'
+  import { ref, computed } from 'vue'
   import logo from '/logo.png'
 
   const props = defineProps({
@@ -77,6 +77,12 @@
       icon: 'mdi-food-apple',
       roles: [1, 2],
       subLinks: [
+        {
+          path: '/menu-categoory',
+          title: 'Menu Categoory',
+          icon: 'mdi-silverware-fork-knife',
+          roles: [1]
+        },
         {
           path: '/menu-management',
           title: 'Menu Setup',

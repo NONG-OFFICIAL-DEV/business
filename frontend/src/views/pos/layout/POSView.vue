@@ -142,7 +142,7 @@ ACTIONS
     // Print the selected bill
     const selectOrderId = posStore.orderId
     const res = await saleStore.printBillForPayment(selectOrderId)
-    if(res.status == 200){
+    if (res.status == 200) {
       await orderStore.fetchAllOrders()
       window.open(res.data.invoice_url, '_blank')
     }
@@ -213,3 +213,15 @@ ON MOUNT
 
   <QRPaymentDialog v-model="showQRDialog" :total="total" />
 </template>
+<style scoped>
+  .cart-anchor {
+    position: fixed;
+    bottom: 24px; /* Space from bottom edge */
+    left: 0;
+    right: 0;
+    z-index: 999;
+    max-width: 450px; /* Optional: Keep it centered on larger screens */
+    margin: 0 auto;
+    margin-right: 45%;
+  }
+</style>

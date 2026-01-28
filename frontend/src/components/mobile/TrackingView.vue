@@ -24,16 +24,9 @@
   })
 
   onMounted(async () => {
-    try {
-      if (!props.tableNumber) return
-      order.value = await orderStore.fetchOrderByTable(props.tableId)
-    } catch (e) {
-      console.error('Failed to load order', e)
-    } finally {
-      loading.value = false
-    }
+    if (!props.tableNumber) return
+    order.value = await orderStore.fetchOrderByTable(props.tableId)
   })
-  // loadingStore.start('skeleton')
 </script>
 
 <template>

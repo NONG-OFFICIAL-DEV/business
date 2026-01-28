@@ -149,6 +149,12 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: '/menu-categoory',
+        name: 'MenuCategory',
+        component: () => import('@/views/menus/MenuCategory.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: '/notifications',
         name: 'Notifications',
         component: () => import('@/views/Notification.vue'),

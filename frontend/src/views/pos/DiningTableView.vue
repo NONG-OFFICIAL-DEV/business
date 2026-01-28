@@ -12,7 +12,7 @@
   // ------------------------------
   // Composables & Utils
   // ------------------------------
-  const { isAdmin, isManager, isPurchaser } = usePermission()
+  const { isAdmin, isManager } = usePermission()
   const { confirm, notif } = useAppUtils()
   const posStore = usePosStore()
   const tableStore = useDiningTableStore()

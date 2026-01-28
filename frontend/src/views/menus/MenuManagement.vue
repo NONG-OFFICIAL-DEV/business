@@ -15,7 +15,7 @@
     </custom-title>
 
     <v-row>
-      <v-col>
+      <v-col cols="4">
         <v-select
           v-model="selectedCategory"
           :items="categoryStore.items"
@@ -35,14 +35,6 @@
             </v-list-item>
           </template>
         </v-select>
-      </v-col>
-      <v-col>
-        <v-btn
-          variant="tonal"
-          color="secondary"
-          icon="mdi-cog-outline"
-          @click="openCategoryDialog()"
-        ></v-btn>
       </v-col>
     </v-row>
 
