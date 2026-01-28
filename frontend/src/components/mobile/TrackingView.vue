@@ -1,7 +1,8 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { useOrderStore } from '@/stores/orderStore'
-
+  import { useLoadingStore } from '@/stores/loading'
+  const loadingStore = useLoadingStore()
   const props = defineProps({
     tableNumber: String,
     tableId: Number
@@ -32,22 +33,40 @@
       loading.value = false
     }
   })
+  // loadingStore.start('skeleton')
 </script>
 
 <template>
   <v-container
     class="fill-height bg-grey-lighten-5 d-flex align-center justify-center"
   >
-    <!-- No active orders -->
-    <div v-if="!order || order.items?.length === 0" class="text-center px-6">
+    <!-- 🔹 SKELETON: only when fetching AND no order yet -->
+    <template
+      v-if="
+        loadingStore.isLoading && loadingStore.mode === 'skeleton' && !order
+      "
+    >
+      <v-card flat class="rounded-xl w-100" style="max-width: 450px">
+        <v-skeleton-loader type="article, table-tfoot" class="pa-4" />
+      </v-card>
+    </template>
+
+    <!-- 🔹 NO ACTIVE ORDERS -->
+    <div
+      v-else-if="!order || order.items?.length === 0"
+      class="text-center px-6"
+    >
       <v-avatar color="grey-lighten-4" size="120" class="mb-6">
         <v-icon size="60" color="grey-lighten-1">mdi-tray-full</v-icon>
       </v-avatar>
+
       <h3 class="text-h5 font-weight-black mb-2">No active orders</h3>
+
       <p class="text-body-2 text-medium-emphasis mb-6">
         Looks like you haven't ordered anything yet. Let's find something
         delicious!
       </p>
+
       <v-btn
         color="#3b828e"
         size="large"
@@ -60,7 +79,7 @@
       </v-btn>
     </div>
 
-    <!-- Active order -->
+    <!-- 🔹 ACTIVE ORDER -->
     <div v-else class="w-100 px-4" style="max-width: 450px">
       <div class="text-center mb-8">
         <v-avatar
@@ -70,9 +89,11 @@
         >
           <v-icon size="48" color="white">mdi-silverware-clean</v-icon>
         </v-avatar>
+
         <h2 class="text-h4 font-weight-black mb-1" style="color: #2c5157">
           Order Placed!
         </h2>
+
         <p class="text-body-1 text-medium-emphasis">
           Sit back and relax, Table
           <b>{{ props.tableNumber }}</b>
@@ -108,23 +129,23 @@
 
             <v-divider
               class="mt-3 mx-2"
+              thickness="2"
               :color="
                 order.kitchen_status === 'preparing'
                   ? '#3b828e'
                   : 'grey-lighten-1'
               "
-              thickness="2"
             />
 
             <!-- Cooking -->
             <div class="d-flex flex-column align-center">
               <v-icon
+                class="chef-icon-animation"
                 :color="
                   order.kitchen_status !== 'preparing'
                     ? 'success'
                     : 'grey-lighten-1'
                 "
-                class="chef-icon-animation"
               >
                 mdi-fire
               </v-icon>
@@ -179,9 +200,12 @@
             class="d-flex justify-space-between mb-3"
           >
             <div class="d-flex flex-column">
-              <span class="text-body-2 font-weight-bold">{{ item.name }}</span>
+              <span class="text-body-2 font-weight-bold">
+                {{ item.name }}
+              </span>
               <span class="text-caption text-grey">Qty: {{ item.qty }}</span>
             </div>
+
             <span class="text-body-2 font-weight-medium">
               ${{ (item.price * item.qty).toFixed(2) }}
             </span>

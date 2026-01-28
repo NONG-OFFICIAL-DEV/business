@@ -1,84 +1,101 @@
 <script setup>
   defineProps({
-    tableNumber: String,
+    tableNumber: { type: String, default: '00' },
     search: String
   })
+  defineEmits(['view-process', 'update:search'])
 </script>
 
 <template>
-  <div class="bg-white px-4 pt-3 pb-3 border-bottom sticky-header">
-    <div class="d-flex align-center">
-      <div class="d-flex align-center flex-grow-1">
-        <v-avatar color="#3b828e15" size="40" class="mr-3">
-          <v-icon color="#3b828e" size="20">mdi-table-chair</v-icon>
-        </v-avatar>
-        
-        <div>
-          <div class="text-caption font-weight-bold text-grey-darken-1 line-height-1">
-            TABLE
-          </div>
-          <div class="text-h6 font-weight-black line-height-1">
+  <div class="header-container sticky-header">
+    <div class="d-flex align-center justify-space-between px-4 py-2">
+      <div class="d-flex align-center">
+        <div class="table-pill d-flex align-center px-3 py-1 mr-2">
+          <v-icon size="16" color="#3b828e" class="mr-2">
+            mdi-table-furniture
+          </v-icon>
+          <span class="text-subtitle-2 font-weight-black color-primary">
             {{ tableNumber }}
-          </div>
+          </span>
         </div>
+        <h1 class="text-subtitle-1 font-weight-bold">Menu</h1>
       </div>
 
-      <v-btn
-        color="#3b828e"
-        variant="tonal"
-        rounded="pill"
-        size="small"
-        class="text-none font-weight-bold px-4"
-        @click="$emit('view-process')"
-      >
+      <v-btn class="text-none" icon  variant="text">
         <v-badge
-          color="error"
-          dot
-          offset-x="-2"
-          offset-y="-2"
+          location="top right"
+          color="primary"
+          content="1"
+          bordered
+          @click="$emit('view-process')"
         >
-          <v-icon start size="18">mdi-clock-fast</v-icon>
+          <v-icon icon="mdi-cart" color="primary"></v-icon>
         </v-badge>
-        My Orders
       </v-btn>
     </div>
 
-    <v-text-field
-      v-if="search !== undefined"
-      :model-value="search"
-      @update:model-value="$emit('update:search', $event)"
-      placeholder="Search menu..."
-      variant="filled"
-      density="compact"
-      hide-details
-      prepend-inner-icon="mdi-magnify"
-      rounded="lg"
-      class="mt-3 bg-grey-lighten-4 custom-search"
-    />
+    <div v-if="search !== undefined" class="px-4 pb-3">
+      <v-text-field
+        :model-value="search"
+        @update:model-value="$emit('update:search', $event)"
+        placeholder="Search dishes, drinks..."
+        variant="solo"
+        density="compact"
+        hide-details
+        flat
+        bg-color="#f5f5f5"
+        prepend-inner-icon="mdi-magnify"
+        rounded="xl"
+        class="search-input"
+      >
+        <template v-slot:append-inner v-if="search">
+          <v-icon size="18" color="grey" @click="$emit('update:search', '')">
+            mdi-close-circle
+          </v-icon>
+        </template>
+      </v-text-field>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.sticky-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
+  .header-container {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px); /* Modern blur effect */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
 
-.line-height-1 {
-  line-height: 1.1 !important;
-}
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
 
-.border-bottom {
-  border-bottom: 1px solid #eeeeee !important;
-}
+  .table-pill {
+    background: #3b828e15;
+    border: 1px solid #3b828e30;
+    border-radius: 100px;
+  }
 
-/* Custom styling to make the search field less "boxy" */
-:deep(.custom-search .v-field__outline) {
-  display: none;
-}
-:deep(.custom-search .v-field__input) {
-  font-size: 0.9rem;
-}
+  .color-primary {
+    color: #3b828e;
+  }
+
+  .order-btn {
+    letter-spacing: 0.5px;
+    background-color: #3b828e !important;
+    color: white !important;
+  }
+
+  /* Make search feel like a native mobile input */
+  :deep(.search-input .v-field) {
+    border-radius: 12px !important;
+    font-size: 14px;
+  }
+
+  :deep(.search-input .v-field__input) {
+    min-height: 40px !important;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
 </style>
