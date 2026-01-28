@@ -25,28 +25,29 @@
               variant="outlined"
               rows="3"
             />
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                v-if="isCategoryEdit"
+                variant="text"
+                color="grey"
+                class="text-none"
+                @click="resetForm"
+              >
+                Cancel
+              </v-btn>
+              <v-btn
+                color="primary"
+                elevation="0"
+                class="text-none font-weight-bold rounded-lg"
+                type="submit"
+                :loading="loading"
+              >
+                {{ isCategoryEdit ? 'Update' : 'Save' }}
+              </v-btn>
+            </v-card-actions>
           </v-form>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              v-if="isCategoryEdit"
-              variant="text"
-              color="grey"
-              class="text-none"
-              @click="resetForm"
-            >
-              Cancel
-            </v-btn>
-            <v-btn
-              color="primary"
-              elevation="0"
-              class="text-none font-weight-bold rounded-lg"
-              type="submit"
-              :loading="loading"
-            >
-              {{ isCategoryEdit ? 'Update' : 'Save' }}
-            </v-btn>
-          </v-card-actions>
         </v-card>
       </v-col>
 
