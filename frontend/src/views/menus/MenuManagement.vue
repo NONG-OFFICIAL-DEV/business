@@ -150,7 +150,7 @@
   const menuStore = useMenuStore()
   const categoryStore = useCategoryMenuStore()
 
-  const selectedCategory = ref('All Items')
+  const selectedCategory = ref(null)
   const dialog = ref(false)
   const isEdit = ref(false)
   const selectedItem = ref(null)
@@ -161,10 +161,15 @@
 
   const filteredProducts = computed(() => {
     const data = menuStore.menus?.data || []
-    if (selectedCategory.value === 'All Items') return data
+
+    // no category selected → show all
+    if (!selectedCategory.value) {
+      return data
+    }
+
+    // filter by category
     return data.filter(item => item.menu_category_id === selectedCategory.value)
   })
-
   /* Menu Actions */
   const openAddDialog = () => {
     isEdit.value = false
