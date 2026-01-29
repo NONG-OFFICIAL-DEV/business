@@ -12,7 +12,7 @@ const getQty = (cart, id) => {
 
 <template>
   <v-row class="pa-2">
-    <transition-group name="list-stagger" tag="div" class="v-row ma-0">
+    <transition-group name="list-stagger">
       <v-col 
         v-for="p in items" 
         :key="p.id" 
@@ -84,6 +84,10 @@ const getQty = (cart, id) => {
 </template>
 
 <style scoped>
+.v-row {
+  width: 100%;
+  margin: 0 !important;
+}
 .product-card {
   background: white;
   transition: transform 0.2s ease;
