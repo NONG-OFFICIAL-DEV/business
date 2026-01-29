@@ -78,7 +78,7 @@
             rounded="pill"
             elevation="0"
             class="text-none"
-            >
+          >
             <!-- :loading="loadingStore.isLoading"
             @click="applyFilters" -->
             <v-icon start>mdi-filter-check</v-icon>
@@ -166,7 +166,7 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12">
+      <v-col cols="12" md="6">
         <v-card border flat>
           <v-card-title class="d-flex align-center pe-2">
             Recent Transactions
@@ -206,68 +206,6 @@
           </v-data-table>
         </v-card>
       </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="6">
-        <v-card border flat class="pa-4">
-          <div class="d-flex justify-space-between align-center mb-4">
-            <div>
-              <v-card-title class="pa-0">Top Selling Items</v-card-title>
-              <v-card-subtitle class="pa-0">
-                Ranked by total revenue
-              </v-card-subtitle>
-            </div>
-            <v-icon color="primary">mdi-cash-multiple</v-icon>
-          </div>
-
-          <v-list lines="two">
-            <v-list-item
-              v-for="(item, index) in topSellingData"
-              :key="item.name"
-              class="px-0"
-            >
-              <template v-slot:prepend>
-                <v-avatar
-                  :color="index === 0 ? 'amber-lighten-4' : 'grey-lighten-4'"
-                  size="32"
-                  class="mr-3"
-                >
-                  <span
-                    :class="index === 0 ? 'text-amber-darken-3' : ''"
-                    class="text-caption font-weight-bold"
-                  >
-                    #{{ index + 1 }}
-                  </span>
-                </v-avatar>
-              </template>
-
-              <v-list-item-title class="font-weight-medium">
-                {{ item.name }}
-              </v-list-item-title>
-              <v-list-item-subtitle>{{ item.category }}</v-list-item-subtitle>
-
-              <template v-slot:append>
-                <div class="text-right">
-                  <div class="font-weight-bold">
-                    {{ formatCurrency(item.revenue) }}
-                  </div>
-                  <v-progress-linear
-                    :model-value="
-                      (item.revenue / topSellingData[0].revenue) * 100
-                    "
-                    color="primary"
-                    height="6"
-                    rounded
-                    class="mt-1"
-                    style="width: 100px"
-                  ></v-progress-linear>
-                </div>
-              </template>
-            </v-list-item>
-          </v-list>
-        </v-card>
-      </v-col>
-
       <v-col cols="12" md="6">
         <v-card border flat class="pa-4">
           <div class="d-flex justify-space-between align-center mb-4">
@@ -477,9 +415,10 @@
   }
   // Table Configuration
   const headers = [
+    { title: 'Invoice', key: 'invoice_no' },
     { title: 'Date', key: 'sale_date' },
-    { title: 'Order ID', key: 'id' },
-    { title: 'Amount', key: 'total_amount' },
+    { title: 'Items', key: 'items_count' },
+    { title: 'Total', key: 'total_amount' },
     { title: 'Status', key: 'status' }
   ]
 
@@ -490,13 +429,6 @@
     return 'grey'
   }
 
-  const topSellingData = ref([
-    { name: 'Enterprise Cloud Suite', category: 'Software', revenue: 24500 },
-    { name: 'Hardware Firewall v2', category: 'Hardware', revenue: 18200 },
-    { name: 'Premium Support Plan', category: 'Services', revenue: 12400 },
-    { name: 'Data Migration Tool', category: 'Software', revenue: 9800 },
-    { name: 'Consulting Hourly', category: 'Services', revenue: 5600 }
-  ])
 
   // Fake Data for Top Ordered (Quantity)
   const topOrderedData = ref([

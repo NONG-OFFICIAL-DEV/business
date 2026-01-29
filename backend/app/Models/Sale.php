@@ -15,7 +15,6 @@ class Sale extends Model
         'tax_amount',
         'status',
         'cashier_id',
-        'payment_method',
         'order_id',
     ];
 

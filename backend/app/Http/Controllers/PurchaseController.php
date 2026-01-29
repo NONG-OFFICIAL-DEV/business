@@ -29,12 +29,6 @@ class PurchaseController extends Controller
         $user = Auth::user();
         $userRole = $user->role->id ?? null;
 
-        // $roleStatusMap = [
-        //     3 => ['draft', 'requested', 'approved', 'rejected', 'ordered', 'received', 'completed'],
-        //     2 => ['requested', 'approved', 'rejected', 'ordered', 'received', 'completed'],
-        //     1 => ['draft', 'requested', 'approved', 'rejected', 'ordered', 'received', 'completed', 'cancelled'],
-        // ];
-
         $roleStatusMap = [
             3 => ['draft', 'request', 'pending', 'approved', 'rejected', 'completed'],
             2 => ['request', 'pending', 'approved', 'rejected', 'completed'],

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\Sale;
+use Illuminate\Support\Facades\Auth;
 
 class SaleService
 {
@@ -16,7 +17,7 @@ class SaleService
         }
 
         $total = $order->items->sum(fn($i) => $i->quantity * $i->price);
-
+        $user = Auth::user();
         $sale = Sale::create([
             'sale_date'      => now(),
             'invoice_no'     => 'SAL-' . now()->format('YmdHis'),
@@ -27,10 +28,7 @@ class SaleService
             'tax_amount'     => 0,
 
             'status'         => 'paid',
-            'payment_status' => 'QR Payment',
-
-            'cashier_id'     => null, // or null
-            'payment_method' => null,          // will be filled later
+            'cashier_id'     => $user->id ?? null,
             'notes'          => null,
         ]);
 

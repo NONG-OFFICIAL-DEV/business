@@ -16,13 +16,11 @@ return new class extends Migration
             $table->dateTime('sale_date');
             $table->decimal('total_amount', 10, 2);
             $table->string('invoice_no', 100)->nullable();
-            // Other columns
             $table->text('notes')->nullable();
             $table->decimal('discount', 12, 2)->default(0);
             $table->decimal('tax_amount', 12, 2)->default(0);
             $table->enum('status', ['paid', 'refunded'])->default('paid');
             $table->foreignId('cashier_id')->nullable()->constrained('users')->onDelete('cascade');
-            $table->enum('payment_method', ['Cash', 'Card', 'QR Payment'])->nullable();
             $table->integer('queue_number')->nullable();
             $table->timestamps();
         });

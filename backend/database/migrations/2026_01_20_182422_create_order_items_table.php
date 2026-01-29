@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('menu_id')->constrained()->restrictOnDelete();
             $table->integer('quantity')->default(1);
+             $table->decimal('price', 10, 2)->nullable();
+            $table->decimal('total_amount', 10, 2)->nullable();
             $table->string('note')->nullable(); // no spicy, extra cheese
             $table->enum('status', ['pending', 'preparing', 'ready'])
                 ->default('pending');

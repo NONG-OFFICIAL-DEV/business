@@ -53,6 +53,8 @@ return new class extends Migration
                 'reserved',
                 'disabled'
             ])->default('available')->after('capacity');
+
+            $table->string('qr_token')->unique()->nullable()->after('id');
         });
     }
 

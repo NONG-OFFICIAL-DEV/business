@@ -88,10 +88,6 @@
 
     <!-- USER -->
     <div class="d-flex align-center">
-      <v-chip color="success" variant="tonal" class="mr-3" size="small">
-        SHIFT ACTIVE
-      </v-chip>
-
       <div class="text-right d-none d-md-block">
         <div class="text-caption font-weight-bold text-capitalize">
           {{ user?.username }}
