@@ -49,6 +49,15 @@ class SaleService
 
         // 🔒 Lock order
         $order->update(['status' => 'paid']);
+         // ✅ Release table
+        if ($order->table) {
+            $order->table->update([
+                'status'            => 'available',
+                'current_order_id'  => null,
+                'reserved_at'       => null,
+                'reserved_until'    => null,
+            ]);
+        }
 
         return $sale;
     }
