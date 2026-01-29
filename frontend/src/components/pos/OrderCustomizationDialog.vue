@@ -10,29 +10,46 @@
 
   // --- State for selections ---
   const quantity = ref(1)
-  const selectedCup = ref('Small (Hot)')
-  const selectedSugar = ref('Less Sugar')
+  const selectedVariant = ref(null) // Stores the actual variant object
+  const selectedSugar = ref('Normal Sugar')
   const orderType = ref('Dine-in')
 
   // --- Options Data ---
-  const cupOptions = ['Small (Hot)', 'Medium (Ice)', 'Large (Ice)']
   const sugarOptions = ['Less Sugar', 'Normal Sugar']
 
   // --- RESET LOGIC ---
-  // This is the fix: whenever the dialog opens, reset all fields
-  watch(() => props.modelValue, (isOpen) => {
-    if (isOpen) {
-      quantity.value = 1
-      selectedCup.value = 'Small (Hot)'
-      selectedSugar.value = 'Less Sugar'
-      orderType.value = 'Dine-in'
+  watch(
+    () => props.modelValue,
+    isOpen => {
+      if (isOpen) {
+        quantity.value = 1
+        selectedSugar.value = 'Normal Sugar'
+        orderType.value = 'Dine-in'
+
+        // Default to the first variant (usually "Small" or the cheapest)
+        if (
+          props.product?.has_variants &&
+          props.product?.variants?.length > 0
+        ) {
+          selectedVariant.value = props.product.variants[0]
+        } else {
+          selectedVariant.value = null
+        }
+      }
     }
-  })
+  )
 
   // --- Calculations ---
+  const currentItemPrice = computed(() => {
+    // If it has variants, use the variant price. Otherwise, use base product price.
+    if (props.product?.has_variants && selectedVariant.value) {
+      return parseFloat(selectedVariant.value.price)
+    }
+    return parseFloat(props.product?.price || 0)
+  })
+
   const totalPrice = computed(() => {
-    const basePrice = parseFloat(props.product?.price || 0)
-    return (basePrice * quantity.value).toFixed(2)
+    return (currentItemPrice.value * quantity.value).toFixed(2)
   })
 
   // --- Actions ---
@@ -42,15 +59,19 @@
 
   function submitOrder() {
     const orderData = {
-      ...props.product, // Keep original product data (id, name, type)
+      ...props.product,
+      // If variant selected, we use variant details
+      variant_id: selectedVariant.value?.id || null,
+      name: selectedVariant.value
+        ? `${props.product.name} (${selectedVariant.value.name})`
+        : props.product.name,
+      price: currentItemPrice.value, // Send the specific price for this variant
       qty: quantity.value,
       customizations: {
-        cup: selectedCup.value,
+        variant_name: selectedVariant.value?.name || 'Standard',
         sugar: selectedSugar.value,
         orderType: orderType.value
       }
-      // Note: We don't need to send 'finalPrice' because the 
-      // parent computed 'total' will recalculate based on qty * price
     }
     emit('add-to-cart', orderData)
     close()
@@ -65,91 +86,110 @@
   >
     <v-card rounded="xl" class="pa-4 shadow-lg">
       <v-card-title class="d-flex justify-space-between align-center px-2">
-        <div class="d-flex align-center font-weight-bold">
-          <v-icon icon="mdi-tray-arrow-down" class="mr-2" size="small" color="primary" />
-          Customize Order
-        </div>
+        <div class="text-h6 font-weight-black">Customize Order</div>
         <v-btn icon="mdi-close" variant="tonal" size="small" @click="close" />
       </v-card-title>
 
       <v-card-text class="pa-2">
-        <label class="text-subtitle-2 font-weight-bold">Order Type</label>
-        <v-btn-toggle
-          v-model="orderType"
-          mandatory
-          color="orange-darken-2"
-          class="d-flex mb-4 mt-2"
-          variant="outlined"
-          density="compact"
-        >
-          <v-btn value="Dine-in" class="flex-grow-1">Dine-in</v-btn>
-          <v-btn value="Takeaway" class="flex-grow-1">Takeaway</v-btn>
-          <v-btn value="Delivery" class="flex-grow-1">Delivery</v-btn>
-        </v-btn-toggle>
-
-        <div class="coffee-box d-flex align-center mb-5 pa-3 rounded-lg">
-          <v-avatar size="70" rounded="lg">
+        <div class="bg-grey-lighten-4 d-flex align-center mb-5 pa-3 rounded-xl">
+          <v-avatar size="70" rounded="lg" class="border">
             <v-img :src="product?.image_url" cover />
           </v-avatar>
 
           <div class="ml-3 flex-grow-1">
-            <div class="text-subtitle-2 font-weight-bold text-truncate" style="max-width: 150px;">
+            <div class="text-subtitle-1 font-weight-bold">
               {{ product?.name }}
             </div>
-            <div class="text-h6 font-weight-black text-orange-darken-2">
-              ${{ product?.price }}
+            <div class="text-h6 font-weight-black text-primary">
+              ${{ currentItemPrice.toFixed(2) }}
             </div>
           </div>
 
-          <div class="d-flex align-center bg-white rounded-pill border px-1 shadow-sm">
-            <v-btn icon="mdi-minus" variant="text" size="x-small" @click="quantity > 1 ? quantity-- : null" />
-            <span class="px-3 font-weight-bold">{{ quantity }}</span>
-            <v-btn icon="mdi-plus" variant="text" size="x-small" @click="quantity++" />
+          <div class="d-flex align-center bg-white rounded-pill border px-1">
+            <v-btn
+              icon="mdi-minus"
+              variant="text"
+              size="small"
+              @click="quantity > 1 ? quantity-- : null"
+            />
+            <span class="px-2 font-weight-black">{{ quantity }}</span>
+            <v-btn
+              icon="mdi-plus"
+              variant="text"
+              size="small"
+              @click="quantity++"
+            />
           </div>
         </div>
 
-        <template v-if="product?.type !== 'stock'">
-            <div class="mb-4">
-            <label class="text-subtitle-2 font-weight-bold d-block mb-2">Select a Cup</label>
-            <v-radio-group v-model="selectedCup" hide-details density="compact">
-                <v-radio
-                v-for="cup in cupOptions"
-                :key="cup"
-                :label="cup"
-                :value="cup"
-                class="border rounded-lg mb-2 px-3 py-1"
-                color="orange-darken-1"
-                />
-            </v-radio-group>
-            </div>
+        <v-btn-toggle
+          v-model="orderType"
+          mandatory
+          color="primary"
+          class="d-flex mb-6"
+          variant="outlined"
+          density="comfortable"
+        >
+          <v-btn value="Dine-in" class="flex-grow-1 rounded-s-xl">
+            Dine-in
+          </v-btn>
+          <v-btn value="Takeaway" class="flex-grow-1">Takeaway</v-btn>
+          <v-btn value="Delivery" class="flex-grow-1 rounded-e-xl">
+            Delivery
+          </v-btn>
+        </v-btn-toggle>
 
-            <div class="mb-4">
-            <label class="text-subtitle-2 font-weight-bold d-block mb-2">Sugar Level</label>
-            <v-radio-group v-model="selectedSugar" hide-details density="compact">
-                <v-radio
-                v-for="sugar in sugarOptions"
-                :key="sugar"
-                :label="sugar"
-                :value="sugar"
-                class="border rounded-lg mb-2 px-3 py-1"
-                color="orange-darken-1"
-                />
-            </v-radio-group>
-            </div>
+        <template v-if="product?.has_variants">
+          <label class="text-subtitle-2 font-weight-bold d-block mb-2">
+            Select Size
+          </label>
+          <v-radio-group v-model="selectedVariant" hide-details class="mb-4">
+            <v-card
+              v-for="v in product.variants"
+              :key="v.id"
+              flat
+              border
+              :class="[
+                'mb-2 rounded-lg',
+                selectedVariant?.id === v.id
+                  ? 'border-primary border-opacity-100 bg-blue-lighten-5'
+                  : ''
+              ]"
+              @click="selectedVariant = v"
+            >
+              <div class="d-flex align-center pa-2">
+                <v-radio :value="v" color="primary" density="compact" />
+                <span class="text-subtitle-2">{{ v.name }}</span>
+                <v-spacer />
+                <span class="text-subtitle-2 font-weight-black">
+                  ${{ v.price }}
+                </span>
+              </div>
+            </v-card>
+          </v-radio-group>
         </template>
+
+        <label class="text-subtitle-2 font-weight-bold d-block mb-2">
+          Sugar Level
+        </label>
+        <v-select
+          v-model="selectedSugar"
+          :items="sugarOptions"
+          variant="outlined"
+          rounded="lg"
+          density="comfortable"
+        />
       </v-card-text>
 
       <v-card-actions class="pa-2">
         <v-btn
           block
-          color="primary"
-          height="54"
-          variant="flat"
-          rounded="lg"
-          class="text-white font-weight-bold"
+          size="x-large"
+          rounded="xl"
+          class="bg-primary text-none text-white"
           @click="submitOrder"
         >
-          Add to Order - ${{ totalPrice }}
+          Add to Order — ${{ totalPrice }}
         </v-btn>
       </v-card-actions>
     </v-card>

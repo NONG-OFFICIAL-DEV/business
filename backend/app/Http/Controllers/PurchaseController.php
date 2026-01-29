@@ -6,6 +6,7 @@ use App\Models\Purchase;
 use App\Models\PurchaseStatus;
 use App\Models\Role;
 use App\Models\Stock;
+use App\Models\StockMovement;
 use App\Models\User;
 use App\Services\NotificationService;
 use App\Services\StockService;
@@ -356,9 +357,21 @@ class PurchaseController extends Controller
                 foreach ($purchase->items as $item) {
                     $stock = Stock::firstOrCreate(['product_id' => $item->product_id]);
 
-                    // Move draft_qty to quantity
+                    // Move draft_qty to actual quantity
                     $stock->increment('quantity', $item->quantity);
                     $stock->decrement('draft_qty', $item->quantity);
+
+                    // Record the stock movement
+                    $user = Auth::user();
+                    StockMovement::create([
+                        'product_id'    => $item->product_id,
+                        'movement_type' => 'purchase',
+                        'qty'           => $item->quantity,
+                        'cost'          => $item->cost_price,
+                        'related_id'    => $purchase->id,
+                        'note'          => "Purchase #{$purchase->id} approved",
+                        'created_by'    => $user->id,
+                    ]);
                 }
             }
 

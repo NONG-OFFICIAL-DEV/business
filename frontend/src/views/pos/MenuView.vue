@@ -102,7 +102,7 @@
 
   function handleProductClick(product) {
     // Retail / Mart: quick-add
-    if (!product.has_variants ) {
+    if (!product.has_variants) {
       // storeStore.selectedStore.type === 'retail'
       emit('quick-add', product)
     } else {
