@@ -56,8 +56,13 @@ onBeforeUnmount(() => {
 </script>
 
 <style>
-html {
+html,
+body {
   overflow-y: auto;
+  width: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+  height: 100%;
 }
 
 #app {
@@ -70,10 +75,17 @@ html {
 body {
   font-family: 'Poppins', sans-serif;
   touch-action: manipulation;
+  position: relative;
+  touch-action: pan-y;
 }
 
 thead tr th {
   font-size: 15px;
   font-weight: bold;
+}
+
+/* 2. Hide scrollbars but keep scrolling functional */
+::-webkit-scrollbar {
+  display: none;
 }
 </style>
