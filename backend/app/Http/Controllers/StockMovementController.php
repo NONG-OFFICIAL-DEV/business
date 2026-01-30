@@ -16,14 +16,25 @@ class StockMovementController extends Controller
             'product_id' => 'required|integer',
         ]);
 
-        $query = StockMovement::with(['product', 'user'])
+        $movements = StockMovement::with('user:id,name')
             ->where('product_id', $request->product_id)
-            ->orderBy('created_at', 'desc');
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($m) {
+                return [
+                    'user_name'     => $m->user->name ?? 'System',
+                    'movement_type' => $m->movement_type,
+                    'qty'           => (float) $m->qty,
+                    'total_cost'    => round((float) $m->qty * (float) $m->cost, 2),
+                    'date'          => $m->created_at->format('Y-m-d H:i'),
+                ];
+            });
+
 
         return response()->json([
             'success' => true,
             'message' => 'Stock movements fetched successfully',
-            'data' => $query->get(),
+            'data' => $movements,
         ], 200);
     }
 

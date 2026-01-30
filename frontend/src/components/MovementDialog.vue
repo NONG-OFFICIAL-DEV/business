@@ -43,6 +43,9 @@
               {{ item.qty }}
             </span>
           </template>
+          <template #item.total_cost="{ item }">
+            {{formatCurrency(item.total_cost)}}
+          </template>
 
           <template #item.created_at="{ item }">
             {{ formatDateTime(item.created_at) }}
@@ -76,9 +79,9 @@
   import { watch, computed } from 'vue'
   import { useStockMovementStore } from '@/stores/stockMovementStore'
   import { useDate } from '@/composables/useDate'
-  // import { useAppUtils } from '@/composables/useAppUtils'
+  import { useCurrency } from '@/composables/useCurrency.js'
 
-  // const { confirm, notif } = useAppUtils()
+  const { formatCurrency } = useCurrency()
   const { formatDateTime } = useDate()
   const stockMovementStore = useStockMovementStore()
 
@@ -97,8 +100,8 @@
   const headers = [
     { title: 'Type', key: 'movement_type', sortable: false },
     { title: 'Qty', key: 'qty' },
-    { title: 'Cost', key: 'cost' },
-    { title: 'Created By', key: 'user.name' },
+    { title: 'Total cost', key: 'total_cost' },
+    { title: 'Created By', key: 'user_name' },
     { title: 'Date', key: 'created_at' }
   ]
 
