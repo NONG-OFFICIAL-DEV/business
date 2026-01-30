@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mb-4 order-card" elevation="2">
+  <v-card class="mb-4 order-card" elevation="0">
     <v-card-item :class="getUrgencyBgColor(order.order_time)">
       <div class="d-flex justify-space-between">
         <div>
@@ -44,6 +44,9 @@
         DONE
       </v-btn>
     </v-card-actions>
+    <div class="bg-grey-lighten-4 py-1 d-flex justify-center cursor-move">
+      <v-icon color="grey">mdi-drag-horizontal</v-icon>
+    </div>
   </v-card>
 </template>
 

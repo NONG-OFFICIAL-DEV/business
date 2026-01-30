@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tables', function (Blueprint $table) {
             $table->id();
             $table->string('table_number'); // e.g. T1, T5
-            $table->boolean('is_available')->default(true);
+            $table->boolean('is_active')->default(true);
 
             $table->timestamps();
         });

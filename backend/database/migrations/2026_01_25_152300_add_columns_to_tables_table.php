@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::table('tables', function (Blueprint $table) {
             // Relations
-            $table->string('area')->nullable()->after('is_available');
             $table->foreignId('current_order_id')
                 ->nullable()
                 ->after('table_number')

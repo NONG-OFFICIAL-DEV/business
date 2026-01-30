@@ -75,7 +75,7 @@ class OrderController extends Controller
                 'quantity' => $item['quantity'],
                 'price' => $item['price'] ?? null,
                 'note' => $item['note'] ?? null,
-                'status' => 'pending',
+                'kitchen_status' => 'pending',
             ]);
         }
         // 3. Update table status
