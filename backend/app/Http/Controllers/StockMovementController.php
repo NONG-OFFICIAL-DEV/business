@@ -26,7 +26,7 @@ class StockMovementController extends Controller
                     'movement_type' => $m->movement_type,
                     'qty'           => (float) $m->qty,
                     'total_cost'    => round((float) $m->qty * (float) $m->cost, 2),
-                    'date'          => $m->created_at->format('Y-m-d H:i'),
+                    'date'          => $m->created_at,
                 ];
             });
 
