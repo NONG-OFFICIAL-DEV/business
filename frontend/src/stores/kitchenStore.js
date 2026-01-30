@@ -70,9 +70,8 @@ export const useKitchenStore = defineStore('kitchen', {
         this.loading = false
       }
 
-      this.eventSource.addEventListener('orders', event => {
+      this.eventSource.addEventListener('kitchen-items', event => {
         const data = JSON.parse(event.data)
-
         // 🔔 LOGIC:
         // 1. Must be unlocked
         // 2. data.length must be more than previous

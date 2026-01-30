@@ -1,88 +1,49 @@
 <template>
-  <v-card class="mb-4 order-card" elevation="2" border>
-    <v-card-item
-      :class="['pa-0', getUrgencyBgColor(order.order_time)]"
-      class="border-bottom"
-    >
-      <div class="d-flex align-stretch" style="height: 70px">
-        <div class="pa-3 d-flex flex-column justify-center flex-grow-1">
-          <span
-            class="text-caption font-weight-black text-grey-darken-1 line-height-1"
-          >
-            ORDER #{{ order.order_no.slice(-4) }}
-          </span>
-          <div class="d-flex align-center mt-1">
-            <v-icon size="small" class="mr-1" color="grey">
-              mdi-clock-outline
-            </v-icon>
-            <span class="text-subtitle-2 font-weight-bold mr-2">
-              <v-chip
-                size="x-small"
-                :color="getUrgencyColor(order.order_time)"
-                variant="flat"
-              >
-                {{ getElapsedTime(order.order_time) }} ago
-              </v-chip>
-            </span>
+  <v-card class="mb-4 order-card" elevation="2">
+    <v-card-item :class="getUrgencyBgColor(order.order_time)">
+      <div class="d-flex justify-space-between">
+        <div>
+          <div class="text-caption font-weight-black">
+            {{ order.order_no }}
           </div>
+          <v-chip size="x-small">
+            {{ getElapsedTime(order.order_time) }} ago
+          </v-chip>
         </div>
 
-        <div
-          class="bg-primary d-flex flex-column align-center justify-center px-6"
-        >
-          <span
-            class="text-caption font-weight-black text-white opacity-80 line-height-1"
-          >
-            Table
-          </span>
-          <span class="text-h6 font-weight-black text-white line-height-1">
-            {{ order.table.table_number }}
-          </span>
+        <div class="text-h6 font-weight-black">
+          T-{{ order.table_number }}
         </div>
       </div>
     </v-card-item>
 
     <v-divider />
 
-    <v-card-text class="py-3">
-      <v-list density="compact" class="bg-transparent pa-0">
-        <v-list-item v-for="(item, i) in order.items" :key="i" class="px-0">
-          <template v-slot:prepend>
-            <v-chip color="success" class="mr-3" size="small">
-              X {{ item.quantity }}
-            </v-chip>
-          </template>
+    <v-card-text>
+      <div class="d-flex align-center">
+        <v-chip color="success" size="small" class="mr-2 font-weight-bold">
+          x{{ order.quantity }}
+        </v-chip>
+        <div class="text-subtitle-1 font-weight-bold">
+          {{ order.menu_name }}
+        </div>
+      </div>
 
-          <div>
-            <v-list-item-title
-              class="text-subtitle-2"
-              v-text="item.name"
-            ></v-list-item-title>
-            <v-list-item-subtitle v-if="item.note">
-              ⚠️ {{ item.note }}
-            </v-list-item-subtitle>
-          </div>
-        </v-list-item>
-      </v-list>
+      <div v-if="order.note" class="text-caption text-error mt-1">
+        ⚠ {{ order.note }}
+      </div>
     </v-card-text>
 
-    <v-card-actions v-if="order.kitchen_status === 'ready'" class="pa-0">
+    <v-card-actions v-if="order.kitchen_status === 'ready'">
       <v-btn
         block
         color="success"
-        height="50"
-        variant="flat"
-        class="font-weight-black text-none"
-        @click.stop="$emit('served', order.id)"
+        variant="tonal"
+        @click="$emit('served', order.item_id)"
       >
-        <v-icon start>mdi-check-circle</v-icon>
-        BUMP / SERVED in {{ timeLabel }}
+        DONE
       </v-btn>
     </v-card-actions>
-    <v-divider />
-    <div class="bg-grey-lighten-4 py-1 d-flex justify-center cursor-move">
-      <v-icon color="grey">mdi-drag-horizontal</v-icon>
-    </div>
   </v-card>
 </template>
 

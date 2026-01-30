@@ -99,7 +99,7 @@
             <draggable
               v-model="col.list"
               group="orders"
-              item-key="id"
+              item-key="item_id"
               class="flex-grow-1 bg-grey-lighten-3 pa-3 rounded-b-lg scroll-y"
               min-height="100px"
               @change="e => handleMove(e, col.status)"
@@ -174,22 +174,21 @@
   }
   const handleMove = async (evt, newStatus) => {
     if (evt.added) {
-      const orderId = evt.added.element.id
-      const order = kitchenStore.orders.find(o => o.id === orderId)
-      if (order) {
-        try {
-          // Update local state immediately for smooth UI
-          order.kitchen_status = newStatus
+      // Use item_id because we are displaying item by item
+      const itemId = evt.added.element.item_id
+      const item = kitchenStore.orders.find(o => o.item_id === itemId)
 
-          // Call backend service to persist
+      if (item) {
+        try {
+          item.kitchen_status = newStatus // Update UI immediately
+
           if (newStatus === 'preparing') {
-            await kitchenStore.startCooking(orderId)
+            await kitchenStore.startCooking(itemId)
           } else if (newStatus === 'ready') {
-            await kitchenStore.markReady(orderId)
+            await kitchenStore.markReady(itemId)
           }
-        } catch {
-          // revert if needed
-          evt.added.element.kitchen_status = evt.from.dataset.status
+        } catch (error) {
+          console.error('Failed to update status', error)
         }
       }
     }

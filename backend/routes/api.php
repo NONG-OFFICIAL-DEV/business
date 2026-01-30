@@ -105,10 +105,10 @@ Route::middleware('jwt.auth')->post('/telegram/link', [TelegramController::class
 
 Route::prefix('kitchen')->group(function () {
     Route::get('/orders', [KitchenOrderController::class, 'index']);
-    Route::patch('/orders/{order}/start', [KitchenOrderController::class, 'start']);
-    Route::patch('/orders/{order}/ready', [KitchenOrderController::class, 'ready']);
+    Route::patch('/orders/{item}/start', [KitchenOrderController::class, 'startItem']);
+    Route::patch('/orders/{item}/ready', [KitchenOrderController::class, 'readyItem']);
+    Route::put('/orders/{item}/mark-served', [KitchenOrderController::class, 'serveItem']);
     Route::get('/orders/stream', [KitchenOrderController::class, 'stream']);
-    Route::put('/orders/mark-served/{order}', [KitchenOrderController::class, 'markServed']);
 });
 
 Route::patch('/order-items/{item}/status', [OrderController::class, 'updateStatus']);

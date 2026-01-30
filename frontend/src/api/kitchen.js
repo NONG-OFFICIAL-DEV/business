@@ -4,14 +4,14 @@ export default {
   getOrders() {
     return http.get('/kitchen/orders')
   },
-  startCooking(orderId) {
-    return http.patch(`/kitchen/orders/${orderId}/start`)
+  startCooking(orderItemId) {
+    return http.patch(`/kitchen/orders/${orderItemId}/start`)
   },
-  markReady(orderId) {
-    return http.patch(`/kitchen/orders/${orderId}/ready`)
+  markReady(orderItemId) {
+    return http.patch(`/kitchen/orders/${orderItemId}/ready`)
   },
-  markServed(orderId) {
-    return http.put(`/kitchen/orders/mark-served/${orderId}`)
+  markServed(orderItemId) {
+    return http.put(`/kitchen/orders/${orderItemId}/mark-served`)
   },
   updateItemStatus(itemId, newStatus) {
     return http.patch(`/order-items/${itemId}/status`, { kitchen_status: newStatus })

@@ -38,28 +38,61 @@ class KitchenOrderController extends Controller
     }
 
     // PATCH /api/kitchen/orders/{order}/start
-    public function start(Order $order)
+    public function startItem(OrderItem $item)
     {
-        $order->update(['kitchen_status' => 'preparing']);
-        $order->items()->update(['status' => 'preparing']);
+        $item->update([
+            'status' => 'preparing',
+        ]);
+
+        // Optional: update order kitchen_status if needed
+        $item->order()->update([
+            'kitchen_status' => 'preparing',
+        ]);
 
         return response()->json(['success' => true]);
     }
+
 
     // PATCH /api/kitchen/orders/{order}/ready
-    public function ready(Order $order)
+    public function readyItem(OrderItem $item)
     {
-        $order->update(['kitchen_status' => 'ready']);
-        $order->items()->update(['status' => 'ready']);
+        $item->update([
+            'status' => 'ready',
+        ]);
+
+        // If ALL items are ready → order ready
+        $allReady = $item->order
+            ->items()
+            ->where('status', '!=', 'ready')
+            ->doesntExist();
+
+        if ($allReady) {
+            $item->order->update([
+                'kitchen_status' => 'ready',
+            ]);
+        }
 
         return response()->json(['success' => true]);
     }
 
-    public function markServed(Order $order)
+
+    public function serveItem(OrderItem $item)
     {
-        $order->update([
-            'status' => 'served'
+        $item->update([
+            'status' => 'served',
         ]);
+
+        // If ALL items are served → order served
+        $allServed = $item->order
+            ->items()
+            ->where('status', '!=', 'served')
+            ->doesntExist();
+
+        if ($allServed) {
+            $item->order->update([
+                'status' => 'served',
+            ]);
+        }
 
         return response()->json(['success' => true]);
     }
