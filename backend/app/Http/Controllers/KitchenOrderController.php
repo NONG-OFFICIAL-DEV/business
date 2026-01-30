@@ -41,61 +41,47 @@ class KitchenOrderController extends Controller
     public function startItem(OrderItem $item)
     {
         $item->update([
-            'status' => 'preparing',
-        ]);
-
-        // Optional: update order kitchen_status if needed
-        $item->order()->update([
             'kitchen_status' => 'preparing',
         ]);
 
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'item_id' => $item->id,
+            'kitchen_status' => $item->kitchen_status,
+        ]);
     }
+
 
 
     // PATCH /api/kitchen/orders/{order}/ready
     public function readyItem(OrderItem $item)
     {
         $item->update([
-            'status' => 'ready',
+            'kitchen_status' => 'ready',
         ]);
 
-        // If ALL items are ready → order ready
-        $allReady = $item->order
-            ->items()
-            ->where('status', '!=', 'ready')
-            ->doesntExist();
-
-        if ($allReady) {
-            $item->order->update([
-                'kitchen_status' => 'ready',
-            ]);
-        }
-
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'item_id' => $item->id,
+            'kitchen_status' => $item->kitchen_status,
+        ]);
     }
+
 
 
     public function serveItem(OrderItem $item)
     {
         $item->update([
-            'status' => 'served',
+            'kitchen_status' => 'served',
         ]);
 
-        // If ALL items are served → order served
-        $allServed = $item->order
-            ->items()
-            ->where('status', '!=', 'served')
-            ->doesntExist();
-
-        if ($allServed) {
-            $item->order->update([
-                'status' => 'served',
-            ]);
-        }
-
-        return response()->json(['success' => true]);
+        return response()->json([
+            'success' => true,
+            'item_id' => $item->id,
+            'kitchen_status' => $item->kitchen_status,
+        ]);
     }
+
 
     // public function stream()
     // {
