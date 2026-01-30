@@ -15,7 +15,8 @@ class OrderItem extends Model
         'quantity',
         'note',
         'status',
-        'price'
+        'price',
+        'kitchen_status'
     ];
 
     /**
