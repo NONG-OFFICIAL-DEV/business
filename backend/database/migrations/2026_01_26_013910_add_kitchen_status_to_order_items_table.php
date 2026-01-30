@@ -11,16 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_items', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('menu_id')->constrained()->restrictOnDelete();
-            $table->integer('quantity')->default(1);
-             $table->decimal('price', 10, 2)->nullable();
-            $table->decimal('total_amount', 10, 2)->nullable();
-            $table->string('note')->nullable(); // no spicy, extra cheese
-            $table->enum('status', ['pending', 'preparing', 'ready'])
-                ->default('pending');
+        Schema::table('order_items', function (Blueprint $table) {
             $table->enum('kitchen_status', [
                 'pending',     // order received, not started
                 'accepted',    // kitchen accepted the order (optional but useful)
@@ -28,9 +19,8 @@ return new class extends Migration
                 'ready',       // ready to serve / pickup
                 'served',      // served to customer / picked up
                 'cancelled'    // cancelled before preparation
-            ])->default('pending');
+            ])->default('pending')->after('id');
 
-            $table->timestamps();
         });
     }
 
@@ -39,6 +29,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_items');
+        Schema::table('order_items', function (Blueprint $table) {
+            $table->dropForeign(['kitchen_status']);
+            $table->dropColumn('kitchen_status');
+        });
     }
 };

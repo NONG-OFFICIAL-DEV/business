@@ -63,41 +63,88 @@ class KitchenOrderController extends Controller
         return response()->json(['success' => true]);
     }
 
+    // public function stream()
+    // {
+    //     return response()->stream(function () {
+    //         while (true) {
+
+    //             $orders = Order::with([
+    //                 'table:id,table_number',
+    //                 'items.menu:id,name'
+    //             ])
+    //             ->whereIn('kitchen_status', ['pending', 'preparing', 'ready'])
+    //             ->orderBy('created_at')
+    //             ->get()
+    //             ->map(function ($order) {
+    //                 return [
+    //                     'id' => $order->id,
+    //                     'order_no' => $order->order_no,
+    //                     'kitchen_status' => $order->kitchen_status,
+    //                     'order_time' => $order->created_at,
+    //                     'table' => $order->table,
+    //                     'items' => $order->items->map(fn ($item) => [
+    //                         'id' => $item->id,
+    //                         'name' => $item->menu->name,
+    //                         'quantity' => $item->quantity,
+    //                         'note' => $item->note
+    //                     ])
+    //                 ];
+    //             });
+
+    //             echo "event: orders\n";
+    //             echo "data: " . json_encode($orders) . "\n\n";
+
+    //             ob_flush();
+    //             flush();
+
+    //             sleep(3); // push every 3 seconds
+    //         }
+    //     }, 200, [
+    //         'Content-Type' => 'text/event-stream',
+    //         'Cache-Control' => 'no-cache',
+    //         'Connection' => 'keep-alive',
+    //     ]);
+    // }
+
     public function stream()
     {
         return response()->stream(function () {
             while (true) {
 
-                $orders = Order::with([
-                    'table:id,table_number',
-                    'items.menu:id,name'
+                $items = OrderItem::with([
+                    'order:id,order_no,table_id,created_at',
+                    'order.table:id,table_number',
+                    'menu:id,name'
                 ])
-                ->whereIn('kitchen_status', ['pending', 'preparing', 'ready'])
+                ->whereIn('kitchen_status', [
+                    'pending',
+                    'accepted',
+                    'preparing',
+                    'ready'
+                ])
                 ->orderBy('created_at')
                 ->get()
-                ->map(function ($order) {
+                ->map(function ($item) {
                     return [
-                        'id' => $order->id,
-                        'order_no' => $order->order_no,
-                        'kitchen_status' => $order->kitchen_status,
-                        'order_time' => $order->created_at,
-                        'table' => $order->table,
-                        'items' => $order->items->map(fn ($item) => [
-                            'id' => $item->id,
-                            'name' => $item->menu->name,
-                            'quantity' => $item->quantity,
-                            'note' => $item->note
-                        ])
+                        'item_id'        => $item->id,
+                        'order_id'       => $item->order_id,
+                        'order_no'       => $item->order->order_no,
+                        'table_number'   => $item->order->table->table_number ?? null,
+                        'menu_name'      => $item->menu->name,
+                        'quantity'       => $item->quantity,
+                        'note'           => $item->note,
+                        'kitchen_status' => $item->kitchen_status,
+                        'order_time'     => $item->order->created_at,
                     ];
                 });
 
-                echo "event: orders\n";
-                echo "data: " . json_encode($orders) . "\n\n";
+                echo "event: kitchen-items\n";
+                echo "data: " . json_encode($items) . "\n\n";
 
                 ob_flush();
                 flush();
 
-                sleep(3); // push every 3 seconds
+                sleep(3);
             }
         }, 200, [
             'Content-Type' => 'text/event-stream',
@@ -105,4 +152,5 @@ class KitchenOrderController extends Controller
             'Connection' => 'keep-alive',
         ]);
     }
+
 }
