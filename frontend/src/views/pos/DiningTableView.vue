@@ -77,7 +77,6 @@
 
   function openTable(table) {
     posStore.selectTable(table)
-    console.log('Selected table', table.table_number)
   }
 
   /* -------------------------

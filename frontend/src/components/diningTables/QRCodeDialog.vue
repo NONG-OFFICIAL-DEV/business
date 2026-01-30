@@ -85,7 +85,6 @@
         try {
           const res = await diningTables.showQRCode(newTable.id) // call your service
           qrCode.value = res // make sure to use res.data (SVG from Laravel)
-          console.log('QR code fetched:', qrCode.value)
         } catch (err) {
           console.error('Failed to fetch QR code', err)
         }

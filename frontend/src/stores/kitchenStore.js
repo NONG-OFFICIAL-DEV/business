@@ -23,12 +23,12 @@ export const useKitchenStore = defineStore('kitchen', {
 
     async startCooking(orderId) {
       await kitchenService.startCooking(orderId)
-      await this.fetchOrders()
+      this.startOrdersStream()
     },
 
     async markReady(orderId) {
       await kitchenService.markReady(orderId)
-      await this.fetchOrders()
+      this.startOrdersStream()
     },
     async markServed(orderId) {
       const res = await kitchenService.markServed(orderId)

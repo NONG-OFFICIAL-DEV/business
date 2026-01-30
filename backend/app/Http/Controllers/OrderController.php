@@ -147,7 +147,7 @@ class OrderController extends Controller
                 'name' => $item->menu->name,
                 'price' => $item->menu->price,
                 'qty' => $item->quantity,
-                'status' => $item->status,
+                'status' => $item->kitchen_status,
                 'note' => $item->note,
             ])
         ]);
