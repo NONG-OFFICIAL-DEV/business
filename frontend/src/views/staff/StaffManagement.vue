@@ -17,7 +17,7 @@
     <v-container fluid class="pa-0">
       <v-row>
         <v-col
-          v-for="member in filteredStaff"
+          v-for="member in staffList"
           :key="member.id"
           cols="12"
           sm="6"
@@ -124,70 +124,78 @@
         </v-col>
       </v-row>
     </v-container>
+    <StaffDialogForm
+      v-model="isStaffDialogOpen"
+      :initial-data="selectedStaff"
+      :loading="isSaving"
+      @save="handleSaveStaff"
+    />
   </v-container>
 </template>
 
 <script setup>
-  import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useEmployeeStore } from '@/stores/employeeStore'
+import StaffDialogForm from '../../components/staffs/StaffDialogForm.vue'
 
-  const searchStaff = ref('')
+// --- Store ---
+const employeeStore = useEmployeeStore()
 
-  const staffList = ref([
-    {
-      id: 1,
-      name: 'Sopheap Meas',
-      role: 'Chef',
-      empId: '001',
-      joined: 'Jan 2023',
-      status: 'On Clock',
-      avatar: 'https://i.pravatar.cc/150?u=1'
-    },
-    {
-      id: 2,
-      name: 'Borith Keo',
-      role: 'Server',
-      empId: '042',
-      joined: 'Mar 2023',
-      status: 'Off Duty',
-      avatar: 'https://i.pravatar.cc/150?u=2'
-    },
-    {
-      id: 3,
-      name: 'Dara Sam',
-      role: 'Manager',
-      empId: '005',
-      joined: 'Jun 2022',
-      status: 'On Clock',
-      avatar: 'https://i.pravatar.cc/150?u=3'
-    },
-    {
-      id: 4,
-      name: 'Chanthou Ly',
-      role: 'Cashier',
-      empId: '012',
-      joined: 'Nov 2023',
-      status: 'On Clock',
-      avatar: 'https://i.pravatar.cc/150?u=4'
-    }
-  ])
+onMounted(() => {
+  employeeStore.fetchEmployees()
+})
 
-  const filteredStaff = computed(() => {
-    return staffList.value.filter(
-      s =>
-        s.name.toLowerCase().includes(searchStaff.value.toLowerCase()) ||
-        s.role.toLowerCase().includes(searchStaff.value.toLowerCase())
-    )
-  })
+// --- Dialog & Form State ---
+const isStaffDialogOpen = ref(false)
+const selectedStaff = ref(null)
+const isSaving = ref(false)
+const searchStaff = ref('')
 
-  const getRoleColor = role => {
-    const map = {
-      Chef: 'deep-orange',
-      Server: 'blue',
-      Manager: 'purple',
-      Cashier: 'teal'
-    }
-    return map[role] || 'grey'
+// ✅ READ staff list from store (DO NOT MUTATE)
+const staffList = computed(() => employeeStore.employees)
+
+// --- Methods ---
+const openStaffDialog = () => {
+  selectedStaff.value = null
+  isStaffDialogOpen.value = true
+}
+
+const viewDetails = member => {
+  selectedStaff.value = { ...member }
+  isStaffDialogOpen.value = true
+}
+
+// ❌ Local only (NO store update)
+const handleSaveStaff = async formData => {
+  isSaving.value = true
+  try {
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    isStaffDialogOpen.value = false
+  } finally {
+    isSaving.value = false
   }
+}
+
+// --- Filtering ---
+// const filteredStaff = computed(() => {
+//   return staffList.value.filter(s =>
+//     `${s.first_name} ${s.last_name}`
+//       .toLowerCase()
+//       .includes(searchStaff.value.toLowerCase()) ||
+//     s.role?.toLowerCase().includes(searchStaff.value.toLowerCase())
+//   )
+// })
+
+// --- Role Colors ---
+const getRoleColor = role => {
+  const map = {
+    Admin: 'deep-purple',
+    Staff: 'blue',
+    Manager: 'teal',
+    Chef: 'deep-orange'
+  }
+  return map[role] || 'grey'
+}
 </script>
 
 <style scoped>

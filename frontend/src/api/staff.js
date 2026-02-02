@@ -1,0 +1,16 @@
+import http from './api'
+
+export default {
+  getAll(filters) {
+    return http.get('/employees',{ params: filters })
+  },
+  create(data) {
+    return http.post('/employees', data)
+  },
+  update(id, data) {
+    return http.put(`/employees/${id}`, data)
+  },
+  delete(id) {
+    return http.delete(`/employees/${id}`)
+  }
+}
