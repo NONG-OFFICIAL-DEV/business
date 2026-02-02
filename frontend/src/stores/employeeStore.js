@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import employeeService from '../api/staff'
 
-export const useEmployeeStore = defineStore('employee', {
+export const useStaffStore = defineStore('employee', {
   state: () => ({
     employees: [],
     loading: false,
@@ -11,7 +11,7 @@ export const useEmployeeStore = defineStore('employee', {
   actions: {
     async fetchEmployees() {
       const res = await employeeService.getAll()
-      this.employees = res
+      this.employees = res.data
     },
 
     async createEmployee(employee) {

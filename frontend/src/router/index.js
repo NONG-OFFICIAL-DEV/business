@@ -167,6 +167,12 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: '/settings/invoice-customization',
+        name: 'InvoiceCustomization',
+        component: () => import('@/views/setting/InvoiceCustomization.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: '/expense-management',
         name: 'Expense',
         component: () => import('@/views/expenses/ExpenseManagement.vue'),
@@ -182,6 +188,18 @@ const routes = [
         path: '/payroll',
         name: 'Payroll',
         component: () => import('@/views/staff/PayrollManagement.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/attendance',
+        name: 'Attendance',
+        component: () => import('@/views/staff/StaffAttendance.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/staff-performance',
+        name: 'StaffPerformance',
+        component: () => import('@/views/staff/StaffPerformance.vue'),
         meta: { requiresAuth: true }
       },
       {

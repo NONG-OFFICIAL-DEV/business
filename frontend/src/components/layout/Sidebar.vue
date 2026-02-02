@@ -227,7 +227,7 @@
           roles: [1]
         },
         {
-          path: '/settings/tax',
+          path: '/settings/invoice-customization',
           title: 'Invoice Customization',
           icon: 'mdi-invoice-outline',
           roles: [1]

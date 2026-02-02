@@ -26,7 +26,6 @@
         >
           <v-card rounded="lg" border="sm" flat class="staff-card elevation-0">
             <v-sheet :color="getRoleColor(member.role)" height="4" />
-
             <v-card-text class="pa-4">
               <div class="d-flex align-center mb-3">
                 <v-avatar size="48" class="border">
@@ -38,7 +37,7 @@
                     class="text-subtitle-2 font-weight-bold text-truncate"
                     style="line-height: 1.2"
                   >
-                    {{ member.name }}
+                    {{ member.first_name }} {{ member.last_name }}
                   </div>
                   <v-chip
                     size="x-small"
@@ -67,14 +66,14 @@
               <div class="d-flex justify-space-between mb-1">
                 <span class="text-caption text-grey-darken-1">ID</span>
                 <span class="text-caption font-weight-bold">
-                  #{{ member.empId }}
+                  #{{ member.employee_id }}
                 </span>
               </div>
 
               <div class="d-flex justify-space-between mb-1">
                 <span class="text-caption text-grey-darken-1">Joined</span>
                 <span class="text-caption font-weight-medium">
-                  {{ member.joined }}
+                  {{ member.joining_date }}
                 </span>
               </div>
 
@@ -135,11 +134,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useEmployeeStore } from '@/stores/employeeStore'
+import { useStaffStore } from '@/stores/employeeStore'
 import StaffDialogForm from '../../components/staffs/StaffDialogForm.vue'
 
 // --- Store ---
-const employeeStore = useEmployeeStore()
+const employeeStore = useStaffStore()
 
 onMounted(() => {
   employeeStore.fetchEmployees()
@@ -169,7 +168,7 @@ const viewDetails = member => {
 const handleSaveStaff = async formData => {
   isSaving.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await employeeStore.createEmployee(formData)
     isStaffDialogOpen.value = false
   } finally {
     isSaving.value = false
