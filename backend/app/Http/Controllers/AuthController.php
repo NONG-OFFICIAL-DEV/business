@@ -32,6 +32,7 @@ class AuthController extends Controller
             return response()->json([
                 'status' => 'success',
                 'token'  => $token,
+                'expires_in'   => JWTAuth::factory()->getTTL() * 60,
                 'user'   => $user
             ]);
         } catch (JWTException $e) {
