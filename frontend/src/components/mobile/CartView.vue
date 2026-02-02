@@ -53,31 +53,6 @@ import { computed } from 'vue'
       </v-row>
     </div>
     <v-container class="pb-15">
-      <!-- <v-row no-gutters align="center" class="mb-4">
-        <v-btn
-          icon="mdi-chevron-left"
-          variant="text"
-          density="comfortable"
-          @click="$emit('back')"
-        />
-        <v-spacer />
-        <div class="text-center">
-          <div class="text-subtitle-2 font-weight-bold">My Basket</div>
-        </div>
-        <v-spacer />
-        <v-btn
-          v-if="cart.length > 0"
-          variant="text"
-          color="error"
-          size="small"
-          class="text-caption"
-          rounded="pill"
-          @click="$emit('clear')"
-        >
-          Clear
-        </v-btn>
-      </v-row> -->
-
       <v-fade-transition hide-on-leave>
         <div v-if="cart.length === 0" class="text-center py-12">
           <v-icon size="48" color="grey-lighten-1">mdi-basket-outline</v-icon>

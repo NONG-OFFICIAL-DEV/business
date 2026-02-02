@@ -37,7 +37,6 @@
         </v-select>
       </v-col>
     </v-row>
-
     <v-window v-model="menuStore.loading" class="mt-4">
       <v-row v-if="menuStore.loading">
         <v-col v-for="n in 8" :key="n" cols="12" sm="6" md="4" lg="3" xl="2">
@@ -78,7 +77,13 @@
               <div class="text-subtitle-2 font-weight-bold text-truncate mb-1">
                 {{ product.name }}
               </div>
-              <div class="text-h6 font-weight-black text-primary">
+              <div
+                v-if="product.has_variants"
+                class="text-h6 font-weight-black text-primary"
+              >
+                ${{ product.variants[0].price }}
+              </div>
+              <div v-else class="text-h6 font-weight-black text-primary">
                 ${{ product.price }}
               </div>
             </v-card-text>

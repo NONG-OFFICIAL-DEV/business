@@ -38,17 +38,15 @@
               {{ product.name }}
             </div>
             <div class="d-flex align-center justify-space-between mt-1">
-              <span class="text-h6 font-weight-black text-primary">
+              <div
+                v-if="product.has_variants"
+                class="text-h6 font-weight-black text-primary"
+              >
+               ${{ product.variants[0].price }}
+              </div>
+              <div v-else class="text-h6 font-weight-black text-primary">
                 ${{ product.price }}
-              </span>
-              <v-icon
-                :icon="
-                  product.type === 'stock'
-                    ? 'mdi-plus-circle'
-                    : 'mdi-cog-outline'
-                "
-                color="primary"
-              />
+              </div>
             </div>
           </v-card-text>
         </v-card>
@@ -68,7 +66,7 @@
   const categoryStore = useCategoryStore()
   const menuStore = useMenuStore()
 
-  const posStore = usePosStore() 
+  const posStore = usePosStore()
 
   const search = ref('')
 

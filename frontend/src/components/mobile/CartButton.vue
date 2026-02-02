@@ -30,7 +30,7 @@
       </span>
 
       <v-spacer />
-      <span class="text-subtitle-2 font-weight-black">
+      <span class="text-subtitle-2 font-weight-black ms-4">
         ${{ totalPrice.toFixed(2) }}
       </span>
     </v-btn>

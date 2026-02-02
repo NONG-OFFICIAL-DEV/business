@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, onMounted } from 'vue'
+  import { ref, computed, onMounted, watch } from 'vue' // Added watch
   import { useCart } from '@/composables/useCart'
   import { useRoute } from 'vue-router'
 
@@ -14,7 +14,6 @@
   import { useDiningTableStore } from '../../stores/diningTableStore'
   import { useLoadingStore } from '@/stores/loading'
 
-  // const tableNumber = ref('05')
   const orderStore = useOrderStore()
   const menuStore = useMenuStore()
   const diningTableStore = useDiningTableStore()
@@ -23,28 +22,41 @@
   const tableNumber = ref()
   const tableId = ref()
   const loadingStore = useLoadingStore()
+
+  // --- PERSISTENCE LOGIC START ---
+  // Load the page from localStorage immediately on script load
+  const page = ref(localStorage.getItem('active_page') || 'home')
+
+  // Save the page to localStorage whenever it changes
+  watch(page, (newPage) => {
+    localStorage.setItem('active_page', newPage)
+  })
+  // --- PERSISTENCE LOGIC END ---
+
   onMounted(async () => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('table')) tableNumber.value = params.get('table')
+    
     await menuStore.fetchMenus()
     const res = await diningTableStore.getTableNumberByToken(token)
     tableNumber.value = res.table.table_number
     tableId.value = res.table.id
-    // console.log(res.table.table_number)
+
+    // UX Protection: If page is 'cart' but cart is empty after refresh, go home
+    if (page.value === 'cart' && cart.value.length === 0) {
+      page.value = 'home'
+    }
   })
 
   const categories = ['All', 'Coffee', 'Tea', 'Pastries', 'Food']
   const selectedCategory = ref('All')
-  const page = ref('home')
   const isOrdering = ref(false)
-  const { cart, totalItems, cartTotal, addToCart, updateQty, clearCart } =
-    useCart()
+  const { cart, totalItems, cartTotal, addToCart, updateQty, clearCart } = useCart()
   const viewProcess = ref(false)
 
   async function placeOrder() {
     isOrdering.value = true
     try {
-      // Prepare backend payload
       const orderData = {
         table_id: tableId.value,
         items: cart.value.map(i => ({
@@ -54,10 +66,10 @@
         }))
       }
 
-      // Call API via order store
       await orderStore.createOrder(orderData)
       await menuStore.fetchMenus()
-      // Go to tracking page
+      
+      // Navigate to tracking
       page.value = 'tracking'
     } catch (err) {
       console.error(err)
@@ -72,8 +84,11 @@
 
   function handleReset() {
     clearCart()
+    // Clear page persistence on manual reset
+    localStorage.removeItem('active_page')
     page.value = 'home'
   }
+
   const search = ref('')
 
   const filteredProducts = computed(() => {
@@ -81,13 +96,11 @@
     if (selectedCategory.value !== 'All') {
       list = list.filter(p => p.category === selectedCategory.value)
     }
-
     if (search.value) {
       list = list.filter(p =>
         p.name.toLowerCase().includes(search.value.toLowerCase())
       )
     }
-
     return list
   })
 </script>
@@ -99,10 +112,11 @@
       @view-process="goToTracking"
       :tableNumber="tableNumber"
     />
+    
     <v-main>
       <transition name="fade-slide" mode="out-in">
-        <div>
-          <div v-if="page === 'home'" :key="'home'">
+        <div :key="page">
+          <div v-if="page === 'home'">
             <div class="sticky-nav bg-white shadow-sm">
               <CategoryTabs
                 :categories="categories"
@@ -113,79 +127,31 @@
 
             <v-container class="pb-16">
               <v-row>
-                <template
-                  v-if="
-                    loadingStore.isLoading && loadingStore.mode === 'skeleton'
-                  "
-                >
-                  <v-row class="ma-0 w-100">
-                    <v-col
-                      v-for="n in 6"
-                      :key="`skeleton-${n}`"
-                      cols="6"
-                      class="pa-2"
-                    >
-                      <v-card flat rounded="xl" class="pa-3 bg-white">
-                        <v-skeleton-loader
-                          class="rounded-circle mx-auto mb-2"
-                          height="100"
-                          width="100"
-                        ></v-skeleton-loader>
-
-                        <v-skeleton-loader
-                          type="text"
-                          class="mx-auto mb-4"
-                          width="80%"
-                        ></v-skeleton-loader>
-
-                        <div class="d-flex justify-space-between align-center">
-                          <v-skeleton-loader
-                            type="text"
-                            width="40%"
-                          ></v-skeleton-loader>
-                          <v-skeleton-loader
-                            type="avatar"
-                            size="32"
-                          ></v-skeleton-loader>
-                        </div>
-                      </v-card>
-                    </v-col>
-                  </v-row>
+                <template v-if="loadingStore.isLoading && loadingStore.mode === 'skeleton'">
+                  <v-col v-for="n in 6" :key="n" cols="6" class="pa-2">
+                    <v-card flat rounded="xl" class="pa-3 bg-white">
+                      <v-skeleton-loader type="avatar" height="100" class="mx-auto mb-2"></v-skeleton-loader>
+                      <v-skeleton-loader type="text" width="80%" class="mx-auto mb-4"></v-skeleton-loader>
+                      <div class="d-flex justify-space-between align-center">
+                        <v-skeleton-loader type="text" width="40%"></v-skeleton-loader>
+                        <v-skeleton-loader type="avatar" size="32"></v-skeleton-loader>
+                      </div>
+                    </v-card>
+                  </v-col>
                 </template>
+
                 <template v-else-if="filteredProducts.length === 0">
-                  <v-col
-                    cols="12"
-                    class="d-flex flex-column align-center justify-center py-12"
-                  >
+                  <v-col cols="12" class="d-flex flex-column align-center justify-center py-12">
                     <v-avatar color="#3b828e10" size="100" class="mb-6">
-                      <v-icon size="48" color="#3b828e">
-                        mdi-book-search-outline
-                      </v-icon>
+                      <v-icon size="48" color="#3b828e">mdi-book-search-outline</v-icon>
                     </v-avatar>
-
-                    <h3 class="text-h6 font-weight-black mb-1">
-                      No dishes found
-                    </h3>
-                    <p
-                      class="text-body-2 text-medium-emphasis text-center px-10 mb-6"
-                    >
-                      We couldn't find any items matching
-                      <br />
-                      Try checking your spelling or search for something else!
-                    </p>
-
-                    <v-btn
-                      variant="tonal"
-                      color="#3b828e"
-                      rounded="pill"
-                      class="text-none font-weight-bold px-6"
-                      prepend-icon="mdi-refresh"
-                      @click="$emit('update:search', '')"
-                    >
+                    <h3 class="text-h6 font-weight-black mb-1">No dishes found</h3>
+                    <v-btn variant="tonal" color="#3b828e" rounded="pill" @click="search = ''">
                       Clear search
                     </v-btn>
                   </v-col>
                 </template>
+
                 <template v-else>
                   <ProductCard
                     :items="filteredProducts"
@@ -199,7 +165,7 @@
           </div>
 
           <CartView
-            v-if="page === 'cart'"
+            v-else-if="page === 'cart'"
             :cart="cart"
             :total="cartTotal"
             :tableNumber="tableNumber"
@@ -211,7 +177,7 @@
           />
 
           <TrackingView
-            v-if="page === 'tracking'"
+            v-else-if="page === 'tracking'"
             :cart="cart"
             :tableNumber="tableNumber"
             :tableId="tableId"
@@ -221,6 +187,7 @@
         </div>
       </transition>
     </v-main>
+
     <transition name="pop">
       <CartButton
         v-if="cart.length && page === 'home'"
@@ -231,7 +198,6 @@
     </transition>
   </v-app>
 </template>
-
 <style scoped>
   /* Update your style section */
   .sticky-nav {
