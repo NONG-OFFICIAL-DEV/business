@@ -33,9 +33,9 @@
     isInitialLoading.value = true
     try {
       const res = await diningTableStore.getTableNumberByToken(token)
-      if (res?.table?.table_number) {
+      if (res?.table?.id) {
         // Fetch the actual order from the backend
-        const data = await orderStore.fetchOrderByTable(res.table.table_number)
+        const data = await orderStore.fetchOrderByTable(res.table.id)
         order.value = data
       }
     } catch (err) {

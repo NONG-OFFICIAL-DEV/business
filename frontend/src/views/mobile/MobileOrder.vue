@@ -28,7 +28,7 @@
   const page = ref(localStorage.getItem('active_page') || 'home')
 
   // Save the page to localStorage whenever it changes
-  watch(page, (newPage) => {
+  watch(page, newPage => {
     localStorage.setItem('active_page', newPage)
   })
   // --- PERSISTENCE LOGIC END ---
@@ -36,7 +36,7 @@
   onMounted(async () => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('table')) tableNumber.value = params.get('table')
-    
+
     await menuStore.fetchMenus()
     const res = await diningTableStore.getTableNumberByToken(token)
     tableNumber.value = res.table.table_number
@@ -51,7 +51,8 @@
   const categories = ['All', 'Coffee', 'Tea', 'Pastries', 'Food']
   const selectedCategory = ref('All')
   const isOrdering = ref(false)
-  const { cart, totalItems, cartTotal, addToCart, updateQty, clearCart } = useCart()
+  const { cart, totalItems, cartTotal, addToCart, updateQty, clearCart } =
+    useCart()
   const viewProcess = ref(false)
 
   async function placeOrder() {
@@ -62,13 +63,14 @@
         items: cart.value.map(i => ({
           menu_id: i.id,
           quantity: i.qty,
+          price: i.price,
           note: i.customizations || null
         }))
       }
 
       await orderStore.createOrder(orderData)
       await menuStore.fetchMenus()
-      
+
       // Navigate to tracking
       page.value = 'tracking'
     } catch (err) {
@@ -112,7 +114,7 @@
       @view-process="goToTracking"
       :tableNumber="tableNumber"
     />
-    
+
     <v-main>
       <transition name="fade-slide" mode="out-in">
         <div :key="page">
@@ -127,26 +129,56 @@
 
             <v-container class="pb-16">
               <v-row>
-                <template v-if="loadingStore.isLoading && loadingStore.mode === 'skeleton'">
+                <template
+                  v-if="
+                    loadingStore.isLoading && loadingStore.mode === 'skeleton'
+                  "
+                >
                   <v-col v-for="n in 6" :key="n" cols="6" class="pa-2">
                     <v-card flat rounded="xl" class="pa-3 bg-white">
-                      <v-skeleton-loader type="avatar" height="100" class="mx-auto mb-2"></v-skeleton-loader>
-                      <v-skeleton-loader type="text" width="80%" class="mx-auto mb-4"></v-skeleton-loader>
+                      <v-skeleton-loader
+                        type="avatar"
+                        height="100"
+                        class="mx-auto mb-2"
+                      ></v-skeleton-loader>
+                      <v-skeleton-loader
+                        type="text"
+                        width="80%"
+                        class="mx-auto mb-4"
+                      ></v-skeleton-loader>
                       <div class="d-flex justify-space-between align-center">
-                        <v-skeleton-loader type="text" width="40%"></v-skeleton-loader>
-                        <v-skeleton-loader type="avatar" size="32"></v-skeleton-loader>
+                        <v-skeleton-loader
+                          type="text"
+                          width="40%"
+                        ></v-skeleton-loader>
+                        <v-skeleton-loader
+                          type="avatar"
+                          size="32"
+                        ></v-skeleton-loader>
                       </div>
                     </v-card>
                   </v-col>
                 </template>
 
                 <template v-else-if="filteredProducts.length === 0">
-                  <v-col cols="12" class="d-flex flex-column align-center justify-center py-12">
+                  <v-col
+                    cols="12"
+                    class="d-flex flex-column align-center justify-center py-12"
+                  >
                     <v-avatar color="#3b828e10" size="100" class="mb-6">
-                      <v-icon size="48" color="#3b828e">mdi-book-search-outline</v-icon>
+                      <v-icon size="48" color="#3b828e">
+                        mdi-book-search-outline
+                      </v-icon>
                     </v-avatar>
-                    <h3 class="text-h6 font-weight-black mb-1">No dishes found</h3>
-                    <v-btn variant="tonal" color="#3b828e" rounded="pill" @click="search = ''">
+                    <h3 class="text-h6 font-weight-black mb-1">
+                      No dishes found
+                    </h3>
+                    <v-btn
+                      variant="tonal"
+                      color="#3b828e"
+                      rounded="pill"
+                      @click="search = ''"
+                    >
                       Clear search
                     </v-btn>
                   </v-col>
