@@ -32,7 +32,29 @@
         </v-card>
       </template>
 
-      <div v-else-if="order && order.items?.length > 0">
+      
+
+      <div v-else-if="order && order.items?.length == 0" class="text-center py-16">
+        <div class="empty-state-visual mb-6">
+          <v-icon size="80" color="#3b828e33">mdi-tray-plus</v-icon>
+        </div>
+        <h3 class="text-h5 font-weight-black mb-2">No Active Orders</h3>
+        <p class="text-body-2 text-grey-darken-1 mb-8 px-8">
+          It looks like you haven't ordered anything yet. Let's start with
+          something delicious!
+        </p>
+        <v-btn
+          color="#3b828e"
+          size="x-large"
+          block
+          rounded="pill"
+          class="font-weight-black text-none"
+          @click="$emit('reset')"
+        >
+          View Full Menu
+        </v-btn>
+      </div>
+      <div v-else>
         <div class="section-label mb-4">Items in Preparation</div>
 
         <v-card
@@ -115,41 +137,22 @@
           </div>
         </footer>
       </div>
-
-      <div v-else class="text-center py-16">
-        <div class="empty-state-visual mb-6">
-          <v-icon size="80" color="#3b828e33">mdi-tray-plus</v-icon>
-        </div>
-        <h3 class="text-h5 font-weight-black mb-2">No Active Orders</h3>
-        <p class="text-body-2 text-grey-darken-1 mb-8 px-8">
-          It looks like you haven't ordered anything yet. Let's start with
-          something delicious!
-        </p>
-        <v-btn
-          color="#3b828e"
-          size="x-large"
-          block
-          rounded="pill"
-          class="font-weight-black text-none"
-          @click="$emit('reset')"
-        >
-          View Full Menu
-        </v-btn>
-      </div>
     </v-container>
   </div>
 </template>
 
 <script setup>
-  import { ref, computed, onMounted } from 'vue'
+  import { ref, computed, onMounted, onUnmounted } from 'vue'
   import { useOrderStore } from '@/stores/orderStore'
   import { useRoute } from 'vue-router'
   import { useDiningTableStore } from '../../stores/diningTableStore'
+  import { useOrderStream } from '@/stores/useOrderStream'
 
   const diningTableStore = useDiningTableStore()
   const route = useRoute()
   const token = route.params.token
   const orderStore = useOrderStore()
+  const steamStore = useOrderStream()
 
   const props = defineProps({
     tableNumber: String,
@@ -158,7 +161,7 @@
 
   defineEmits(['reset'])
 
-  const order = ref(null)
+  // const order = ref(null)
   const isInitialLoading = ref(true)
 
   const totalAmount = computed(() => {
@@ -167,14 +170,17 @@
       .reduce((sum, item) => sum + item.price * item.qty, 0)
       .toFixed(2)
   })
-
+  const order = computed(() => steamStore.order)
   onMounted(async () => {
     isInitialLoading.value = true
     try {
       const res = await diningTableStore.getTableNumberByToken(token)
       if (res?.table?.id) {
-        const data = await orderStore.fetchOrderByTable(res.table.id)
-        order.value = data
+        // const data = await orderStore.fetchOrderByTable(res.table.id)
+        steamStore.connect(res.table.id)
+        // console.log(data)
+
+        // order.value = data
       }
     } catch (err) {
       console.error('Tracking Error:', err)
@@ -182,7 +188,9 @@
       isInitialLoading.value = false
     }
   })
-
+  onUnmounted(() => {
+    steamStore.disconnect()
+  })
   // Modern UI Helpers
   const getStepIcon = step => {
     if (step === 'pending') return 'mdi-receipt-text-check'
