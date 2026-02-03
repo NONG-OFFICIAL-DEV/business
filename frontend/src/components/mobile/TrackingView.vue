@@ -21,7 +21,7 @@
       <div style="width: 40px"></div>
     </div>
 
-    <v-container class="px-5 pt-4 pb-16">
+    <v-container class="px-5 pt-4 pb-16 mb-5">
       <template v-if="isInitialLoading">
         <v-card v-for="i in 3" :key="i" flat class="modern-card mb-5 pa-4">
           <div class="d-flex align-center mb-4">
@@ -74,7 +74,7 @@
 
               <div class="stepper-points">
                 <div
-                  v-for="step in ['Ordered', 'Preparing', 'Ready']"
+                  v-for="step in ['pending', 'preparing', 'ready']"
                   :key="step"
                   class="point-group"
                   :class="{
@@ -85,7 +85,7 @@
                   <div class="point-circle">
                     <v-icon size="14">{{ getStepIcon(step) }}</v-icon>
                   </div>
-                  <span class="point-label">{{ step }}</span>
+                  <span class="point-label text-capitalize">{{ step }}</span>
                 </div>
               </div>
             </div>
@@ -186,27 +186,34 @@
 
   // Modern UI Helpers
   const getStepIcon = step => {
-    if (step === 'Ordered') return 'mdi-receipt-text-check'
-    if (step === 'Preparing') return 'mdi-fire'
+    if (step === 'pending') return 'mdi-receipt-text-check'
+    if (step === 'preparing') return 'mdi-fire'
     return 'mdi-room-service'
   }
 
   const isCurrentStep = (status, step) => {
-    const map = { ordered: 'Ordered', preparing: 'Preparing', ready: 'Ready' }
-    return map[status?.toLowerCase()] === step
+    const s = status?.toLowerCase()
+    const map = {
+      ordered: 'pending',
+      pending: 'pending',
+      preparing: 'preparing',
+      ready: 'ready'
+    }
+    return map[s] === step.toLowerCase()
   }
 
   const isStepCompleted = (status, step) => {
-    const levels = { ordered: 1, preparing: 2, ready: 3 }
-    const steps = { Ordered: 1, Preparing: 2, Ready: 3 }
-    return levels[status?.toLowerCase()] > steps[step]
+    const s = status?.toLowerCase()
+    const levels = { ordered: 1, pending: 1, preparing: 2, ready: 3 }
+    const stepWeights = { pending: 1, preparing: 2, ready: 3 }
+    return levels[s] > stepWeights[step]
   }
 
   const getProgressValue = status => {
     const s = status?.toLowerCase()
-    if (s === 'preparing') return 50
     if (s === 'ready') return 100
-    return 5
+    if (s === 'preparing') return 50
+    return 0 // Pending starts at the first circle
   }
 </script>
 
@@ -350,7 +357,6 @@
     color: #94a3b8;
     transition: all 0.4s ease;
   }
-
   .point-label {
     font-size: 11px;
     font-weight: 700;
@@ -365,13 +371,12 @@
     transform: scale(1.15);
     box-shadow: 0 4px 10px rgba(59, 130, 142, 0.2);
   }
-
   .active .point-label {
     color: #0f172a;
   }
 
   .done .point-circle {
-    background: #3b828e;
+    background-color: #3b828e !important;
     border-color: #3b828e;
     color: white;
   }
