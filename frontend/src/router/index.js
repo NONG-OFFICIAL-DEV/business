@@ -246,6 +246,35 @@ const routes = [
     path: '/kitchen-kds',
     name: 'KitchenKDS',
     component: () => import('@/views/kitchen/ChefKDS.vue')
+  },
+  {
+    path: '/attendance-layout',
+    name: 'AttendanceLayout',
+    component: () => import('@/views/staff/attendances/AttendanceLayout.vue'),
+    redirect: '/attendance-layout/home',
+    children: [
+      {
+        path: 'home',
+        name: 'HomeAttdance',
+        component: () => import('@/views/staff/attendances/HomeView.vue')
+      },
+      {
+        path: 'scan',
+        name: 'AttendanceScan',
+        component: () => import('@/views/staff/attendances/AttendanceScan.vue')
+      },
+      {
+        path: 'history',
+        name: 'HistoryView',
+        component: () => import('@/views/staff/attendances/HistoryView.vue')
+      },
+      {
+        path: '/attendance/result',
+        name: 'AttendanceResult',
+        component: () =>
+          import('@/views/staff/attendances/AttendanceResult.vue')
+      }
+    ]
   }
 ]
 
