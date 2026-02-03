@@ -120,7 +120,7 @@ ACTIONS
             note: 'Test'
           }))
         }
-        await orderStore.createOrder(orderData)
+        await orderStore.createOrder(orderData,'overlay')
         await menuStore.fetchMenus()
       }
 

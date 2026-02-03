@@ -212,25 +212,26 @@ const routes = [
     path: '/pos',
     name: 'POS',
     component: () => import('@/views/pos/layout/POSView.vue'),
+    redirect: '/pos/dining-table-view',
     children: [
       {
-        path: '/dining-table-view',
+        path: 'dining-table-view',
         component: () => import('@/views/pos/DiningTableView.vue')
       },
       {
-        path: '/menu-list',
+        path: 'menu-list',
         component: () => import('@/views/pos/MenuView.vue')
       },
       {
-        path: '/kds',
+        path: 'kds',
         component: () => import('@/views/pos/KitchenDisplayView.vue')
       },
       {
-        path: '/cashier',
+        path: 'cashier',
         component: () => import('@/views/pos/CashierView.vue')
       },
       {
-        path: '/reports',
+        path: 'reports',
         component: () => import('@/views/pos/SalesReportView.vue')
       }
     ]

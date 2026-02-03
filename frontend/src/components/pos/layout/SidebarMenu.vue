@@ -110,26 +110,31 @@
       tooltip: 'Table',
       icon: 'mdi-apps',
       value: 'Dining Table',
-      to: '/dining-table-view'
+      to: '/pos/dining-table-view'
     },
-    { tooltip: 'Menu', icon: 'mdi-food', value: 'Menu List', to: '/menu-list' },
+    {
+      tooltip: 'Menu',
+      icon: 'mdi-food',
+      value: 'Menu List',
+      to: '/pos/menu-list'
+    },
     {
       tooltip: 'Kitchen',
       icon: 'mdi-silverware',
       value: 'Kitchen Display',
-      to: '/kds'
+      to: '/pos/kds'
     },
     {
       tooltip: 'Orders',
       icon: 'mdi-cash-register',
       value: 'Cashier',
-      to: '/cashier'
+      to: '/pos/cashier'
     },
     {
       tooltip: 'Reports',
       icon: 'mdi-chart-bar',
       value: 'Reports',
-      to: '/reports'
+      to: '/pos/reports'
     }
   ]
 </script>

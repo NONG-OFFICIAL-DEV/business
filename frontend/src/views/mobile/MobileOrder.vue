@@ -68,7 +68,7 @@
         }))
       }
 
-      await orderStore.createOrder(orderData)
+      await orderStore.createOrder(orderData,'noLoading')
       await menuStore.fetchMenus()
 
       // Navigate to tracking

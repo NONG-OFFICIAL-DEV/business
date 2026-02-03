@@ -4,8 +4,10 @@ export default {
   getAllOrder() {
     return http.get('/orders')
   },
-  createOrder(payload) {
-    return http.post('/orders', payload)
+  createOrder(payload,loading) {
+    return http.post('/orders', payload, {
+      meta: { loader:loading }
+    })
   },
   getOrderByTable(tableNumber) {
     return http.get(`/orders/by-table/${tableNumber}`, {
