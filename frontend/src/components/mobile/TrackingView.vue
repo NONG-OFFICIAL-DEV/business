@@ -143,7 +143,6 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { useOrderStore } from '@/stores/orderStore'
-  import { useLoadingStore } from '@/stores/loading'
   import { useRoute } from 'vue-router'
   import { useDiningTableStore } from '../../stores/diningTableStore'
 

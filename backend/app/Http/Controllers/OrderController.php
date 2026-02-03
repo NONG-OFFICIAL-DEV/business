@@ -152,4 +152,57 @@ class OrderController extends Controller
             ])
         ]);
     }
+
+    public function streamByTable(string $tableId)
+    {
+        return response()->stream(function () use ($tableId) {
+
+            while (true) {
+
+                $table = Table::where('id', trim($tableId))
+                    ->with(['activeOrder.items.menu'])
+                    ->first();
+
+                if (!$table || !$table->activeOrder) {
+                    echo "event: order\n";
+                    echo "data: null\n\n";
+                    ob_flush();
+                    flush();
+                    sleep(2);
+                    continue;
+                }
+
+                $order = $table->activeOrder;
+
+                $payload = [
+                    'order_id'       => $order->id,
+                    'order_no'       => $order->order_no,
+                    'status'         => $order->status,
+                    'kitchen_status' => $order->kitchen_status,
+                    'items' => $order->items->map(fn ($item) => [
+                        'id'     => $item->id,
+                        'name'   => $item->menu->name,
+                        'price'  => $item->menu->price,
+                        'qty'    => $item->quantity,
+                        'status' => $item->kitchen_status,
+                        'note'   => $item->note,
+                    ]),
+                ];
+
+                echo "event: order\n";
+                echo "data: " . json_encode($payload) . "\n\n";
+
+                ob_flush();
+                flush();
+
+                sleep(2); // update interval
+            }
+
+        }, 200, [
+            'Content-Type'  => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'Connection'    => 'keep-alive',
+        ]);
+    }
+
 }
