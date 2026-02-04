@@ -168,6 +168,8 @@ watch(
   val => {
     // Once we receive the first message (even empty), stop loading.
     if (val !== null && val !== undefined) {
+      console.log(val);
+      
       hasReceivedFirstStreamData.value = true
       isInitialLoading.value = false
     }

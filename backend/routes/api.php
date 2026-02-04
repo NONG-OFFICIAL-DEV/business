@@ -23,6 +23,7 @@ use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\StoreController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\TelegramController;
 use App\Http\Controllers\UserController;
@@ -86,6 +87,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::get('/reports/sales/top-menus', [SaleController::class, 'topMenusReport']);
 
     Route::apiResource('employees', EmployeeController::class);
+    Route::apiResource('stores', StoreController::class);
 
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index']);
@@ -135,5 +137,4 @@ Route::prefix('tables')->group(function () {
     // POS / KDS
     Route::patch('{table}/status', [TableController::class, 'updateStatus']);
     Route::get('/table-by-token/{token}', [TableController::class, 'getTableByToken']);
-
 });

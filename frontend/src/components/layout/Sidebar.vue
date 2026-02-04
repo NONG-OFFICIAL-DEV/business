@@ -45,6 +45,12 @@
       roles: [1, 2, 3]
     },
     {
+      path: '/store-management',
+      title: 'Stores',
+      icon: 'mdi-domain',
+      roles: [1, 2, 3]
+    },
+    {
       title: 'Operations',
       icon: 'mdi-silverware-fork-knife',
       roles: [1, 2],

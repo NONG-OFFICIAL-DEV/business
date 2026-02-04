@@ -41,3 +41,5 @@ php artisan migrate --seed
 
 8. Start the development server
 php artisan serve
+9. Clear Catch
+php artisan optimize:clear

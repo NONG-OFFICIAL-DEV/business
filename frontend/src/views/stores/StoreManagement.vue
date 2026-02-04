@@ -1,46 +1,62 @@
 <script setup>
-  import { ref } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
+  import StoreCreateDialog from '@/components/stores/StoreCreateDialog.vue'
+  import { useStoreStore } from '../../stores/storeStore'
+  import { useI18n } from 'vue-i18n'
+  import { useAppUtils } from '@/composables/useAppUtils'
 
-  const stores = ref([
-    {
-      id: 1,
-      name: 'Downtown Bistro',
-      address: 'Central District, NY',
-      staffCount: 12,
-      image:
-        'https://images.unsplash.com/photo-1552566626-52f8b828add9?q=80&w=400'
-    },
-    {
-      id: 2,
-      name: 'Riverside Grill',
-      address: 'East Side, Brooklyn',
-      staffCount: 8,
-      image:
-        'https://i.pinimg.com/736x/85/bc/84/85bc84f9f109447e4064e4fea66eb2c3.jpg'
-    },
-    {
-      id: 3,
-      name: 'Riverside Grill',
-      address: 'East Side, Brooklyn',
-      staffCount: 8,
-      image:
-        'https://i.pinimg.com/1200x/14/c0/de/14c0deb99b3dd66de1ea65386adeefed.jpg'
-    }
-    // Add more stores here...
-  ])
+  const { t } = useI18n()
+  const { confirm, notif } = useAppUtils()
 
-  const deleteDialog = ref(false)
+  const storeStore = useStoreStore()
+  const stores = computed(() => storeStore.stores)
+
   const selectedStore = ref(null)
+  const showDialog = ref(false)
 
-  const confirmDelete = store => {
+  const onEdit = store => {
     selectedStore.value = store
-    deleteDialog.value = true
+    showDialog.value = true
   }
 
-  const handleDelete = () => {
-    stores.value = stores.value.filter(s => s.id !== selectedStore.value.id)
-    deleteDialog.value = false
+  const createStore = async payload => {
+    if (payload.id) {
+      await storeStore.updateStore(payload)
+    } else {
+      await storeStore.addStore(payload)
+    }
+    await storeStore.fetchStores()
   }
+
+  const handleDelete = id => {
+    confirm({
+      title: 'Are you sure?',
+      message: `Are you sure you want to delete this"?`,
+      options: { type: 'error', color: 'error', width: 550 },
+      agree: async () => {
+        try {
+          await storeStore.deleteStore(id)
+          notif(t('messages.deleted_success'), {
+            type: 'success',
+            color: 'primary'
+          })
+          await storeStore.fetchStores()
+        } catch (err) {
+          notif(err.response?.data?.error || t('messages.delete_failed'), {
+            type: 'error',
+            color: 'error'
+          })
+        }
+      }
+    })
+  }
+  const openCreateDialog = () => {
+    showDialog.value = true
+  }
+
+  onMounted(async () => {
+    await storeStore.fetchStores()
+  })
 </script>
 
 <template>
@@ -60,7 +76,7 @@
     </custom-title>
     <v-row>
       <v-col
-        v-for="store in stores"
+        v-for="store in stores?.data?.data"
         :key="store.id"
         cols="12"
         sm="6"
@@ -70,7 +86,12 @@
       >
         <v-card flat class="compact-premium-card">
           <div class="card-image-wrapper">
-            <v-img :src="store.image" aspect-ratio="2" cover class="store-img">
+            <v-img
+              :src="store.logo_url"
+              aspect-ratio="2"
+              cover
+              class="store-img"
+            >
               <div class="d-flex justify-end pa-2">
                 <v-btn
                   icon="mdi-pencil"
@@ -78,6 +99,7 @@
                   color="white"
                   class="edit-btn-mini"
                   elevation="4"
+                  @click="onEdit(store)"
                 ></v-btn>
               </div>
             </v-img>
@@ -116,7 +138,7 @@
                 size="x-small"
                 class="text-none font-weight-bold"
                 prepend-icon="mdi-trash-can-outline"
-                @click="confirmDelete(store)"
+                @click="handleDelete(store.id)"
               >
                 Delete
               </v-btn>
@@ -125,6 +147,12 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <StoreCreateDialog
+      v-model="showDialog"
+      :store="selectedStore"
+      @created="createStore"
+    />
   </v-container>
 </template>
 
