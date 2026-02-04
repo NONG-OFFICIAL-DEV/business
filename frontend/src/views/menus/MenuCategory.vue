@@ -152,7 +152,7 @@
     confirm({
       title: t('Confirm Delete'),
       message: `Are you sure delete category "${item.name}"?`,
-      options: { type: 'error', color: 'error' },
+      options: { type: 'error', color: 'error',width: 550 },
       agree: async () => {
         await categoryStore.deleteItem(item.id)
         notif(t('messages.deleted_success'), { type: 'success' })

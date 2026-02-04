@@ -26,7 +26,7 @@
         <v-card v-for="i in 3" :key="i" flat class="modern-card mb-5 pa-4">
           <div class="d-flex align-center mb-4">
             <v-skeleton-loader type="avatar" size="50" class="mr-3" />
-            <v-skeleton-loader type="text" width="150" />
+            <v-skeleton-loader type="list-item-two-line" width="150" />
           </div>
           <v-skeleton-loader type="list-item" />
         </v-card>
@@ -34,7 +34,7 @@
 
       
 
-      <div v-else-if="order && order.items?.length == 0" class="text-center py-16">
+      <div  v-else-if="hasReceivedFirstStreamData && order && order.items?.length == 0" class="text-center py-16">
         <div class="empty-state-visual mb-6">
           <v-icon size="80" color="#3b828e33">mdi-tray-plus</v-icon>
         </div>
@@ -55,10 +55,8 @@
         </v-btn>
       </div>
       <div v-else>
-        <div class="section-label mb-4">Items in Preparation</div>
-
         <v-card
-          v-for="item in order.items"
+          v-for="item in order?.items"
           :key="item.id"
           class="modern-card mb-5 overflow-visible"
           flat
@@ -142,87 +140,108 @@
 </template>
 
 <script setup>
-  import { ref, computed, onMounted, onUnmounted } from 'vue'
-  import { useOrderStore } from '@/stores/orderStore'
-  import { useRoute } from 'vue-router'
-  import { useDiningTableStore } from '../../stores/diningTableStore'
-  import { useOrderStream } from '@/stores/useOrderStream'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useDiningTableStore } from '../../stores/diningTableStore'
+import { useOrderStream } from '@/stores/useOrderStream'
 
-  const diningTableStore = useDiningTableStore()
-  const route = useRoute()
-  const token = route.params.token
-  const orderStore = useOrderStore()
-  const steamStore = useOrderStream()
+const diningTableStore = useDiningTableStore()
+const route = useRoute()
+const token = route.params.token
+const steamStore = useOrderStream()
 
-  const props = defineProps({
-    tableNumber: String,
-    tableId: Number
-  })
+const props = defineProps({
+  tableNumber: String,
+  tableId: Number
+})
 
-  defineEmits(['reset'])
+defineEmits(['reset'])
 
-  // const order = ref(null)
-  const isInitialLoading = ref(true)
+const isInitialLoading = ref(true)
+const hasReceivedFirstStreamData = ref(false)
 
-  const totalAmount = computed(() => {
-    if (!order.value || !order.value.items) return '0.00'
-    return order.value.items
-      .reduce((sum, item) => sum + item.price * item.qty, 0)
-      .toFixed(2)
-  })
-  const order = computed(() => steamStore.order)
-  onMounted(async () => {
-    isInitialLoading.value = true
-    try {
-      const res = await diningTableStore.getTableNumberByToken(token)
-      if (res?.table?.id) {
-        // const data = await orderStore.fetchOrderByTable(res.table.id)
-        steamStore.connect(res.table.id)
-        // console.log(data)
+// order from stream
+const order = computed(() => steamStore.order)
 
-        // order.value = data
-      }
-    } catch (err) {
-      console.error('Tracking Error:', err)
-    } finally {
+watch(
+  () => steamStore.order,
+  val => {
+    // Once we receive the first message (even empty), stop loading.
+    if (val !== null && val !== undefined) {
+      hasReceivedFirstStreamData.value = true
       isInitialLoading.value = false
     }
-  })
-  onUnmounted(() => {
-    steamStore.disconnect()
-  })
-  // Modern UI Helpers
-  const getStepIcon = step => {
-    if (step === 'pending') return 'mdi-receipt-text-check'
-    if (step === 'preparing') return 'mdi-fire'
-    return 'mdi-room-service'
-  }
+  },
+  { immediate: true }
+)
 
-  const isCurrentStep = (status, step) => {
-    const s = status?.toLowerCase()
-    const map = {
-      ordered: 'pending',
-      pending: 'pending',
-      preparing: 'preparing',
-      ready: 'ready'
+const totalAmount = computed(() => {
+  if (!order.value || !order.value.items) return '0.00'
+  return order.value.items
+    .reduce((sum, item) => sum + item.price * item.qty, 0)
+    .toFixed(2)
+})
+
+onMounted(async () => {
+  isInitialLoading.value = true
+  hasReceivedFirstStreamData.value = false
+
+  try {
+    const res = await diningTableStore.getTableNumberByToken(token)
+
+    if (res?.table?.id) {
+      steamStore.connect(res.table.id)
+
+      // IMPORTANT:
+      // We DO NOT set loading=false here anymore
+      // because SSE may take 1-2 seconds to send the first order.
+    } else {
+      // If no table, stop loading
+      isInitialLoading.value = false
     }
-    return map[s] === step.toLowerCase()
+  } catch (err) {
+    console.error('Tracking Error:', err)
+    isInitialLoading.value = false
   }
+})
 
-  const isStepCompleted = (status, step) => {
-    const s = status?.toLowerCase()
-    const levels = { ordered: 1, pending: 1, preparing: 2, ready: 3 }
-    const stepWeights = { pending: 1, preparing: 2, ready: 3 }
-    return levels[s] > stepWeights[step]
-  }
+onUnmounted(() => {
+  steamStore.disconnect()
+})
 
-  const getProgressValue = status => {
-    const s = status?.toLowerCase()
-    if (s === 'ready') return 100
-    if (s === 'preparing') return 50
-    return 0 // Pending starts at the first circle
+// Modern UI Helpers
+const getStepIcon = step => {
+  if (step === 'pending') return 'mdi-receipt-text-check'
+  if (step === 'preparing') return 'mdi-fire'
+  return 'mdi-room-service'
+}
+
+const isCurrentStep = (status, step) => {
+  const s = status?.toLowerCase()
+  const map = {
+    ordered: 'pending',
+    pending: 'pending',
+    preparing: 'preparing',
+    ready: 'ready'
   }
+  return map[s] === step.toLowerCase()
+}
+
+const isStepCompleted = (status, step) => {
+  const s = status?.toLowerCase()
+  const levels = { ordered: 1, pending: 1, preparing: 2, ready: 3 }
+  const stepWeights = { pending: 1, preparing: 2, ready: 3 }
+  return levels[s] > stepWeights[step]
+}
+
+const getProgressValue = status => {
+  const s = status?.toLowerCase()
+  if (s === 'ready') return 100
+  if (s === 'preparing') return 50
+  return 0
+}
 </script>
+
 
 <style scoped>
   /* Header */
