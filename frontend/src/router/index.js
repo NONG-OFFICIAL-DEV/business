@@ -18,6 +18,12 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: '/store-management',
+        name: 'Store',
+        component: () => import('@/views/stores/StoreManagement.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: '/users-management',
         name: 'UserManagement',
         component: () => import('@/views/users/UserManagement.vue'),
@@ -62,11 +68,6 @@ const routes = [
         props: true, // Pass route param `id` as prop to component
         meta: { requiresAuth: true }
       },
-      // {
-      //   path: '/Unit/:id/details',
-      //   name: 'purchase-details',
-      //   component: () => import('@/views/purchases/UnitDetails.vue')
-      // },
       {
         path: '/suppliers',
         name: 'Suppliers',

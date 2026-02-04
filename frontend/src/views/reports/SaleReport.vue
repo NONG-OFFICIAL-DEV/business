@@ -285,6 +285,7 @@
   const search = ref('')
   const saleStore = useSaleStore()
   const tableData = ref([])
+  const summaryKpi = ref([])
   const filters = reactive({ search: '', status: null, from: null, to: null })
   const showFilterForm = ref(false)
   const selectedRange = ref('thisMonth')
@@ -321,10 +322,10 @@
       granularity.value = 'day'
     }
   }
-  const kpiData = ref([
+  const kpiData = computed(() =>[
     {
       title: 'Total Revenue',
-      value: '$42,850',
+      value: summaryKpi.value.total_revenue ?? 0,
       icon: 'mdi-currency-usd',
       color: 'primary',
       trend: 15.2,
@@ -332,7 +333,7 @@
     },
     {
       title: 'Avg. Order Value',
-      value: '$124.20',
+      value: summaryKpi.value.avg_value ?? 0,
       icon: 'mdi-cart-percent',
       color: 'info',
       trend: -2.4,
@@ -409,6 +410,7 @@
     const reportData = await saleStore.saleReport()
     saleStore.topMenusReport(filters.from, filters.to)
     tableData.value = reportData.table_data
+    summaryKpi.value = reportData.summary
   })
   const toggleFilterForm = () => {
     showFilterForm.value = !showFilterForm.value
