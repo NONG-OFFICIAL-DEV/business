@@ -200,7 +200,7 @@
               <v-btn
                 icon="mdi-plus"
                 size="30"
-                color="success"
+                color="primary"
                 elevation="1"
                 variant="flat"
                 @click="handleIncrease(p)"
@@ -228,7 +228,7 @@
                 size="24"
                 variant="text"
                 density="comfortable"
-                color="success"
+                color="primary"
                 :class="{
                   'opacity-30': getProductTotalQty(p) >= MAX_QTY_PER_ITEM
                 }"
