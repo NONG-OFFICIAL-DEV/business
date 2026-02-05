@@ -71,7 +71,7 @@
         return
       }
 
-      emit('add', { ...product, qty: 1 })
+      emit('add', { ...product, menu_id: product.id, qty: 1 })
       return
     }
 
