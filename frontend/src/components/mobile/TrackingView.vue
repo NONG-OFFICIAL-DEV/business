@@ -32,26 +32,42 @@
         </v-card>
       </template>
 
-      
-
-      <div  v-else-if="hasReceivedFirstStreamData && order && order.items?.length == 0" class="text-center py-16">
-        <div class="empty-state-visual mb-6">
-          <v-icon size="80" color="#3b828e33">mdi-tray-plus</v-icon>
+      <div
+        v-else-if="
+          hasReceivedFirstStreamData &&
+          (!order || !order.items || order.items.length === 0)
+        "
+        class="empty-state-container d-flex flex-column align-center justify-center py-16 px-6"
+      >
+        <div class="visual-wrapper mb-8">
+          <div class="blob-bg"></div>
+          <v-icon size="90" class="floating-icon" color="primary">
+            mdi-silverware-clean
+          </v-icon>
         </div>
-        <h3 class="text-h5 font-weight-black mb-2">No Active Orders</h3>
-        <p class="text-body-2 text-grey-darken-1 mb-8 px-8">
-          It looks like you haven't ordered anything yet. Let's start with
-          something delicious!
+
+        <h3 class="text-h5 font-weight-black mb-2 text-slate-900">
+          Your table is ready!
+        </h3>
+
+        <p
+          class="text-body-1 text-grey-darken-1 text-center mb-10 max-width-300"
+        >
+          Scan the menu and place your first order. We'll track every step of
+          your meal right here.
         </p>
+
         <v-btn
-          color="#3b828e"
+          color="primary"
           size="x-large"
           block
-          rounded="pill"
-          class="font-weight-black text-none"
+          rounded="xl"
+          elevation="1"
+          class="action-button font-weight-black text-none"
           @click="$emit('reset')"
         >
-          View Full Menu
+          <v-icon start class="mr-2">mdi-book-open-variant</v-icon>
+          Browse Full Menu
         </v-btn>
       </div>
       <div v-else>
@@ -140,110 +156,110 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import { useDiningTableStore } from '../../stores/diningTableStore'
-import { useOrderStream } from '@/stores/useOrderStream'
+  import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+  import { useRoute } from 'vue-router'
+  import { useDiningTableStore } from '../../stores/diningTableStore'
+  import { useOrderStream } from '@/stores/useOrderStream'
 
-const diningTableStore = useDiningTableStore()
-const route = useRoute()
-const token = route.params.token
-const steamStore = useOrderStream()
+  const diningTableStore = useDiningTableStore()
+  const route = useRoute()
+  const token = route.params.token
+  const steamStore = useOrderStream()
 
-const props = defineProps({
-  tableNumber: String,
-  tableId: Number
-})
+  const props = defineProps({
+    tableNumber: String,
+    tableId: Number
+  })
 
-defineEmits(['reset'])
+  defineEmits(['reset'])
 
-const isInitialLoading = ref(true)
-const hasReceivedFirstStreamData = ref(false)
+  const isInitialLoading = ref(true)
+  const hasReceivedFirstStreamData = ref(false)
 
-// order from stream
-const order = computed(() => steamStore.order)
+  // order from stream
+  const order = computed(() => steamStore.order)
 
-watch(
-  () => steamStore.order,
-  val => {
-    // Once we receive the first message (even empty), stop loading.
-    if (val !== null && val !== undefined) {
-      console.log(val);
-      
-      hasReceivedFirstStreamData.value = true
+  watch(
+    () => steamStore.order,
+    val => {
+      // Once we receive the first message (even empty), stop loading.
+      if (val !== null && val !== undefined) {
+        hasReceivedFirstStreamData.value = true
+        isInitialLoading.value = false
+      }
+    },
+    { immediate: true }
+  )
+
+  const totalAmount = computed(() => {
+    if (!order.value || !order.value.items) return '0.00'
+    return order.value.items
+      .reduce((sum, item) => sum + item.price * item.qty, 0)
+      .toFixed(2)
+  })
+
+  onMounted(async () => {
+    isInitialLoading.value = true
+    hasReceivedFirstStreamData.value = false
+
+    try {
+      const res = await diningTableStore.getTableNumberByToken(token)
+
+      if (res?.table?.id) {
+        steamStore.connect(res.table.id)
+
+        // SAFETY NET: If no data arrives in 3 seconds, stop loading
+        setTimeout(() => {
+          if (isInitialLoading.value) {
+            console.log('Stream timeout: showing empty state')
+            isInitialLoading.value = false
+            hasReceivedFirstStreamData.value = true
+          }
+        }, 3000)
+      } else {
+        isInitialLoading.value = false
+      }
+    } catch (err) {
       isInitialLoading.value = false
     }
-  },
-  { immediate: true }
-)
+  })
 
-const totalAmount = computed(() => {
-  if (!order.value || !order.value.items) return '0.00'
-  return order.value.items
-    .reduce((sum, item) => sum + item.price * item.qty, 0)
-    .toFixed(2)
-})
+  onUnmounted(() => {
+    steamStore.disconnect()
+  })
 
-onMounted(async () => {
-  isInitialLoading.value = true
-  hasReceivedFirstStreamData.value = false
+  // Modern UI Helpers
+  const getStepIcon = step => {
+    if (step === 'pending') return 'mdi-receipt-text-check'
+    if (step === 'preparing') return 'mdi-fire'
+    return 'mdi-room-service'
+  }
 
-  try {
-    const res = await diningTableStore.getTableNumberByToken(token)
-
-    if (res?.table?.id) {
-      steamStore.connect(res.table.id)
-
-      // IMPORTANT:
-      // We DO NOT set loading=false here anymore
-      // because SSE may take 1-2 seconds to send the first order.
-    } else {
-      // If no table, stop loading
-      isInitialLoading.value = false
+  const isCurrentStep = (status, step) => {
+    const s = status?.toLowerCase()
+    const map = {
+      ordered: 'pending',
+      pending: 'pending',
+      preparing: 'preparing',
+      ready: 'ready'
     }
-  } catch (err) {
-    console.error('Tracking Error:', err)
-    isInitialLoading.value = false
+    return map[s] === step.toLowerCase()
   }
-})
 
-onUnmounted(() => {
-  steamStore.disconnect()
-})
-
-// Modern UI Helpers
-const getStepIcon = step => {
-  if (step === 'pending') return 'mdi-receipt-text-check'
-  if (step === 'preparing') return 'mdi-fire'
-  return 'mdi-room-service'
-}
-
-const isCurrentStep = (status, step) => {
-  const s = status?.toLowerCase()
-  const map = {
-    ordered: 'pending',
-    pending: 'pending',
-    preparing: 'preparing',
-    ready: 'ready'
+  const isStepCompleted = (status, step) => {
+    const s = status?.toLowerCase()
+    const levels = { ordered: 1, pending: 1, preparing: 2, ready: 3 }
+    const stepWeights = { pending: 1, preparing: 2, ready: 3 }
+    return levels[s] > stepWeights[step]
   }
-  return map[s] === step.toLowerCase()
-}
 
-const isStepCompleted = (status, step) => {
-  const s = status?.toLowerCase()
-  const levels = { ordered: 1, pending: 1, preparing: 2, ready: 3 }
-  const stepWeights = { pending: 1, preparing: 2, ready: 3 }
-  return levels[s] > stepWeights[step]
-}
-
-const getProgressValue = status => {
-  const s = status?.toLowerCase()
-  if (s === 'ready') return 100
-  if (s === 'preparing') return 50
-  return 0
-}
+  const getProgressValue = status => {
+    const s = status?.toLowerCase()
+    if (s === 'ready') return 100
+    if (s === 'preparing') return 50
+    return 0
+  }
 </script>
-
 
 <style scoped>
   /* Header */
@@ -444,4 +460,5 @@ const getProgressValue = status => {
     justify-content: center;
     margin: 0 auto;
   }
+  
 </style>

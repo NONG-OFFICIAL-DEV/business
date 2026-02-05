@@ -26,11 +26,24 @@ export const useOrderStream = defineStore('orderStream', () => {
       isConnected.value = true
       loading.value = false
       console.log('✅ Table order stream connected')
+
+      // If we connect and order is still null, set it to an empty object
+      // This triggers the 'watch' in your component immediately
+      if (order.value === null) {
+        order.value = { items: [] }
+      }
     }
 
+    // Inside useOrderStream.js
     eventSource.addEventListener('order', event => {
       const data = JSON.parse(event.data)
-      order.value = data
+
+      // Logic check: If the backend sends null or empty, ensure order.value reflects that
+      if (!data || Object.keys(data).length === 0) {
+        order.value = null
+      } else {
+        order.value = data
+      }
     })
 
     eventSource.onerror = () => {
