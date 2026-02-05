@@ -59,11 +59,11 @@
 
         <v-btn
           color="primary"
-          size="x-large"
+          size="large"
           block
-          rounded="xl"
+          rounded="pill"
           elevation="1"
-          class="action-button font-weight-black text-none"
+          class="text-none"
           @click="$emit('reset')"
         >
           <v-icon start class="mr-2">mdi-book-open-variant</v-icon>
@@ -81,9 +81,12 @@
             <div class="d-flex justify-space-between align-start mb-6">
               <div class="d-flex align-center">
                 <div class="item-icon-wrapper">
-                  <v-icon color="#3b828e" size="24">
+                  <v-avatar size="50">
+                    <v-img alt="John" :src="item.image_url"></v-img>
+                  </v-avatar>
+                  <!-- <v-icon color="#3b828e" size="24">
                     mdi-silverware-variant
-                  </v-icon>
+                  </v-icon> -->
                 </div>
                 <div class="ml-3">
                   <h3 class="text-body-1 font-weight-black mb-0">
@@ -460,5 +463,4 @@
     justify-content: center;
     margin: 0 auto;
   }
-  
 </style>
