@@ -1,35 +1,158 @@
 <script setup>
-  import { ref } from 'vue'
+  import { ref, computed } from 'vue'
+
   const props = defineProps({
     items: Array,
     cart: Array
   })
+
   const emit = defineEmits(['add', 'update'])
+
   const MAX_QTY_PER_ITEM = 5
   const snackbar = ref(false)
 
-  const getQty = (cart, id) => {
-    return cart.find(i => i.id === id)?.qty || 0
+  // Variant Sheet
+  const showVariantSheet = ref(false)
+  const selectedProduct = ref(null)
+  const selectedVariant = ref(null)
+  const selectedVariantQty = ref(0) // track variant quantity
+
+  // Sugar + note
+  const selectedSugar = ref(100)
+  const note = ref('')
+  const sugarOptions = [0, 25, 50, 75, 100]
+
+  const activeProduct = computed(() => selectedProduct.value)
+
+  // ----------------------
+  // Helpers
+  // ----------------------
+  const getQty = (cart, id) => cart.find(i => i.id === id)?.qty || 0
+
+  const getProductTotalQty = product => {
+    if (!product?.has_variants) return getQty(props.cart, product.id)
+    return (product.variants || []).reduce(
+      (sum, v) => sum + getQty(props.cart, v.id),
+      0
+    )
   }
 
-  // New function to handle the click and the alert logic
-  const handleIncrease = (item, isNewAdd = false) => {
-    const currentQty = getQty(props.cart, item.id || item) // handle both object and id
+  const resetVariantExtras = () => {
+    selectedVariant.value = null
+    selectedVariantQty.value = 0
+    selectedSugar.value = 100
+    note.value = ''
+  }
 
-    if (currentQty >= MAX_QTY_PER_ITEM) {
+  const openVariantPicker = product => {
+    selectedProduct.value = product
+    resetVariantExtras()
+    showVariantSheet.value = true
+  }
+
+  const getLastVariantInCart = product => {
+    if (!product?.has_variants) return null
+    const variantIds = (product.variants || []).map(v => v.id)
+    return (
+      [...props.cart].reverse().find(i => variantIds.includes(i.id)) || null
+    )
+  }
+
+  // ----------------------
+  // Main actions
+  // ----------------------
+  const handleIncrease = product => {
+    // Normal product
+    if (!product.has_variants) {
+      const currentQty = getQty(props.cart, product.id)
+
+      if (currentQty >= MAX_QTY_PER_ITEM) {
+        snackbar.value = true
+        return
+      }
+
+      emit('add', { ...product, qty: 1 })
+      return
+    }
+
+    // Variant product => ALWAYS open customize sheet
+    openVariantPicker(product)
+  }
+
+  const handleDecrease = product => {
+    if (!product.has_variants) {
+      emit('update', product.id, -1)
+      return
+    }
+
+    const lastVariant = getLastVariantInCart(product)
+    if (!lastVariant) return
+    emit('update', lastVariant.id, -1)
+  }
+
+  // ----------------------
+  // Variant selection
+  // ----------------------
+  const selectVariant = variant => {
+    selectedVariant.value = variant
+  }
+
+  const increaseVariantQty = () => {
+    if (!selectedProduct.value) return
+
+    const totalInCart = getProductTotalQty(selectedProduct.value)
+
+    // total already in cart + what user is selecting now
+    if (totalInCart + selectedVariantQty.value >= MAX_QTY_PER_ITEM) {
       snackbar.value = true
-      return // Stop the execution here
+      return
     }
 
-    if (isNewAdd) {
-      emit('add', item)
-    } else {
-      emit('update', item, 1) // item here is id
+    selectedVariantQty.value++
+  }
+
+  const decreaseVariantQty = () => {
+    if (selectedVariantQty.value <= 0) return
+    selectedVariantQty.value--
+  }
+
+  const confirmAddVariant = () => {
+    if (!selectedProduct.value || !selectedVariant.value) return
+    if (selectedVariantQty.value === 0) return
+
+    const totalInCart = getProductTotalQty(selectedProduct.value)
+
+    if (totalInCart + selectedVariantQty.value > MAX_QTY_PER_ITEM) {
+      snackbar.value = true
+      return
     }
+
+    const itemToAdd = {
+      ...selectedProduct.value,
+      id: selectedVariant.value.id,
+      menu_id: selectedProduct.value.id,
+      variant_id: selectedVariant.value.id,
+      name: `${selectedProduct.value.name} (${selectedVariant.value.name})`,
+      price: selectedVariant.value.price,
+      size: selectedVariant.value.name,
+      customizations: {
+        variant_name: selectedVariant.value.name,
+        sugar: selectedSugar.value
+      },
+      note: note.value
+    }
+
+    for (let i = 0; i < selectedVariantQty.value; i++) {
+      emit('add', { ...itemToAdd, qty: 1 })
+    }
+
+    showVariantSheet.value = false
+    resetVariantExtras()
   }
 </script>
 
 <template>
+  <!-- Snackbar -->
   <v-snackbar
     v-model="snackbar"
     :timeout="2000"
@@ -40,10 +163,11 @@
   >
     <div class="d-flex align-center">
       <v-icon start icon="mdi-alert-circle" />
-      <span>Maximum limit of {{ MAX_QTY_PER_ITEM }} reached for this item</span>
+      <span>Maximum limit of {{ MAX_QTY_PER_ITEM }} reached</span>
     </div>
   </v-snackbar>
 
+  <!-- Product Grid -->
   <v-row class="pa-2">
     <transition-group name="list-stagger">
       <v-col v-for="p in items" :key="p.id" cols="6" class="pa-2">
@@ -56,25 +180,30 @@
             width="100"
           />
 
-          <div
-            class="text-subtitle-2 font-weight-bold text-center mb-1 truncate"
-          >
+          <div class="text-subtitle-2 font-weight-bold text-center mb-1">
             {{ p.name }}
           </div>
 
           <div class="d-flex justify-space-between align-center px-1">
-            <span class="text-subtitle-1 font-weight-black">
+            <span
+              v-if="p.has_variants"
+              class="text-subtitle-1 font-weight-black"
+            >
+              ${{ p.variants?.[0]?.price }}
+            </span>
+            <span v-else class="text-subtitle-1 font-weight-black">
               ${{ p.price }}
             </span>
 
-            <div v-if="getQty(cart, p.id) === 0">
+            <!-- Add / Qty control -->
+            <div v-if="getProductTotalQty(p) === 0">
               <v-btn
                 icon="mdi-plus"
                 size="30"
                 color="success"
                 elevation="1"
                 variant="flat"
-                @click="handleIncrease(p, true)"
+                @click="handleIncrease(p)"
               />
             </div>
 
@@ -87,19 +216,23 @@
                 size="24"
                 variant="text"
                 density="comfortable"
-                @click="emit('update', p.id, -1)"
+                @click="handleDecrease(p)"
               />
+
               <span class="mx-2 text-caption font-weight-bold">
-                {{ getQty(cart, p.id) }}
+                {{ getProductTotalQty(p) }}
               </span>
+
               <v-btn
                 icon="mdi-plus"
                 size="24"
                 variant="text"
                 density="comfortable"
                 color="success"
-                :class="{ 'opacity-30': getQty(cart, p.id) >= 5 }"
-                @click="handleIncrease(p.id)"
+                :class="{
+                  'opacity-30': getProductTotalQty(p) >= MAX_QTY_PER_ITEM
+                }"
+                @click="handleIncrease(p)"
               />
             </div>
           </div>
@@ -107,6 +240,134 @@
       </v-col>
     </transition-group>
   </v-row>
+
+<!-- Variant Sheet -->
+<v-bottom-sheet v-model="showVariantSheet">
+  <v-card rounded="t-xl" class="variant-sheet px-4 pt-2 pb-6">
+    <div class="d-flex justify-space-between align-center py-4">
+      <div>
+        <div class="text-h6 font-weight-black line-height-1">
+          {{ activeProduct?.name }}
+        </div>
+        <div class="text-caption text-grey-darken-1">
+          Choose size, sugar & note
+        </div>
+      </div>
+      <v-btn icon="mdi-close" variant="text" density="comfortable" @click="showVariantSheet = false" />
+    </div>
+
+    <v-divider class="mb-5" />
+
+    <div class="sheet-body">
+      <div class="mb-6">
+        <div class="d-flex justify-space-between align-center mb-3">
+          <div class="text-subtitle-2 font-weight-bold">Size</div>
+          <div class="text-caption text-grey-darken-1">Max {{ MAX_QTY_PER_ITEM }} per product</div>
+        </div>
+
+        <div class="modern-variant-grid">
+          <v-card
+            v-for="v in activeProduct?.variants"
+            :key="v.id"
+            class="size-card"
+            :class="{ 'selected-card': selectedVariant?.id === v.id }"
+            flat
+            border
+            rounded="xl"
+            @click="selectVariant(v)"
+          >
+            <div class="pa-3 d-flex flex-column position-relative h-100">
+              <v-icon
+                class="selection-icon"
+                :icon="selectedVariant?.id === v.id ? 'mdi-check-circle' : 'mdi-circle-outline'"
+                :color="selectedVariant?.id === v.id ? 'primary' : 'grey-lighten-1'"
+                size="20"
+              />
+              <div class="text-subtitle-2 font-weight-bold pt-1">{{ v.name }}</div>
+              <div class="text-caption text-grey-darken-1">${{ v.price }}</div>
+            </div>
+          </v-card>
+        </div>
+      </div>
+
+      <div v-if="selectedVariant" class="mb-6">
+        <div class="text-subtitle-2 font-weight-bold mb-3">Quantity</div>
+        <div class="modern-qty-bar">
+          <v-btn
+            icon="mdi-minus"
+            variant="flat"
+            size="36"
+            rounded="circle"
+            class="bg-grey-lighten-4"
+            :disabled="selectedVariantQty <= 0"
+            @click="decreaseVariantQty"
+          />
+          <div class="text-h6 font-weight-bold px-8">
+            {{ selectedVariantQty }}
+          </div>
+          <v-btn
+            icon="mdi-plus"
+            variant="flat"
+            size="36"
+            rounded="circle"
+            class="bg-grey-lighten-4"
+            color="primary"
+            @click="increaseVariantQty"
+          />
+        </div>
+        <div class="text-center text-caption text-grey-darken-1 mt-3">
+          Tip: You can mix sizes but total cannot exceed {{ MAX_QTY_PER_ITEM }}.
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <div class="text-subtitle-2 font-weight-bold mb-3">Sugar</div>
+        <div class="d-flex flex-wrap ga-2">
+          <v-chip
+            v-for="s in sugarOptions"
+            :key="s"
+            filter
+            variant="flat"
+            :color="selectedSugar === s ? 'primary' : 'grey-lighten-4'"
+            class="px-4 font-weight-bold"
+            @click="selectedSugar = s"
+          >
+            {{ s }}%
+          </v-chip>
+        </div>
+      </div>
+
+      <div class="mb-8">
+        <div class="text-subtitle-2 font-weight-bold mb-3">Note</div>
+        <v-textarea
+          v-model="note"
+          rows="1"
+          auto-grow
+          variant="outlined"
+          rounded="xl"
+          placeholder="Example: less ice, extra hot, no straw..."
+          hide-details
+          color="primary"
+          bg-color="grey-lighten-5"
+          class="custom-textarea"
+        />
+      </div>
+    </div>
+
+    <v-btn
+      block
+      size="x-large"
+      rounded="xl"
+      color="primary"
+      elevation="0"
+      class="text-none font-weight-bold py-6"
+      :disabled="!selectedVariant || selectedVariantQty === 0"
+      @click="confirmAddVariant"
+    >
+      CONFIRM ORDER
+    </v-btn>
+  </v-card>
+</v-bottom-sheet>
 </template>
 
 <style scoped>
@@ -124,4 +385,53 @@
   .product-card:active {
     transform: scale(0.98);
   }
+
+
+
+.line-height-1 {
+  line-height: 1.2;
+}
+
+/* 3 Column Grid */
+.modern-variant-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.size-card {
+  border: 1.5px solid #e0e0e0 !important;
+  transition: all 0.2s ease;
+  background-color: transparent;
+}
+
+.selected-card {
+  border: 2px solid var(--v-primary-base, #4db6ac) !important;
+  background-color: #f1f8f7 !important; /* Very light primary tint */
+}
+
+.selection-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* Modern Qty Bar */
+.modern-qty-bar {
+  background-color: #f5f5f5;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px;
+  max-width: 100%;
+}
+
+.custom-textarea :deep(.v-field__outline) {
+  --v-field-border-opacity: 0.1;
+}
+
+.v-btn--disabled {
+  opacity: 0.4;
+}
 </style>

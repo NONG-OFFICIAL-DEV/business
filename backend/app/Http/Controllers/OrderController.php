@@ -179,12 +179,16 @@ class OrderController extends Controller
                     'order_no'       => $order->order_no,
                     'status'         => $order->status,
                     'kitchen_status' => $order->kitchen_status,
+                    'item_count' => $order->items->sum('quantity'),
+                    'total' => $order->items->sum(fn($i) => $i->quantity * $i->price),
                     'items' => $order->items->map(fn ($item) => [
                         'id'     => $item->id,
+                        'menu_id' => $item->menu_id,
                         'name'   => $item->menu->name,
-                        'price'  => $item->menu->price,
-                        'qty'    => $item->quantity,
+                        'image_url' => $item->menu->image_url,
                         'status' => $item->kitchen_status,
+                        'qty'    => $item->quantity,
+                        'price'  => $item->price,
                         'note'   => $item->note,
                     ]),
                 ];

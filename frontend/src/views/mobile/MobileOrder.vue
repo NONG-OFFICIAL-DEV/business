@@ -61,14 +61,16 @@
       const orderData = {
         table_id: tableId.value,
         items: cart.value.map(i => ({
-          menu_id: i.id,
+          // menu_id: i.id,
+          menu_id: i.menu_id,
           quantity: i.qty,
           price: i.price,
-          note: i.customizations || null
+          note: i.note || null,
+          customizations: i.customizations || null
         }))
       }
 
-      await orderStore.createOrder(orderData,'noLoading')
+      await orderStore.createOrder(orderData, 'noLoading')
       await menuStore.fetchMenus()
 
       // Navigate to tracking
@@ -185,12 +187,12 @@
                 </template>
 
                 <template v-else>
-                  <ProductCard
-                    :items="filteredProducts"
-                    :cart="cart"
-                    @add="addToCart"
-                    @update="updateQty"
-                  />
+                    <ProductCard
+                      :items="filteredProducts"
+                      :cart="cart"
+                      @add="addToCart"
+                      @update="updateQty"
+                    />
                 </template>
               </v-row>
             </v-container>
