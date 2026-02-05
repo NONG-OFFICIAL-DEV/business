@@ -5,7 +5,7 @@
         icon="mdi-arrow-left"
         variant="flat"
         size="small"
-        @click="$emit('reset')"
+        @click="$emit('back')"
       ></v-btn>
       <div class="flex-grow-1 text-center">
         <h2 class="text-subtitle-1 font-weight-black mb-0">Order Tracker</h2>
@@ -174,7 +174,7 @@
     tableId: Number
   })
 
-  defineEmits(['reset'])
+  defineEmits(['reset','back'])
 
   const isInitialLoading = ref(true)
   const hasReceivedFirstStreamData = ref(false)

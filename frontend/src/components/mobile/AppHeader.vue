@@ -1,7 +1,8 @@
 <script setup>
   defineProps({
     tableNumber: { type: String, default: '00' },
-    search: String
+    search: String,
+    cartCount: { type: Number, default: 0 }
   })
   defineEmits(['view-process', 'update:search'])
 </script>
@@ -21,17 +22,35 @@
         <h1 class="text-subtitle-1 font-weight-bold">Menu</h1>
       </div>
 
-      <v-btn class="text-none" icon  variant="text">
-        <v-badge
-          location="top right"
-          color="primary"
-          content="1"
-          bordered
+      <!-- Right: Actions -->
+      <div class="d-flex align-center ga-2">
+        <!-- Cart -->
+        <v-btn
+          class="action-btn"
+          icon
+          variant="flat"
+          @click="$emit('view-cart')"
+        >
+          <v-badge
+            :content="cartCount"
+            :model-value="cartCount > 0"
+            color="primary"
+            location="top end"
+          >
+            <v-icon icon="mdi-cart-outline" color="primary" size="22" />
+          </v-badge>
+        </v-btn>
+
+        <!-- Tracking -->
+        <v-btn
+          class="action-btn"
+          icon
+          variant="flat"
           @click="$emit('view-process')"
         >
-          <v-icon icon="mdi-cart" color="primary"></v-icon>
-        </v-badge>
-      </v-btn>
+          <v-icon icon="mdi-room-service-outline" color="primary" size="22" />
+        </v-btn>
+      </div>
     </div>
 
     <div v-if="search !== undefined" class="px-4 pb-3">
@@ -97,5 +116,55 @@
     min-height: 40px !important;
     padding-top: 0;
     padding-bottom: 0;
+  }
+  /* Modern glass header */
+  .header {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  /* Table pill */
+  .table-pill {
+    background: #3b828e12;
+    border: 1px solid #3b828e30;
+    border-radius: 999px;
+  }
+
+  .color-primary {
+    color: #3b828e;
+  }
+
+  /* Modern action button */
+  .action-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: white !important;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Search styling */
+  :deep(.search-input .v-field) {
+    border-radius: 16px !important;
+    font-size: 14px;
+  }
+
+  :deep(.search-input .v-field__input) {
+    min-height: 44px !important;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
   }
 </style>

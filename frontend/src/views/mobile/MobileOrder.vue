@@ -85,6 +85,9 @@
   function goToTracking() {
     page.value = 'tracking'
   }
+  function goToCart() {
+    page.value = 'cart'
+  }
 
   function handleReset() {
     clearCart()
@@ -114,7 +117,9 @@
     <AppHeader
       v-if="page === 'home'"
       @view-process="goToTracking"
+      @view-cart="goToCart"
       :tableNumber="tableNumber"
+      :cartCount="totalItems"
     />
 
     <v-main>
@@ -187,12 +192,12 @@
                 </template>
 
                 <template v-else>
-                    <ProductCard
-                      :items="filteredProducts"
-                      :cart="cart"
-                      @add="addToCart"
-                      @update="updateQty"
-                    />
+                  <ProductCard
+                    :items="filteredProducts"
+                    :cart="cart"
+                    @add="addToCart"
+                    @update="updateQty"
+                  />
                 </template>
               </v-row>
             </v-container>
@@ -213,6 +218,7 @@
           <TrackingView
             v-else-if="page === 'tracking'"
             :cart="cart"
+            @back="page = 'home'"
             :tableNumber="tableNumber"
             :tableId="tableId"
             v-model="viewProcess"

@@ -27,8 +27,9 @@
       <v-row no-gutters align="center" class="py-2">
         <v-col cols="2">
           <v-btn
-            icon="mdi-chevron-left"
+            icon="mdi-arrow-left"
             variant="text"
+            size="small"
             @click="$emit('back')"
           />
         </v-col>
