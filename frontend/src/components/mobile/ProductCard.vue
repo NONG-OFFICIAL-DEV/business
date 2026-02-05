@@ -241,133 +241,150 @@
     </transition-group>
   </v-row>
 
-<!-- Variant Sheet -->
-<v-bottom-sheet v-model="showVariantSheet">
-  <v-card rounded="t-xl" class="variant-sheet px-4 pt-2 pb-6">
-    <div class="d-flex justify-space-between align-center py-4">
-      <div>
-        <div class="text-h6 font-weight-black line-height-1">
-          {{ activeProduct?.name }}
-        </div>
-        <div class="text-caption text-grey-darken-1">
-          Choose size, sugar & note
-        </div>
-      </div>
-      <v-btn icon="mdi-close" variant="text" density="comfortable" @click="showVariantSheet = false" />
-    </div>
-
-    <v-divider class="mb-5" />
-
-    <div class="sheet-body">
-      <div class="mb-6">
-        <div class="d-flex justify-space-between align-center mb-3">
-          <div class="text-subtitle-2 font-weight-bold">Size</div>
-          <div class="text-caption text-grey-darken-1">Max {{ MAX_QTY_PER_ITEM }} per product</div>
-        </div>
-
-        <div class="modern-variant-grid">
-          <v-card
-            v-for="v in activeProduct?.variants"
-            :key="v.id"
-            class="size-card"
-            :class="{ 'selected-card': selectedVariant?.id === v.id }"
-            flat
-            border
-            rounded="xl"
-            @click="selectVariant(v)"
-          >
-            <div class="pa-3 d-flex flex-column position-relative h-100">
-              <v-icon
-                class="selection-icon"
-                :icon="selectedVariant?.id === v.id ? 'mdi-check-circle' : 'mdi-circle-outline'"
-                :color="selectedVariant?.id === v.id ? 'primary' : 'grey-lighten-1'"
-                size="20"
-              />
-              <div class="text-subtitle-2 font-weight-bold pt-1">{{ v.name }}</div>
-              <div class="text-caption text-grey-darken-1">${{ v.price }}</div>
-            </div>
-          </v-card>
-        </div>
-      </div>
-
-      <div v-if="selectedVariant" class="mb-6">
-        <div class="text-subtitle-2 font-weight-bold mb-3">Quantity</div>
-        <div class="modern-qty-bar">
-          <v-btn
-            icon="mdi-minus"
-            variant="flat"
-            size="36"
-            rounded="circle"
-            class="bg-grey-lighten-4"
-            :disabled="selectedVariantQty <= 0"
-            @click="decreaseVariantQty"
-          />
-          <div class="text-h6 font-weight-bold px-8">
-            {{ selectedVariantQty }}
+  <!-- Variant Sheet -->
+  <v-bottom-sheet v-model="showVariantSheet">
+    <v-card rounded="t-xl" class="variant-sheet px-4 pt-2 pb-6">
+      <div class="d-flex justify-space-between align-center py-4">
+        <div>
+          <div class="text-h6 font-weight-black line-height-1">
+            {{ activeProduct?.name }}
           </div>
-          <v-btn
-            icon="mdi-plus"
-            variant="flat"
-            size="36"
-            rounded="circle"
-            class="bg-grey-lighten-4"
-            color="primary"
-            @click="increaseVariantQty"
-          />
+          <div class="text-caption text-grey-darken-1">
+            Choose size, sugar & note
+          </div>
         </div>
-        <div class="text-center text-caption text-grey-darken-1 mt-3">
-          Tip: You can mix sizes but total cannot exceed {{ MAX_QTY_PER_ITEM }}.
-        </div>
-      </div>
-
-      <div class="mb-6">
-        <div class="text-subtitle-2 font-weight-bold mb-3">Sugar</div>
-        <div class="d-flex flex-wrap ga-2">
-          <v-chip
-            v-for="s in sugarOptions"
-            :key="s"
-            filter
-            variant="flat"
-            :color="selectedSugar === s ? 'primary' : 'grey-lighten-4'"
-            class="px-4 font-weight-bold"
-            @click="selectedSugar = s"
-          >
-            {{ s }}%
-          </v-chip>
-        </div>
-      </div>
-
-      <div class="mb-8">
-        <div class="text-subtitle-2 font-weight-bold mb-3">Note</div>
-        <v-textarea
-          v-model="note"
-          rows="1"
-          auto-grow
-          variant="outlined"
-          rounded="xl"
-          placeholder="Example: less ice, extra hot, no straw..."
-          hide-details
-          color="primary"
-          bg-color="grey-lighten-5"
-          class="custom-textarea"
+        <v-btn
+          icon="mdi-close"
+          variant="text"
+          density="comfortable"
+          @click="showVariantSheet = false"
         />
       </div>
-    </div>
 
-    <v-btn
-      block
-      size="x-large"
-      rounded="xl"
-      color="primary"
-      elevation="0"
-      class="text-none font-weight-bold py-6"
-      :disabled="!selectedVariant || selectedVariantQty === 0"
-      @click="confirmAddVariant"
-    >
-      CONFIRM ORDER
-    </v-btn>
-  </v-card>
-</v-bottom-sheet>
+      <v-divider class="mb-5" />
+
+      <div class="sheet-body">
+        <div class="mb-6">
+          <div class="d-flex justify-space-between align-center mb-3">
+            <div class="text-subtitle-2 font-weight-bold">Size</div>
+            <div class="text-caption text-grey-darken-1">
+              Max {{ MAX_QTY_PER_ITEM }} per product
+            </div>
+          </div>
+
+          <div class="modern-variant-grid">
+            <v-card
+              v-for="v in activeProduct?.variants"
+              :key="v.id"
+              class="size-card"
+              :class="{ 'selected-card': selectedVariant?.id === v.id }"
+              flat
+              border
+              rounded="xl"
+              @click="selectVariant(v)"
+            >
+              <div class="pa-3 d-flex flex-column position-relative h-100">
+                <v-icon
+                  class="selection-icon"
+                  :icon="
+                    selectedVariant?.id === v.id
+                      ? 'mdi-check-circle'
+                      : 'mdi-circle-outline'
+                  "
+                  :color="
+                    selectedVariant?.id === v.id ? 'primary' : 'grey-lighten-1'
+                  "
+                  size="20"
+                />
+                <div class="text-subtitle-2 pt-1">
+                  {{ v.name }}
+                </div>
+                <div class="text-caption text-grey-darken-1">
+                  ${{ v.price }}
+                </div>
+              </div>
+            </v-card>
+          </div>
+        </div>
+
+        <div
+          v-if="selectedVariant"
+          class="mb-6 d-flex align-center justify-space-between"
+        >
+          <div class="text-subtitle-2 font-weight-bold">Quantity</div>
+
+          <div class="compact-qty-selector">
+            <v-btn
+              icon="mdi-minus"
+              variant="flat"
+              size="28"
+              rounded="circle"
+              class="bg-white elevation-1"
+              :disabled="selectedVariantQty <= 0"
+              @click="decreaseVariantQty"
+            />
+            <span class="mx-5 font-weight-black text-body-1">
+              {{ selectedVariantQty }}
+            </span>
+            <v-btn
+              icon="mdi-plus"
+              variant="flat"
+              size="28"
+              rounded="circle"
+              class="bg-primary elevation-1"
+              @click="increaseVariantQty"
+            />
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <div class="text-subtitle-2 font-weight-bold mb-3">Sugar</div>
+          <div class="d-flex flex-wrap ga-2">
+            <v-chip
+              v-for="s in sugarOptions"
+              :key="s"
+              filter
+              variant="flat"
+              :color="selectedSugar === s ? 'primary' : 'grey-lighten-4'"
+              class="px-4"
+              @click="selectedSugar = s"
+            >
+              {{ s }}%
+            </v-chip>
+          </div>
+        </div>
+
+        <div class="mb-8">
+          <div class="text-subtitle-2 font-weight-bold mb-3">Note</div>
+          <v-textarea
+            v-model="note"
+            rows="1"
+            auto-grow
+            variant="outlined"
+            rounded="xl"
+            placeholder="Example: less ice, extra hot, no straw..."
+            hide-details
+            color="primary"
+            bg-color="grey-lighten-5"
+            class="custom-textarea"
+          />
+        </div>
+      </div>
+
+      <v-btn
+        block
+        size="large"
+        rounded="xl"
+        color="primary"
+        elevation="0"
+        class="text-none font-weight-bold py-6"
+        :disabled="!selectedVariant || selectedVariantQty === 0"
+        @click="confirmAddVariant"
+      >
+        CONFIRM ORDER
+      </v-btn>
+    </v-card>
+  </v-bottom-sheet>
 </template>
 
 <style scoped>
@@ -386,52 +403,58 @@
     transform: scale(0.98);
   }
 
+  /* Compact Qty Selector */
+  .compact-qty-selector {
+    background-color: #f5f5f5;
+    border-radius: 50px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+  }
+  .line-height-1 {
+    line-height: 1.2;
+  }
 
+  /* 3 Column Grid */
+  .modern-variant-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
 
-.line-height-1 {
-  line-height: 1.2;
-}
+  .size-card {
+    border: 1.5px solid #e0e0e0 !important;
+    transition: all 0.2s ease;
+    background-color: transparent;
+  }
 
-/* 3 Column Grid */
-.modern-variant-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
+  .selected-card {
+    border: 2px solid var(--v-primary-base, #4db6ac) !important;
+    background-color: #f1f8f7 !important; /* Very light primary tint */
+  }
 
-.size-card {
-  border: 1.5px solid #e0e0e0 !important;
-  transition: all 0.2s ease;
-  background-color: transparent;
-}
+  .selection-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
 
-.selected-card {
-  border: 2px solid var(--v-primary-base, #4db6ac) !important;
-  background-color: #f1f8f7 !important; /* Very light primary tint */
-}
+  /* Modern Qty Bar */
+  .modern-qty-bar {
+    background-color: #f5f5f5;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px;
+    max-width: 100%;
+  }
 
-.selection-icon {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
+  .custom-textarea :deep(.v-field__outline) {
+    --v-field-border-opacity: 0.1;
+  }
 
-/* Modern Qty Bar */
-.modern-qty-bar {
-  background-color: #f5f5f5;
-  border-radius: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px;
-  max-width: 100%;
-}
-
-.custom-textarea :deep(.v-field__outline) {
-  --v-field-border-opacity: 0.1;
-}
-
-.v-btn--disabled {
-  opacity: 0.4;
-}
+  .v-btn--disabled {
+    opacity: 0.4;
+  }
 </style>
