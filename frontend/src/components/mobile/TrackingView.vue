@@ -140,8 +140,8 @@
             </div>
             <v-btn
               color="primary"
-              rounded="xl"
-              class="px-6 font-weight-black text-none"
+              rounded="pill"
+              class="px-6 text-none"
               elevation="0"
               @click="$emit('reset')"
             >

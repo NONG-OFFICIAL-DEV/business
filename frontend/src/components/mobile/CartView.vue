@@ -135,9 +135,9 @@
       <v-btn
         block
         color="primary"
-        height="56"
+        size="large"
         rounded="pill"
-        class="font-weight-bold text-subtitle-1 elevation-4 checkout-btn"
+        class="text-subtitle-1 elevation-4 checkout-btn"
         :loading="loading"
         @click="$emit('submit')"
       >

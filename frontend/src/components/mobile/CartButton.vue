@@ -10,10 +10,10 @@
   <div class="cart-anchor px-4">
     <v-btn
       block
-      color="#3b828e"
-      height="56"
+      size="large"
+      color="primary"
       rounded="pill"
-      class="text-none white-text shadow-top"
+      class="text-none shadow-top"
       elevation="8"
       @click="$emit('open')"
     >

@@ -1,5 +1,7 @@
 <script setup>
   import { ref, computed } from 'vue'
+  import { useCurrency } from '@/composables/useCurrency.js'
+  const { formatCurrency, formatCurrencyNoSymbol } = useCurrency()
 
   const props = defineProps({
     items: Array,
@@ -15,7 +17,7 @@
   const showVariantSheet = ref(false)
   const selectedProduct = ref(null)
   const selectedVariant = ref(null)
-  const selectedVariantQty = ref(0) // track variant quantity
+  const selectedVariantQty = ref(1) // track variant quantity
 
   // Sugar + note
   const selectedSugar = ref(100)
@@ -39,14 +41,18 @@
 
   const resetVariantExtras = () => {
     selectedVariant.value = null
-    selectedVariantQty.value = 0
-    selectedSugar.value = 100
+    selectedVariantQty.value = 1
+    selectedSugar.value = 50
     note.value = ''
   }
 
   const openVariantPicker = product => {
     selectedProduct.value = product
     resetVariantExtras()
+    // ✅ Auto select first variant
+    if (product?.variants?.length) {
+      selectedVariant.value = product.variants[0]
+    }
     showVariantSheet.value = true
   }
 
@@ -112,7 +118,7 @@
   }
 
   const decreaseVariantQty = () => {
-    if (selectedVariantQty.value <= 0) return
+    if (selectedVariantQty.value <= 1) return // ✅ stop at 1
     selectedVariantQty.value--
   }
 
@@ -307,10 +313,7 @@
           </div>
         </div>
 
-        <div
-          v-if="selectedVariant"
-          class="mb-6 d-flex align-center justify-space-between"
-        >
+        <div class="mb-6 d-flex align-center justify-space-between">
           <div class="text-subtitle-2 font-weight-bold">Quantity</div>
 
           <div class="compact-qty-selector">
@@ -320,7 +323,7 @@
               size="28"
               rounded="circle"
               class="bg-white elevation-1"
-              :disabled="selectedVariantQty <= 0"
+              :disabled="selectedVariantQty <= 1"
               @click="decreaseVariantQty"
             />
             <span class="mx-5 font-weight-black text-body-1">
@@ -370,19 +373,41 @@
           />
         </div>
       </div>
-
-      <v-btn
-        block
-        size="large"
-        rounded="xl"
-        color="primary"
-        elevation="0"
-        class="text-none font-weight-bold py-6"
-        :disabled="!selectedVariant || selectedVariantQty === 0"
-        @click="confirmAddVariant"
-      >
-        CONFIRM ORDER
-      </v-btn>
+      <!-- <div class="mb-6 d-flex align-center justify-space-between ga-2">
+        <div class="compact-qty-selector">
+          <v-btn
+            icon="mdi-minus"
+            variant="flat"
+            size="x-small"
+            rounded="circle"
+            class="bg-white elevation-1"
+            :disabled="selectedVariantQty <= 1"
+            @click="decreaseVariantQty"
+          />
+          <span class="mx-5 font-weight-black text-body-1">
+            {{ selectedVariantQty }}
+          </span>
+          <v-btn
+            icon="mdi-plus"
+            variant="flat"
+            size="x-small"
+            rounded="circle"
+            class="bg-primary elevation-1"
+            @click="increaseVariantQty"
+          />
+        </div> -->
+        <v-btn
+          size="large"
+          rounded="pill"
+          color="primary"
+          elevation="0"
+          class="text-none"
+          :disabled="!selectedVariant || selectedVariantQty === 0"
+          @click="confirmAddVariant"
+        >
+          CONFIRM ORDER {{ formatCurrency(selectedVariantQty * selectedVariant?.price) }}
+        </v-btn>
+      <!-- </div> -->
     </v-card>
   </v-bottom-sheet>
 </template>
