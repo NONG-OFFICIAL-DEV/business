@@ -230,10 +230,7 @@
               />
             </div>
 
-            <div
-              v-else
-              class="d-flex align-center border rounded-pill px-1 bg-grey-lighten-5"
-            >
+            <div v-else>
               <QtyStepper
                 :modelValue="getProductTotalQty(p)"
                 small
@@ -319,6 +316,7 @@
           <QtyStepper
             v-model="selectedVariantQty"
             :min="1"
+            small
             :max="MAX_QTY_PER_ITEM"
             @change="
               delta => (delta > 0 ? increaseVariantQty() : decreaseVariantQty())
@@ -359,29 +357,6 @@
           />
         </div>
       </div>
-      <!-- <div class="mb-6 d-flex align-center justify-space-between ga-2">
-        <div class="compact-qty-selector">
-          <v-btn
-            icon="mdi-minus"
-            variant="flat"
-            size="x-small"
-            rounded="circle"
-            class="bg-white elevation-1"
-            :disabled="selectedVariantQty <= 1"
-            @click="decreaseVariantQty"
-          />
-          <span class="mx-5 font-weight-black text-body-1">
-            {{ selectedVariantQty }}
-          </span>
-          <v-btn
-            icon="mdi-plus"
-            variant="flat"
-            size="x-small"
-            rounded="circle"
-            class="bg-primary elevation-1"
-            @click="increaseVariantQty"
-          />
-        </div> -->
       <v-btn
         size="large"
         rounded="pill"
@@ -415,14 +390,6 @@
     transform: scale(0.98);
   }
 
-  /* Compact Qty Selector */
-  .compact-qty-selector {
-    background-color: #f5f5f5;
-    border-radius: 50px;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-  }
   .line-height-1 {
     line-height: 1.2;
   }
@@ -449,17 +416,6 @@
     position: absolute;
     top: 10px;
     right: 10px;
-  }
-
-  /* Modern Qty Bar */
-  .modern-qty-bar {
-    background-color: #f5f5f5;
-    border-radius: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px;
-    max-width: 100%;
   }
 
   .custom-textarea :deep(.v-field__outline) {
