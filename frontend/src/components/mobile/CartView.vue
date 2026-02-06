@@ -39,7 +39,7 @@
         <v-col cols="8" class="text-center">
           <div class="text-subtitle-1 font-weight-black">My Basket</div>
           <div class="text-caption text-grey mt-n1">
-            {{ cart.length > 0 ? cart.length : 0 }} items selected
+            {{ totalItems }} items selected
           </div>
         </v-col>
         <v-col cols="2" class="d-flex justify-end">
