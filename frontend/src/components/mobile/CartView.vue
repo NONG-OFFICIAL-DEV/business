@@ -152,7 +152,7 @@
         color="primary"
         size="large"
         rounded="pill"
-        class="text-subtitle-1 elevation-4 checkout-btn font-weight-bold"
+        class="elevation-1 checkout-btn"
         :loading="loading"
         @click="$emit('submit')"
       >
@@ -175,7 +175,7 @@
   .scroll-content {
     flex-grow: 1;
     overflow-y: auto;
-    padding-bottom: 220px !important;
+    padding-bottom: 150px !important;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -216,7 +216,6 @@
 
   .checkout-btn {
     transition: transform 0.1s;
-    height: 54px !important;
   }
 
   .checkout-btn:active {
