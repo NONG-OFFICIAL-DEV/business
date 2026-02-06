@@ -1,5 +1,7 @@
 <script setup>
   import { computed } from 'vue'
+  import { useCurrency } from '@/composables/useCurrency.js'
+  const { formatCurrency } = useCurrency()
   const prop = defineProps({
     cart: {
       type: Array,
@@ -22,7 +24,6 @@
 
 <template>
   <div class="cart-page-wrapper">
-    
     <header class="sticky-header px-2">
       <v-row no-gutters align="center" class="py-2">
         <v-col cols="2">
@@ -61,7 +62,12 @@
             <v-icon size="40" color="grey-lighten-1">mdi-basket-outline</v-icon>
           </v-avatar>
           <p class="text-body-2 text-medium-emphasis">Your basket is empty</p>
-          <v-btn variant="text" color="primary" class="mt-2" @click="$emit('back')">
+          <v-btn
+            variant="text"
+            color="primary"
+            class="mt-2"
+            @click="$emit('back')"
+          >
             Go Shopping
           </v-btn>
         </div>
@@ -84,16 +90,20 @@
             />
             <div class="ml-4 d-flex flex-column justify-center flex-grow-1">
               <div class="d-flex justify-space-between align-start">
-                <span class="font-weight-bold text-subtitle-1">{{ item.name }}</span>
+                <span class="font-weight-bold text-subtitle-1">
+                  {{ item.name }}
+                </span>
                 <span class="font-weight-black text-teal-darken-3">
-                  ${{ (item.price * item.qty).toFixed(2) }}
+                  {{ formatCurrency(item.price * item.qty) }}
                 </span>
               </div>
               <div class="d-flex justify-space-between align-center mt-2">
                 <span class="text-caption text-grey-darken-1 font-weight-bold">
                   ${{ item.price }}
                 </span>
-                <div class="d-flex align-center border rounded-pill px-1 bg-grey-lighten-5">
+                <div
+                  class="d-flex align-center border rounded-pill px-1 bg-grey-lighten-5"
+                >
                   <v-btn
                     icon="mdi-minus"
                     size="32"
@@ -118,12 +128,17 @@
       </div>
     </main>
 
-    <footer v-if="cart.length > 0" class="fixed-footer pa-4 rounded-t-xl shadow-top">
+    <footer
+      v-if="cart.length > 0"
+      class="fixed-footer pa-4 rounded-t-xl shadow-top"
+    >
       <div class="d-flex justify-space-between align-center mb-4 px-2">
         <div>
-          <span class="text-caption text-medium-emphasis d-block">Total Amount</span>
+          <span class="text-caption text-medium-emphasis d-block">
+            Total Amount
+          </span>
           <span class="font-weight-black text-h5 text-primary">
-            ${{ total.toFixed(2) }}
+            {{ formatCurrency(total) }}
           </span>
         </div>
         <div class="text-right">

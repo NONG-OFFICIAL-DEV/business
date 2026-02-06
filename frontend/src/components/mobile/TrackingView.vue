@@ -98,7 +98,7 @@
                 </div>
               </div>
               <div class="price-tag">
-                ${{ (item.price * item.qty).toFixed(2) }}
+                {{ formatCurrency(item.price * item.qty) }}
               </div>
             </div>
 
@@ -138,7 +138,7 @@
                 Total Payable
               </p>
               <h2 class="text-h5 font-weight-black color-primary">
-                ${{ totalAmount }}
+                {{ formatCurrency(totalAmount) }}
               </h2>
             </div>
             <v-btn
@@ -163,7 +163,9 @@
   import { useRoute } from 'vue-router'
   import { useDiningTableStore } from '../../stores/diningTableStore'
   import { useOrderStream } from '@/stores/useOrderStream'
+  import { useCurrency } from '@/composables/useCurrency.js'
 
+  const { formatCurrency } = useCurrency()
   const diningTableStore = useDiningTableStore()
   const route = useRoute()
   const token = route.params.token
@@ -174,7 +176,7 @@
     tableId: Number
   })
 
-  defineEmits(['reset','back'])
+  defineEmits(['reset', 'back'])
 
   const isInitialLoading = ref(true)
   const hasReceivedFirstStreamData = ref(false)

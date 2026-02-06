@@ -1,7 +1,7 @@
 <script setup>
   import { ref, computed } from 'vue'
   import { useCurrency } from '@/composables/useCurrency.js'
-  const { formatCurrency, formatCurrencyNoSymbol } = useCurrency()
+  const { formatCurrency } = useCurrency()
 
   const props = defineProps({
     items: Array,

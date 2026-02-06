@@ -1,4 +1,6 @@
 <script setup>
+  import { useCurrency } from '@/composables/useCurrency.js'
+  const { formatCurrency } = useCurrency()
   defineProps({
     totalItems: Number,
     totalPrice: Number
@@ -13,7 +15,7 @@
       size="large"
       color="primary"
       rounded="pill"
-      class="text-none shadow-top"
+      class="shadow-top"
       elevation="8"
       @click="$emit('open')"
     >
@@ -22,16 +24,10 @@
           {{ totalItems }}
         </span>
       </v-avatar>
-
-      <span
-        class="text-subtitle-2 font-weight-bold text-uppercase tracking-widest"
-      >
-        Review Basket
-      </span>
-
+      Review Basket
       <v-spacer />
-      <span class="text-subtitle-2 font-weight-black ms-4">
-        ${{ totalPrice.toFixed(2) }}
+      <span class="ms-4">
+        {{ formatCurrency(totalPrice) }}
       </span>
     </v-btn>
   </div>
