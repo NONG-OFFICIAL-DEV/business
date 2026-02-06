@@ -1,26 +1,11 @@
 <template>
   <div>
-    <div class="modern-header px-4 d-flex align-center">
-      <v-btn
-        icon="mdi-chevron-left"
-        variant="flat"
-        size="small"
-        class="action-btn"
-        @click="$emit('reset')"
-      ></v-btn>
-      <div class="flex-grow-1 text-center">
-        <h2 class="text-subtitle-1 font-weight-black mb-0">Order Tracker</h2>
-        <div class="d-flex align-center justify-center">
-          <span class="status-indicator"></span>
-          <span
-            class="text-caption font-weight-bold text-grey-darken-1 text-uppercase tracking-widest"
-          >
-            Table {{ props.tableNumber || '...' }} • Live
-          </span>
-        </div>
-      </div>
-      <div style="width: 40px"></div>
-    </div>
+    <CustomAppHeader
+      title="Order Tracker"
+      :subtitle="`Table ${props.tableNumber || '...' } • Live`"
+      live
+      @back="$emit('reset')"
+    />
 
     <v-container class="px-5 pt-4 pb-16 mb-5">
       <template v-if="isInitialLoading">
@@ -85,9 +70,6 @@
                   <v-avatar size="50">
                     <v-img alt="John" :src="item.image_url"></v-img>
                   </v-avatar>
-                  <!-- <v-icon color="#3b828e" size="24">
-                    mdi-silverware-variant
-                  </v-icon> -->
                 </div>
                 <div class="ml-3">
                   <h3 class="text-body-1 font-weight-black mb-0">
@@ -138,7 +120,7 @@
               <p class="text-overline font-weight-black text-grey mb-n1">
                 Total Payable
               </p>
-              <h2 class="text-h5 font-weight-black color-primary">
+              <h2 class="text-h5 font-weight-black text-primary">
                 {{ formatCurrency(totalAmount) }}
               </h2>
             </div>
@@ -165,6 +147,7 @@
   import { useDiningTableStore } from '../../stores/diningTableStore'
   import { useOrderStream } from '@/stores/useOrderStream'
   import { useCurrency } from '@/composables/useCurrency.js'
+  import CustomAppHeader from './CustomAppHeader.vue'
 
   const { formatCurrency } = useCurrency()
   const diningTableStore = useDiningTableStore()
@@ -286,31 +269,6 @@
   }
   .shadow-top {
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.08) !important;
-  }
-
-  .status-indicator {
-    width: 6px;
-    height: 6px;
-    background: #4caf50;
-    border-radius: 50%;
-    margin-right: 6px;
-    box-shadow: 0 0 0 rgba(76, 175, 80, 0.4);
-    animation: pulse-green 2s infinite;
-  }
-
-  @keyframes pulse-green {
-    0% {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
-    }
-    70% {
-      transform: scale(1);
-      box-shadow: 0 0 0 8px rgba(76, 175, 80, 0);
-    }
-    100% {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
-    }
   }
 
   /* Item Cards */
@@ -437,39 +395,4 @@
     color: white;
   }
 
-  /* Floating Total */
-  .summary-anchor {
-    position: fixed;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-    z-index: 99;
-  }
-
-  .summary-floating-card {
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px);
-    border-radius: 24px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  }
-
-  .color-primary {
-    color: #3b828e;
-  }
-  .tracking-widest {
-    letter-spacing: 1px;
-  }
-
-  /* Empty State */
-  .empty-state-visual {
-    width: 120px;
-    height: 120px;
-    background: #f1f5f9;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-  }
 </style>

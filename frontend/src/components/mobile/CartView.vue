@@ -1,6 +1,8 @@
 <script setup>
   import { computed } from 'vue'
   import { useCurrency } from '@/composables/useCurrency.js'
+  import CustomAppHeader from './CustomAppHeader.vue'
+
   import QtyStepper from '../customs/QtyStepper.vue'
   const { formatCurrency } = useCurrency()
 
@@ -26,34 +28,23 @@
 
 <template>
   <div class="cart-page-wrapper">
-    <header class="sticky-header px-2">
-      <v-row no-gutters align="center" class="py-2">
-        <v-col cols="2">
-          <v-btn
-            icon="mdi-chevron-left"
-            variant="text"
-            size="small"
-            class="action-btn"
-            @click="$emit('back')"
-          />
-        </v-col>
-        <v-col cols="8" class="text-center">
-          <div class="text-subtitle-1 font-weight-black">My Basket</div>
-          <div class="text-caption text-grey mt-n1">
-            {{ totalItems }} items selected
-          </div>
-        </v-col>
-        <v-col cols="2" class="d-flex justify-end">
-          <v-btn
-            v-if="cart.length > 0"
-            icon="mdi-delete-outline"
-            variant="text"
-            color="error"
-            @click="$emit('clear')"
-          />
-        </v-col>
-      </v-row>
-    </header>
+    <CustomAppHeader
+      title="My Basket"
+      :subtitle="`${totalItems} items selected`"
+      :showBack="true"
+      @back="$emit('back')"
+    >
+      <template #right>
+        <v-btn
+          v-if="cart.length > 0"
+          icon="mdi-delete-outline"
+          variant="text"
+          color="error"
+          density="comfortable"
+          @click="$emit('clear')"
+        />
+      </template>
+    </CustomAppHeader>
 
     <main class="scroll-content pa-4">
       <v-fade-transition hide-on-leave>
@@ -173,27 +164,12 @@
 </template>
 
 <style scoped>
-  .action-btn {
-    border-radius: 14px;
-    background: white !important;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-  }
-
   .cart-page-wrapper {
     display: flex;
     flex-direction: column;
     height: 100dvh;
     overflow: hidden;
     background-color: #f8f9fa;
-  }
-
-  .sticky-header {
-    flex-shrink: 0;
-    background: white;
-    z-index: 100;
-    padding-top: env(safe-area-inset-top);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   }
 
   .scroll-content {
