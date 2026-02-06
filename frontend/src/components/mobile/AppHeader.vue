@@ -4,7 +4,7 @@
     search: String,
     cartCount: { type: Number, default: 0 }
   })
-  defineEmits(['view-process', 'update:search'])
+  defineEmits(['view-process','view-cart', 'update:search'])
 </script>
 
 <template>

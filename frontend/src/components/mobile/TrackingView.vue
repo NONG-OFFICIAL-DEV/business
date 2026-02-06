@@ -2,7 +2,7 @@
   <div>
     <div class="modern-header px-4 d-flex align-center">
       <v-btn
-        icon="mdi-arrow-left"
+        icon="mdi-chevron-left"
         variant="flat"
         size="small"
         @click="$emit('reset')"
