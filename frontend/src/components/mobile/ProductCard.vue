@@ -1,5 +1,6 @@
 <script setup>
   import { ref, computed } from 'vue'
+  import QtyStepper from '../customs/QtyStepper.vue'
   import { useCurrency } from '@/composables/useCurrency.js'
   const { formatCurrency } = useCurrency()
 
@@ -64,6 +65,22 @@
     )
   }
 
+  // ----------------------
+  // Stepper Bridge
+  // ----------------------
+  const handleStepperChange = (product, delta) => {
+    if (delta > 0) {
+      // Check limit here for a quick snackbar trigger
+      const currentQty = getProductTotalQty(product)
+      if (currentQty >= MAX_QTY_PER_ITEM) {
+        snackbar.value = true // Trigger the alert!
+        return
+      }
+      handleIncrease(product)
+    } else {
+      handleDecrease(product)
+    }
+  }
   // ----------------------
   // Main actions
   // ----------------------
@@ -138,7 +155,7 @@
       id: selectedVariant.value.id,
       menu_id: selectedProduct.value.id,
       variant_id: selectedVariant.value.id,
-      name: `${selectedProduct.value.name} (${selectedVariant.value.name})`,
+      name: selectedProduct.value.name,
       price: selectedVariant.value.price,
       size: selectedVariant.value.name,
       customizations: {
@@ -217,28 +234,12 @@
               v-else
               class="d-flex align-center border rounded-pill px-1 bg-grey-lighten-5"
             >
-              <v-btn
-                icon="mdi-minus"
-                size="24"
-                variant="text"
-                density="comfortable"
-                @click="handleDecrease(p)"
-              />
-
-              <span class="mx-2 text-caption font-weight-bold">
-                {{ getProductTotalQty(p) }}
-              </span>
-
-              <v-btn
-                icon="mdi-plus"
-                size="24"
-                variant="text"
-                density="comfortable"
-                color="primary"
-                :class="{
-                  'opacity-30': getProductTotalQty(p) >= MAX_QTY_PER_ITEM
-                }"
-                @click="handleIncrease(p)"
+              <QtyStepper
+                :modelValue="getProductTotalQty(p)"
+                small
+                :min="0"
+                :max="MAX_QTY_PER_ITEM"
+                @change="delta => handleStepperChange(p, delta)"
               />
             </div>
           </div>
@@ -315,29 +316,14 @@
 
         <div class="mb-6 d-flex align-center justify-space-between">
           <div class="text-subtitle-2 font-weight-bold">Quantity</div>
-
-          <div class="compact-qty-selector">
-            <v-btn
-              icon="mdi-minus"
-              variant="flat"
-              size="28"
-              rounded="circle"
-              class="bg-white elevation-1"
-              :disabled="selectedVariantQty <= 1"
-              @click="decreaseVariantQty"
-            />
-            <span class="mx-5 font-weight-black text-body-1">
-              {{ selectedVariantQty }}
-            </span>
-            <v-btn
-              icon="mdi-plus"
-              variant="flat"
-              size="28"
-              rounded="circle"
-              class="bg-primary elevation-1"
-              @click="increaseVariantQty"
-            />
-          </div>
+          <QtyStepper
+            v-model="selectedVariantQty"
+            :min="1"
+            :max="MAX_QTY_PER_ITEM"
+            @change="
+              delta => (delta > 0 ? increaseVariantQty() : decreaseVariantQty())
+            "
+          />
         </div>
 
         <div class="mb-6">
@@ -396,17 +382,18 @@
             @click="increaseVariantQty"
           />
         </div> -->
-        <v-btn
-          size="large"
-          rounded="pill"
-          color="primary"
-          elevation="0"
-          class="text-none"
-          :disabled="!selectedVariant || selectedVariantQty === 0"
-          @click="confirmAddVariant"
-        >
-          CONFIRM ORDER {{ formatCurrency(selectedVariantQty * selectedVariant?.price) }}
-        </v-btn>
+      <v-btn
+        size="large"
+        rounded="pill"
+        color="primary"
+        elevation="0"
+        class="text-none"
+        :disabled="!selectedVariant || selectedVariantQty === 0"
+        @click="confirmAddVariant"
+      >
+        CONFIRM ORDER
+        {{ formatCurrency(selectedVariantQty * selectedVariant?.price) }}
+      </v-btn>
       <!-- </div> -->
     </v-card>
   </v-bottom-sheet>

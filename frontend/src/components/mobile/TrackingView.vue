@@ -5,7 +5,7 @@
         icon="mdi-arrow-left"
         variant="flat"
         size="small"
-        @click="$emit('back')"
+        @click="$emit('reset')"
       ></v-btn>
       <div class="flex-grow-1 text-center">
         <h2 class="text-subtitle-1 font-weight-black mb-0">Order Tracker</h2>

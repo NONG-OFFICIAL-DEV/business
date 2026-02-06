@@ -1,7 +1,9 @@
 <script setup>
   import { computed } from 'vue'
   import { useCurrency } from '@/composables/useCurrency.js'
+  import QtyStepper from '../customs/QtyStepper.vue'
   const { formatCurrency } = useCurrency()
+
   const prop = defineProps({
     cart: {
       type: Array,
@@ -16,7 +18,7 @@
   })
 
   defineEmits(['back', 'update', 'submit', 'clear'])
-  // Inside your useCart.js or parent script
+
   const totalItems = computed(() => {
     return prop.cart.reduce((sum, item) => sum + item.qty, 0)
   })
@@ -36,11 +38,8 @@
         </v-col>
         <v-col cols="8" class="text-center">
           <div class="text-subtitle-1 font-weight-black">My Basket</div>
-          <div v-if="cart.length > 0" class="text-caption text-grey mt-n1">
-            {{ cart.length }} items selected
-          </div>
-          <div v-else class="text-caption text-grey mt-n1">
-            0 items selected
+          <div class="text-caption text-grey mt-n1">
+            {{ cart.length > 0 ? cart.length : 0 }} items selected
           </div>
         </v-col>
         <v-col cols="2" class="d-flex justify-end">
@@ -78,49 +77,54 @@
           v-for="item in cart"
           :key="item.id"
           flat
-          class="mb-4 rounded-xl border-sm overflow-hidden"
+          class="cart-card mb-4 border rounded-xl"
         >
           <div class="d-flex pa-3">
             <v-img
               :src="item.image_url"
-              width="85"
-              height="85"
+              width="90"
+              height="90"
               cover
-              class="rounded-lg flex-grow-0"
+              class="rounded-lg flex-grow-0 shadow-sm border"
             />
-            <div class="ml-4 d-flex flex-column justify-center flex-grow-1">
-              <div class="d-flex justify-space-between align-start">
-                <span class="font-weight-bold text-subtitle-1">
-                  {{ item.name }}
-                </span>
-                <span class="font-weight-black text-teal-darken-3">
-                  {{ formatCurrency(item.price * item.qty) }}
-                </span>
-              </div>
-              <div class="d-flex justify-space-between align-center mt-2">
-                <span class="text-caption text-grey-darken-1 font-weight-bold">
-                  ${{ item.price }}
-                </span>
-                <div
-                  class="d-flex align-center border rounded-pill px-1 bg-grey-lighten-5"
-                >
-                  <v-btn
-                    icon="mdi-minus"
-                    size="32"
-                    variant="text"
-                    density="comfortable"
-                    @click="$emit('update', item.id, -1)"
-                  />
-                  <span class="px-2 font-weight-bold">{{ item.qty }}</span>
-                  <v-btn
-                    icon="mdi-plus"
-                    size="32"
-                    variant="text"
-                    color="primary"
-                    density="comfortable"
-                    @click="$emit('update', item.id, 1)"
-                  />
+
+            <div class="ml-4 flex-grow-1 d-flex flex-column">
+              <div class="d-flex justify-space-between align-start mb-1">
+                <div class="pr-2">
+                  <div class="font-weight-black text-body-1 line-height-tight">
+                    {{ item.name }}
+                  </div>
+                  <div
+                    class="text-caption text-grey-darken-1 mt-1"
+                    v-if="item.has_variants"
+                  >
+                    {{ item.customizations.variant_name }}
+                    <span v-if="item.customizations.sugar">
+                      | {{ item.customizations.sugar }}% Sugar
+                    </span>
+                  </div>
                 </div>
+                <div
+                  class="text-teal-darken-3 font-weight-black text-subtitle-1"
+                >
+                  {{ formatCurrency(item.price * item.qty) }}
+                </div>
+              </div>
+
+              <div class="mt-auto d-flex justify-space-between align-center">
+                <div
+                  class="text-caption font-weight-bold text-grey-darken-1 bg-grey-lighten-4 px-2 py-0.5 rounded"
+                >
+                  {{ formatCurrency(item.price) }}
+                </div>
+                <QtyStepper
+                  v-model="item.qty"
+                  small
+                  strict
+                  :max="5"
+                  :min="0"
+                  @change="delta => $emit('update', item.id, delta)"
+                />
               </div>
             </div>
           </div>
@@ -132,7 +136,7 @@
       v-if="cart.length > 0"
       class="fixed-footer pa-4 rounded-t-xl shadow-top"
     >
-      <div class="d-flex justify-space-between align-center mb-4 px-2">
+      <div class="d-flex justify-space-between align-end mb-4 px-2">
         <div>
           <span class="text-caption text-medium-emphasis d-block">
             Total Amount
@@ -145,15 +149,18 @@
           <span class="text-caption text-medium-emphasis d-block">
             {{ totalItems }} Items
           </span>
-          <span class="text-subtitle-2">Table {{ tableNumber }}</span>
+          <span class="text-subtitle-2 font-weight-black">
+            Table {{ tableNumber }}
+          </span>
         </div>
       </div>
+
       <v-btn
         block
         color="primary"
         size="large"
         rounded="pill"
-        class="text-subtitle-1 elevation-4 checkout-btn"
+        class="text-subtitle-1 elevation-4 checkout-btn font-weight-bold"
         :loading="loading"
         @click="$emit('submit')"
       >
@@ -165,17 +172,14 @@
 </template>
 
 <style scoped>
-  /* 1. Reset the wrapper to be a non-scrolling flex container */
   .cart-page-wrapper {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    height: 100dvh;
     overflow: hidden;
     background-color: #f8f9fa;
   }
 
-  /* 2. Header stays at top, supports iOS notch */
   .sticky-header {
     flex-shrink: 0;
     background: white;
@@ -184,16 +188,33 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   }
 
-  /* 3. This area grows to fill space and scrolls internally */
   .scroll-content {
     flex-grow: 1;
     overflow-y: auto;
-    /* Extra padding at bottom so items aren't hidden by the floating footer */
-    padding-bottom: 200px !important;
-    -webkit-overflow-scrolling: touch; /* Smooth scroll for iOS */
+    padding-bottom: 220px !important;
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* 4. Footer is fixed to the viewport bottom */
+  /* Improved Stepper Styling */
+  .stepper-box {
+    display: flex;
+    align-items: center;
+    background: #f5f5f5;
+    padding: 3px;
+    border-radius: 50px;
+  }
+
+  .qty-display {
+    min-width: 30px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+
+  .line-height-tight {
+    line-height: 1.2;
+  }
+
   .fixed-footer {
     position: fixed;
     bottom: 0;
@@ -201,24 +222,25 @@
     right: 0;
     background: white;
     z-index: 1000;
-    /* Bottom padding accounts for iPhone home bar */
     padding-bottom: calc(env(safe-area-inset-bottom) + 16px) !important;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .shadow-top {
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.05) !important;
   }
 
   .checkout-btn {
     transition: transform 0.1s;
+    height: 54px !important;
   }
+
   .checkout-btn:active {
     transform: scale(0.97);
   }
 
-  /* Custom styling for cart cards */
-  .border-sm {
+  .cart-card {
+    background: white !important;
     border: 1px solid rgba(0, 0, 0, 0.05) !important;
   }
 </style>
