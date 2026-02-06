@@ -118,7 +118,7 @@
                   {{ formatCurrency(item.price) }}
                 </div>
                 <QtyStepper
-                  v-model="item.qty"
+                  :modelValue="item.qty"
                   small
                   strict
                   :max="5"

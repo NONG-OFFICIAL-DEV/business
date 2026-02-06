@@ -35,7 +35,7 @@
   const getProductTotalQty = product => {
     if (!product?.has_variants) return getQty(props.cart, product.id)
     return (product.variants || []).reduce(
-      (sum, v) => sum + getQty(props.cart, v.id),
+      (sum, v) => sum + getQty(props.cart, `v${v.id}`),
       0
     )
   }
@@ -59,7 +59,7 @@
 
   const getLastVariantInCart = product => {
     if (!product?.has_variants) return null
-    const variantIds = (product.variants || []).map(v => v.id)
+    const variantIds = (product.variants || []).map(v => `v${v.id}`)
     return (
       [...props.cart].reverse().find(i => variantIds.includes(i.id)) || null
     )
@@ -152,7 +152,7 @@
 
     const itemToAdd = {
       ...selectedProduct.value,
-      id: selectedVariant.value.id,
+      id: `v${selectedVariant.value.id}`,
       menu_id: selectedProduct.value.id,
       variant_id: selectedVariant.value.id,
       name: selectedProduct.value.name,
@@ -314,7 +314,7 @@
         <div class="mb-6 d-flex align-center justify-space-between">
           <div class="text-subtitle-2 font-weight-bold">Quantity</div>
           <QtyStepper
-            v-model="selectedVariantQty"
+            :modelValue="selectedVariantQty"
             :min="1"
             small
             :max="MAX_QTY_PER_ITEM"
