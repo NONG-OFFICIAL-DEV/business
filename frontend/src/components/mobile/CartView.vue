@@ -33,6 +33,7 @@
             icon="mdi-chevron-left"
             variant="text"
             size="small"
+            class="action-btn"
             @click="$emit('back')"
           />
         </v-col>
@@ -172,6 +173,13 @@
 </template>
 
 <style scoped>
+  .action-btn {
+    border-radius: 14px;
+    background: white !important;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  }
+
   .cart-page-wrapper {
     display: flex;
     flex-direction: column;

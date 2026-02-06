@@ -5,6 +5,7 @@
         icon="mdi-chevron-left"
         variant="flat"
         size="small"
+        class="action-btn"
         @click="$emit('reset')"
       ></v-btn>
       <div class="flex-grow-1 text-center">
@@ -267,6 +268,12 @@
 </script>
 
 <style scoped>
+  .action-btn {
+    border-radius: 14px;
+    background: white !important;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  }
   /* Header */
   .modern-header {
     height: 72px;

@@ -29,6 +29,7 @@
           class="action-btn"
           icon
           variant="flat"
+          size="small"
           @click="$emit('view-cart')"
         >
           <v-badge
@@ -45,6 +46,7 @@
         <v-btn
           class="action-btn"
           icon
+          size="small"
           variant="flat"
           @click="$emit('view-process')"
         >
@@ -144,8 +146,6 @@
 
   /* Modern action button */
   .action-btn {
-    width: 42px;
-    height: 42px;
     border-radius: 14px;
     background: white !important;
     border: 1px solid rgba(0, 0, 0, 0.06);
