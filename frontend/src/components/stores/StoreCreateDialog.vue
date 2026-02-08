@@ -133,7 +133,7 @@
                 v-model="form.status"
                 color="primary"
                 true-value="active"
-                fale-value="inctive"
+                false-value="inactive"
                 inset
               ></v-switch>
             </v-col>
@@ -267,7 +267,7 @@
     loading.value = true
     try {
       // emit payload to parent for create or update
-      emit('created', { ...form })
+      emit('created', { ...form.value })
       close()
     } finally {
       loading.value = false

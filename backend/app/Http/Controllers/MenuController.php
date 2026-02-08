@@ -12,32 +12,32 @@ class MenuController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Menu::with('variants')->when(
-            $request->has('has_variants'),
-            fn ($q) => $q->where('has_variants', true)
-        );
+        $query = Menu::with('variants');
 
-        // Filter by status if provided (?status=1 or ?status=0)
         if ($request->has('status')) {
             $query->where('status', $request->status);
         }
 
-        // Pagination (default 10 per page)
-        $menus = $query->orderBy('id', 'desc')->paginate(10);
+        $menus = $query->orderBy('menu_category_id', 'desc')->get();
 
-        $menus->getCollection()->transform(function ($menu) {
+        // Add image_url
+        $menus = $menus->map(function ($menu) {
             $menu->image_url = $menu->image
                 ? asset('storage/' . $menu->image)
                 : null;
             return $menu;
         });
 
+        // ✅ Group by category
+        // $grouped = $menus->groupBy('category');
+
         return response()->json([
-            'success'   => true,
-            'message'   => 'Suppliers retrieved successfully.',
-            'data'      => $menus,
+            'success' => true,
+            'message' => 'Menus retrieved successfully.',
+            'data'    => $menus
         ], 200);
     }
+
 
     /**
      * Store a newly created resource in storage.

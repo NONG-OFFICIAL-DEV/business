@@ -7,8 +7,8 @@ export const useMenuStore = defineStore('menu', () => {
   const loading = ref(false)
 
   async function fetchMenus() {
-    const { data } = await menuService.fetchMenus()
-    menus.value = data.data || []
+    const res = await menuService.fetchMenus()
+    menus.value = res.data || []
   }
 
   async function saveMenu(menu) {
