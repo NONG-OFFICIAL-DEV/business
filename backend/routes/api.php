@@ -63,6 +63,7 @@ Route::middleware('jwt.auth')->group(function () {
     Route::apiResource('suppliers', SupplierController::class);
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('products', ProductController::class);
+    Route::get('/products/scan/{barcode}', [ProductController::class, 'scan']);
     Route::apiResource('stocks', StockController::class);
     Route::apiResource('purchases', PurchaseController::class);
     Route::apiResource('roles', RoleController::class);

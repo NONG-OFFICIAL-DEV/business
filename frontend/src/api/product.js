@@ -23,5 +23,8 @@ export const productService = {
   },
   async remove(id) {
     await http.delete(`/products/${id}`)
+  },
+  async productsScan(barcode) {
+   return await http.get(`/products/scan/${barcode}`)
   }
 }

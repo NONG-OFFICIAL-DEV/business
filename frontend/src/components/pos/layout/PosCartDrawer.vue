@@ -1,5 +1,5 @@
 <script setup>
-  import { computed } from 'vue'
+  import { computed, ref } from 'vue'
   import { usePosStore } from '@/stores/posStore'
 
   /* Sub components */
@@ -7,10 +7,11 @@
   import HospitalityCartItems from './cardDrawer/HospitalityCartItems.vue'
   import RetailCartTable from './cardDrawer/RetailCartTable.vue'
   import CartFooter from './cardDrawer/CartFooter.vue'
-  const emit = defineEmits(['checkout', 'print-bill'])
+  const emit = defineEmits(['checkout', 'print-bill','scan'])
 
   /* Store */
   const posStore = usePosStore()
+  const barcode = ref(null)
 
   /* Computed */
   const isHospitality = computed(
@@ -60,6 +61,11 @@
   const handlePrintBill = () => {
     emit('print-bill')
   }
+  const scan = () => {
+    if (!barcode.value) return
+    emit('scan', barcode.value)
+    barcode.value = ''
+  }
 </script>
 <template>
   <v-navigation-drawer
@@ -81,6 +87,18 @@
 
       <!-- CONTENT -->
       <div class="flex-grow-1 overflow-y-auto pa-3">
+        <v-text-field
+          v-if="!isHospitality"
+          v-model="barcode"
+          label="Scan or enter barcode"
+          density="compact"
+          variant="outlined"
+          hide-details
+          autofocus
+          @keyup.enter="scan"
+        />
+
+        <v-divider class="my-2" />
         <HospitalityCartItems
           v-if="isHospitality"
           :items="displayItems"

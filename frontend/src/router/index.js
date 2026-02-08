@@ -244,6 +244,12 @@ const routes = [
     props: true
   },
   {
+    path: '/mobile-scan',
+    name: 'MobileScanner',
+    component: () => import('@/views/mobile/MobileScanner.vue'),
+    props: true
+  },
+  {
     path: '/kitchen-kds',
     name: 'KitchenKDS',
     component: () => import('@/views/kitchen/ChefKDS.vue')

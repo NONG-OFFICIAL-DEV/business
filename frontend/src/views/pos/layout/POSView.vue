@@ -120,7 +120,7 @@ ACTIONS
             note: 'Test'
           }))
         }
-        await orderStore.createOrder(orderData,'overlay')
+        await orderStore.createOrder(orderData, 'overlay')
         await menuStore.fetchMenus()
       }
 
@@ -153,6 +153,19 @@ ACTIONS
     await authStore.logout()
     notif(t('messages.logout_sucess'), { type: 'success', color: 'primary' })
     router.push({ name: 'Login' })
+  }
+
+  const handleScanBarcode = async barcode => {
+    try {
+      const product = await productStore.scanProduct(barcode)
+      handleAddProductToCart({
+        ...product,
+        qty: 1, // force qty = 1
+        customizations: {}
+      })
+    } catch {
+      notif(t('messages.error'), { type: 'error', color: 'primary' })
+    }
   }
 
   /* -------------------------
@@ -188,6 +201,7 @@ ON MOUNT
     :payment-methods="posStore.paymentMethods"
     @checkout="handleCheckout"
     @print-bill="handlePrintBill"
+    @scan="handleScanBarcode"
   />
 
   <!-- MAIN VIEW -->

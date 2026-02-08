@@ -190,4 +190,24 @@ class ProductController extends Controller
             'message' => 'Product deleted successfully.',
         ], 200);
     }
+
+    public function scan($barcode)
+    {
+        $product = Product::where('sku', $barcode)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$product) {
+            return response()->json([
+                'message' => 'Product not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'id' => $product->id,
+            'name' => $product->name,
+            'price' => $product->price,
+            'stock' => $product->stock
+        ]);
+    }
 }

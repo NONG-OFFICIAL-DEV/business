@@ -21,6 +21,11 @@ export const useProductStore = defineStore('product', {
 
     async deleteProduct(id) {
       await productService.remove(id)
+    },
+
+    async scanProduct(barcode) {
+     const res = await productService.productsScan(barcode)
+     return res.data
     }
   }
 })

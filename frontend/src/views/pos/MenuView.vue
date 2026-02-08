@@ -10,7 +10,7 @@
       <v-slide-group
         v-model="selectedCategory"
         mandatory
-        show-arrows="false"
+        :showArrows="true"  
         class="category-slider"
       >
         <v-slide-group-item v-slot="{ isSelected, toggle }" value="All">
