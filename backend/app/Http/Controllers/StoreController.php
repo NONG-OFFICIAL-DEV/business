@@ -57,7 +57,7 @@ class StoreController extends Controller
             'latitude' => ['nullable', 'numeric'],
             'longitude' => ['nullable', 'numeric'],
 
-            'logo' => ['nullable','max:255'],
+            'logo' => ['nullable', 'max:255'],
 
             'status' => ['nullable', Rule::in(['active', 'inactive'])],
 
@@ -73,10 +73,6 @@ class StoreController extends Controller
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('stores', 'public');
             $validated['logo'] = $path; // ex: stores/logo.png
-        }
-        if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('stores', 'public');
-            $validated['logo'] = $path;
         }
 
         $validated['code'] = $this->generateStoreCode();
@@ -133,6 +129,10 @@ class StoreController extends Controller
             'google_map_url' => ['nullable', 'string'],
             'delivery_radius_km' => ['nullable', 'numeric'],
         ]);
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('stores', 'public');
+            $validated['logo'] = $path;
+        }
         $validated['code'] = $this->generateStoreCode();
         $validated['updated_by'] = JWTAuth::user()->id;
 
