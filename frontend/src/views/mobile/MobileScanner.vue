@@ -79,7 +79,7 @@
       const beep = new Audio('/sounds/beep.mp3')
       beep.play()
     } catch {
-      scanMessage.value = `Product not found`
+      scanMessage.value = `Product not found ${cleanCode}`
       showScanSnackbar.value = true
     }
   }
