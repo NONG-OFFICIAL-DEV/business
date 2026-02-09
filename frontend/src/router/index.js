@@ -244,6 +244,12 @@ const routes = [
     props: true
   },
   {
+    path: '/mobile-product',
+    name: 'MobileProduct',
+    component: () => import('@/views/mobile/ProductPage.vue'),
+    props: true
+  },
+  {
     path: '/mobile-scan',
     name: 'MobileScanner',
     component: () => import('@/views/mobile/MobileScanner.vue'),
