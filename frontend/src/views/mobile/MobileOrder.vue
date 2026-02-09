@@ -13,6 +13,7 @@
   import { useMenuStore } from '@/stores/menuStore'
   import { useDiningTableStore } from '../../stores/diningTableStore'
   import { useLoadingStore } from '@/stores/loading'
+  import { useCategoryMenuStore } from '@/stores/categoryMenu'
 
   const orderStore = useOrderStore()
   const menuStore = useMenuStore()
@@ -22,7 +23,7 @@
   const tableNumber = ref()
   const tableId = ref()
   const loadingStore = useLoadingStore()
-
+  const menuCategoryStore = useCategoryMenuStore()
   // --- PERSISTENCE LOGIC START ---
   // Load the page from localStorage immediately on script load
   const page = ref(localStorage.getItem('active_page') || 'home')
@@ -46,9 +47,9 @@
     if (page.value === 'cart' && cart.value.length === 0) {
       page.value = 'home'
     }
+    await menuCategoryStore.fetchAll({loading:'skeleton'})
   })
 
-  const categories = ['All', 'Coffee', 'Tea', 'Pastries', 'Food']
   const selectedCategory = ref('All')
   const isOrdering = ref(false)
   const { cart, totalItems, cartTotal, addToCart, updateQty, clearCart } =
@@ -101,7 +102,7 @@
   const filteredProducts = computed(() => {
     let list = menuStore.menus.data || []
     if (selectedCategory.value !== 'All') {
-      list = list.filter(p => p.category === selectedCategory.value)
+      list = list.filter(p => p.menu_category_id === selectedCategory.value)
     }
     if (search.value) {
       list = list.filter(p =>
@@ -128,7 +129,7 @@
           <div v-if="page === 'home'">
             <div class="sticky-nav bg-white shadow-sm">
               <CategoryTabs
-                :categories="categories"
+                :categories="menuCategoryStore.items"
                 v-model="selectedCategory"
                 v-model:search="search"
               />

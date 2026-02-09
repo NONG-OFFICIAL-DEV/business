@@ -89,7 +89,6 @@
         <span class="text-subtitle-2 text-grey-darken-4">Categories</span>
         <span class="text-subtitle-2 cursor-pointer">View All</span>
       </div>
-
       <v-slide-group
         v-model="selectedCategory"
         mandatory
@@ -97,30 +96,16 @@
         class="category-slider"
       >
         <v-slide-group-item v-slot="{ isSelected, toggle }" value="All">
-          <v-card
-            :class="[
-              'category-pill',
-              isSelected ? 'active-pill' : 'inactive-pill'
-            ]"
-            flat
+          <v-btn
+            :color="isSelected ? 'primary' : undefined"
+            class="ma-2 text-none"
+            rounded
+            prepend-icon="mdi-food-croissant"
+            variant="tonal"
             @click="toggle"
           >
-            <div class="d-flex align-center pa-2 pr-4">
-              <v-avatar
-                size="36"
-                :color="isSelected ? 'white' : 'grey-lighten-4'"
-                class="mr-3"
-              >
-                <v-icon
-                  size="20"
-                  :color="isSelected ? 'primary' : 'grey-darken-1'"
-                >
-                  mdi-star-outline
-                </v-icon>
-              </v-avatar>
-              <span class="text-body-2">All</span>
-            </div>
-          </v-card>
+            All
+          </v-btn>
         </v-slide-group-item>
 
         <v-slide-group-item
@@ -129,30 +114,16 @@
           v-slot="{ isSelected, toggle }"
           :value="cat.id"
         >
-          <v-card
-            :class="[
-              'category-pill mx-2',
-              isSelected ? 'active-pill' : 'inactive-pill'
-            ]"
-            flat
+          <v-btn
+            :color="isSelected ? 'primary' : undefined"
+            class="ma-2 text-none"
+            rounded
+            prepend-icon="mdi-food-croissant"
+            variant="tonal"
             @click="toggle"
           >
-            <div class="d-flex align-center pa-2 pr-4">
-              <v-avatar
-                size="36"
-                :color="isSelected ? 'white' : 'grey-lighten-4'"
-                class="mr-3 shadow-sm"
-              >
-                <v-icon
-                  size="20"
-                  :color="isSelected ? 'primary' : 'grey-darken-3'"
-                >
-                  mdi-food-croissant
-                </v-icon>
-              </v-avatar>
-              <span class="text-body-2">{{ cat.name }}</span>
-            </div>
-          </v-card>
+            {{ cat.name }}
+          </v-btn>
         </v-slide-group-item>
       </v-slide-group>
     </div>
@@ -198,7 +169,6 @@
   </v-container>
 </template>
 
-
 <style scoped>
   .product-card {
     transition: transform 0.2s;
@@ -206,33 +176,6 @@
   }
   .product-card:hover {
     transform: translateY(-4px);
-  }
-  /* The Pill Container */
-  .category-pill {
-    border-radius: 16px !important;
-    transition: all 0.3s ease;
-    min-width: 120px;
-    cursor: pointer;
-    border: 1px solid transparent !important;
-  }
-
-  /* Selected State (Orange style from image) */
-  .active-pill {
-    background: #ff7043 !important; /* Deep Orange */
-    color: white !important;
-    box-shadow: 0 4px 15px rgba(255, 112, 67, 0.4) !important;
-  }
-
-  /* Unselected State */
-  .inactive-pill {
-    background: white !important;
-    color: #2c3e50 !important;
-    border: 1px solid #f0f0f0 !important;
-  }
-
-  /* Avatar/Icon logic */
-  .v-avatar {
-    transition: background-color 0.3s ease;
   }
 
   .category-slider {

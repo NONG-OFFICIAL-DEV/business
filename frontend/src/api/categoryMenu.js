@@ -3,8 +3,10 @@ import http from './api'
 const BASE_URL = '/category-menus'
 
 export const categoryMenuService = {
-  getAll() {
-    return http.get(BASE_URL)
+  getAll(loading) {
+    return http.get(BASE_URL, {
+      meta: { loader: loading }
+    })
   },
 
   getById(id) {

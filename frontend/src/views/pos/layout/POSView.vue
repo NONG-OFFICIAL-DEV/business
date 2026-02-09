@@ -174,7 +174,7 @@ ON MOUNT
   onMounted(async () => {
     await menuStore.fetchMenus()
     await productStore.fetchProducts()
-    await categoryStore.fetchAll()
+    await categoryStore.fetchAll({loading:'overlay'})
     try {
       await authStore.fetchMe()
       user.value = authStore.me

@@ -7,10 +7,10 @@ export const useCategoryMenuStore = defineStore('categoryMenu', () => {
   const loading = ref(false)
   const error = ref(null)
 
-  async function fetchAll() {
+  async function fetchAll(loading) {
     loading.value = true
     try {
-      const { data } = await categoryMenuService.getAll()
+      const { data } = await categoryMenuService.getAll(loading)
       items.value = data.data || []
     } catch (err) {
       error.value = err

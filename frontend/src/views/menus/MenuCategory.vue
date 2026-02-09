@@ -140,7 +140,7 @@
       }
       notif(t('messages.saved_success'), { type: 'success' })
       resetForm()
-      await categoryStore.fetchAll()
+      await categoryStore.fetchAll({loading:'overlay'})
     } catch (err) {
       notif(t('messages.save_failed'), { type: 'error' })
     } finally {
@@ -156,12 +156,12 @@
       agree: async () => {
         await categoryStore.deleteItem(item.id)
         notif(t('messages.deleted_success'), { type: 'success' })
-        await categoryStore.fetchAll()
+        await categoryStore.fetchAll({loading:'overlay'})
       }
     })
   }
 
   onMounted(() => {
-    categoryStore.fetchAll()
+    categoryStore.fetchAll({loading:'overlay'})
   })
 </script>

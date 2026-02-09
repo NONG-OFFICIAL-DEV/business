@@ -228,7 +228,7 @@
       }
       notif(t('messages.saved_success'), { type: 'success' })
       categoryDialog.value = false
-      await categoryStore.fetchAll()
+      await categoryStore.fetchAll({loading:'overlay'})
     } catch {
       notif(t('messages.save_failed'), { type: 'error' })
     }
@@ -236,6 +236,6 @@
 
   onMounted(() => {
     menuStore.fetchMenus()
-    categoryStore.fetchAll()
+    categoryStore.fetchAll({loading:'overlay'})
   })
 </script>
