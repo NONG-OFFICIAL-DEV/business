@@ -244,7 +244,7 @@ const routes = [
     props: true
   },
   {
-    path: '/mobile-product',
+    path: '/online-store',
     name: 'MobileProduct',
     component: () => import('@/views/mobile/OnlineStore.vue'),
     props: true

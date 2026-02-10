@@ -254,18 +254,14 @@
   const addToCart = product => {
     cartStore.addToCart(product)
   }
-
 </script>
 
 <template>
   <!-- HEADER -->
   <v-app-bar app flat color="white" class="premium-header border-b">
-    <v-container
-      class="d-flex align-center justify-space-between py-0 px-4"
-      style="max-width: 1200px"
-    >
+    <v-container class="d-flex align-center justify-space-between py-0 px-4">
       <h1 class="text-h6 font-weight-black tracking-tighter">STORE.CA</h1>
-    
+
       <v-btn icon @click="$router.push('/mobile-cart')">
         <v-badge
           :content="cartStore.cartCount"
@@ -274,14 +270,12 @@
         >
           <v-icon>mdi-shopping-outline</v-icon>
         </v-badge>
-
-        <v-icon v-else>mdi-shopping-outline</v-icon>
       </v-btn>
     </v-container>
   </v-app-bar>
 
   <v-main>
-    <v-container class="pa-0 pb-16 pb-md-4" style="max-width: 1200px">
+    <v-container class="pa-0 pb-16 pb-md-4">
       <!-- SEARCH -->
       <div class="px-4 py-4">
         <v-text-field

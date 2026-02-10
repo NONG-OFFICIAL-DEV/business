@@ -171,7 +171,7 @@
     </v-sheet>
 
     <div class="scroll-area px-4 py-6">
-      <div class="mx-auto" style="max-width: 600px">
+      <div class="mx-auto">
         <div class="section-label mb-2 ml-1">Contact Information</div>
         <v-card flat class="rounded-xl border-light pa-4 mb-6">
           <v-text-field
@@ -293,7 +293,7 @@
     </div>
 
     <v-sheet class="sticky-footer px-6 pt-5 pb-8 shadow-top">
-      <div class="mx-auto" style="max-width: 600px">
+      <div class="mx-auto">
         <div class="d-flex justify-space-between mb-4">
           <span class="text-grey-darken-1">Order Total</span>
           <span class="font-weight-black text-h6">
