@@ -2,15 +2,6 @@
   import { useCartStore } from '@/stores/cartStore'
   const cartStore = useCartStore()
 
-  const sendWhatsAppInquiry = () => {
-    
-    const items = cartStore.cart
-      .map(i => `${i.qty}x ${i.name} ($${(i.price * i.qty).toLocaleString()})`)
-      .join('\n')
-    const message = `👋 Hello! I'd like to order:\n\n${items}\n\n✨ Total: $${cartStore.cartTotal.toLocaleString()}\n\nPlease let me know the next steps!`
-    const phone = '123456789' // Replace with real number
-    // TODO telegram bot alert
-  }
   const confirmClearCart = () => {
     cartStore.clearCart()
   }
@@ -29,16 +20,13 @@
 
         <div class="text-center">
           <h2 class="text-subtitle-1 font-weight-bold mb-0">Shopping Cart</h2>
-          <div class="text-caption text-grey-darken-1">
-            {{ cartStore.cart.length }} items selected
-          </div>
         </div>
 
         <v-btn
           v-if="cartStore.cart.length"
           icon="mdi-trash-can-outline"
           variant="text"
-          color="grey-darken-1"
+          color="red-darken-2"
           size="small"
           @click="confirmClearCart"
         ></v-btn>
@@ -47,7 +35,7 @@
     </v-sheet>
 
     <div class="scroll-area px-4 pt-4">
-      <div class="mx-auto" style="max-width: 600px">
+      <div class="mx-auto">
         <div
           v-if="!cartStore.cart.length"
           class="empty-state-container d-flex flex-column align-center justify-center"
@@ -66,7 +54,7 @@
             color="teal-darken-2"
             size="large"
             elevation="4"
-            @click="$router.push('/mobile-product')"
+            @click="$router.push('/online-store')"
           >
             Start Discovering
           </v-btn>
@@ -100,7 +88,7 @@
                     icon="mdi-close"
                     variant="text"
                     size="x-small"
-                    color="grey-lighten-1"
+                    color="red-darken-2"
                     @click="cartStore.removeItem(item.id)"
                   ></v-btn>
                 </div>
@@ -143,7 +131,7 @@
       v-if="cartStore.cart.length"
       class="sticky-footer px-6 pt-5 pb-8 shadow-top"
     >
-      <div class="mx-auto" style="max-width: 600px">
+      <div class="mx-auto">
         <div class="d-flex justify-space-between align-center mb-4">
           <div>
             <span class="text-caption text-grey-darken-1 d-block">
@@ -168,7 +156,6 @@
           elevation="8"
           @click="$router.push('/mobile-checkout')"
           >
-          <!-- @click="sendWhatsAppInquiry" -->
           <span>Complete Order</span>
           <v-icon size="20" class="ml-2 animate-arrow">mdi-arrow-right</v-icon>
         </v-btn>
@@ -192,6 +179,7 @@
 
   .cart-wrapper {
     height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
