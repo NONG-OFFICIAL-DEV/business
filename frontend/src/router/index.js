@@ -246,13 +246,19 @@ const routes = [
   {
     path: '/mobile-product',
     name: 'MobileProduct',
-    component: () => import('@/views/mobile/ProductPage.vue'),
+    component: () => import('@/views/mobile/OnlineStore.vue'),
     props: true
   },
   {
     path: '/mobile-cart',
     name: 'MobileCart',
     component: () => import('@/views/mobile/CartView.vue'),
+    props: true
+  },
+  {
+    path: '/mobile-checkout',
+    name: 'Checkout',
+    component: () => import('@/views/mobile/CheckoutDetails.vue'),
     props: true
   },
   {

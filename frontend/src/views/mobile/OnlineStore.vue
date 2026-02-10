@@ -252,28 +252,9 @@
   }
 
   const addToCart = product => {
-    cart.value.push(product)
+    cartStore.addToCart(product)
   }
 
-  const orderOnWhatsApp = () => {
-    if (!selectedProduct.value) return
-
-    const p = selectedProduct.value
-
-    const message = `
-Hello, I want to order:
-🛍️ ${p.name}
-💲 Price: $${p.price}
-
-Please tell me how to buy.
-  `.trim()
-
-    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-      message
-    )}`
-
-    window.open(url, '_blank')
-  }
 </script>
 
 <template>
@@ -284,22 +265,17 @@ Please tell me how to buy.
       style="max-width: 1200px"
     >
       <h1 class="text-h6 font-weight-black tracking-tighter">STORE.CA</h1>
-      <!-- 
-      <v-btn icon variant="tonal" size="small" color="black">
-        <v-badge :content="cartCount" color="error" size="x-small">
-          <v-icon>mdi-shopping-outline</v-icon>
-        </v-badge>
-      </v-btn> -->
+    
       <v-btn icon @click="$router.push('/mobile-cart')">
         <v-badge
           :content="cartStore.cartCount"
           color="red"
           v-if="cartStore.cartCount"
         >
-          <v-icon>mdi-cart-outline</v-icon>
+          <v-icon>mdi-shopping-outline</v-icon>
         </v-badge>
 
-        <v-icon v-else>mdi-cart-outline</v-icon>
+        <v-icon v-else>mdi-shopping-outline</v-icon>
       </v-btn>
     </v-container>
   </v-app-bar>
