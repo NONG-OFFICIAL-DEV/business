@@ -101,12 +101,6 @@ const routes = [
         name: 'purchase-details',
         component: () => import('@/views/purchases/PurchaseDetails.vue')
       },
-      // {
-      //   path: '/purchases/:id/invoice',
-      //   name: 'purchase-invoice',
-      //   component: () => import('@/pages/PurchaseInvoice.vue'),
-      //   props: true
-      // },
       {
         path: '/purchase-reports',
         name: 'Reports',
@@ -244,7 +238,7 @@ const routes = [
     props: true
   },
   {
-    path: '/mobile-product',
+    path: '/online-store',
     name: 'MobileProduct',
     component: () => import('@/views/mobile/OnlineStore.vue'),
     props: true
