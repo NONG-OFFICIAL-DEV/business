@@ -208,6 +208,7 @@
                 color="teal-darken-2"
                 rounded="lg"
                 label="Full Name"
+                hide-details
                 prepend-inner-icon="mdi-account-outline"
               />
               <v-text-field
@@ -350,8 +351,8 @@
         </div>
         <v-btn
           block
-          size="x-large"
-          color="teal-darken-2"
+          size="large"
+          color="primary"
           class="rounded-pill text-none mt-4"
           elevation="4"
           :disabled="!isFormValid"

@@ -150,9 +150,9 @@
 
         <v-btn
           block
-          color="teal-darken-2"
-          size="x-large"
-          class="rounded-xl text-none font-weight-bold checkout-btn"
+          color="primary"
+          size="large"
+          class="rounded-pill text-none checkout-btn"
           elevation="8"
           @click="$router.push('/mobile-checkout')"
           >
@@ -174,7 +174,6 @@
     top: 0;
     z-index: 100;
     background: rgba(255, 255, 255, 0.9) !important;
-    backdrop-filter: blur(10px);
   }
 
   .cart-wrapper {
