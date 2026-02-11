@@ -1,6 +1,8 @@
 <script setup>
   import { ref, computed, watch } from 'vue'
   import { useCartStore } from '@/stores/cartStore'
+  import { useCurrency } from '@/composables/useCurrency.js'
+  const { formatCurrency } = useCurrency()
 
   const cartStore = useCartStore()
 
@@ -64,14 +66,14 @@
       id: 'express',
       name: 'L192 Express',
       time: '1-2 business days',
-      price: 3.0,
+      price: 1.25,
       zone: 'province'
     },
     {
       id: 'vet',
       name: 'VET Express',
       time: '1-2 business days',
-      price: 3.0,
+      price: 2.25,
       zone: 'province'
     }
   ]
@@ -283,7 +285,7 @@
                 </div>
                 <v-spacer></v-spacer>
                 <div class="font-weight-bold text-teal-darken-2">
-                  ${{ method.price.toFixed(2) }}
+                  {{formatCurrency(method.price)}}
                 </div>
               </div>
             </v-card>
@@ -294,17 +296,32 @@
 
     <v-sheet class="sticky-footer px-6 pt-5 pb-8 shadow-top">
       <div class="mx-auto">
-        <div class="d-flex justify-space-between mb-4">
-          <span class="text-grey-darken-1">Order Total</span>
-          <span class="font-weight-black text-h6">
-            ${{ (cartStore.cartTotal + currentDeliveryFee).toLocaleString() }}
+        <div class="d-flex justify-space-between mb-2">
+          <span class="text-caption text-grey-darken-1">Order Subtotal</span>
+          <span class="text-caption font-weight-bold text-black">
+            {{ formatCurrency(cartStore.cartTotal) }}
+          </span>
+        </div>
+        <div class="d-flex justify-space-between">
+          <span class="text-caption text-grey-darken-1">Delivery Fee</span>
+          <span class="text-caption font-weight-bold text-teal-darken-2">
+            {{ formatCurrency(currentDeliveryFee) }}
+          </span>
+        </div>
+
+        <v-divider class="my-3"></v-divider>
+
+        <div class="d-flex justify-space-between align-center">
+          <span class="text-subtitle-2 font-weight-black">Total Amount</span>
+          <span class="text-h5 font-weight-black text-black">
+            {{ formatCurrency(cartStore.cartTotal + currentDeliveryFee) }}
           </span>
         </div>
         <v-btn
           block
           size="x-large"
           color="teal-darken-2"
-          class="rounded-xl text-none font-weight-bold"
+          class="rounded-pill text-none mt-4"
           elevation="4"
           :disabled="!isFormValid"
           @click="submitOrder"
