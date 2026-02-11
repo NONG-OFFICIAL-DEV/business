@@ -4,6 +4,9 @@
 
   import { useCartStore } from '@/stores/cartStore'
 
+  const langSheet = ref(false)
+  const activeLang = ref('EN') // Default language
+
   const cartStore = useCartStore()
   /** PRODUCTS */
   const products = ref([
@@ -254,25 +257,109 @@
   const addToCart = product => {
     cartStore.addToCart(product)
   }
+
+  const languages = [
+    {
+      name: 'English',
+      code: 'EN',
+      flag: 'https://flagcdn.com/w80/gb.png'
+    },
+    {
+      name: 'ភាសាខ្មែរ',
+      code: 'KH',
+      flag: 'https://flagcdn.com/w80/kh.png'
+    }
+  ]
+
+  const currentLang = computed(() => {
+    return languages.find(l => l.code === activeLang.value)
+  })
+
+  const changeLanguage = lang => {
+    activeLang.value = lang.code
+    langSheet.value = false
+
+    // If using vue-i18n:
+    // locale.value = lang.code.toLowerCase()
+
+    console.log('Language changed to:', lang.name)
+  }
 </script>
 
 <template>
   <!-- HEADER -->
   <v-app-bar app flat color="white" class="premium-header border-b">
     <v-container class="d-flex align-center justify-space-between py-0 px-4">
-      <h1 class="text-h6 font-weight-black tracking-tighter">STORE.CA</h1>
+      <h1
+        class="text-h6 font-weight-black tracking-tighter"
+        @click="$router.push('/')"
+      >
+        STORE.CA
+      </h1>
+
+      <v-spacer></v-spacer>
+
+      <v-btn
+        variant="text"
+        @click="langSheet = true"
+        class="px-2 mr-1 rounded-pill"
+      >
+        <v-avatar size="20" class="mr-2">
+          <v-img :src="currentLang.flag"></v-img>
+        </v-avatar>
+        <span class="text-caption font-weight-bold">
+          {{ currentLang.code }}
+        </span>
+      </v-btn>
 
       <v-btn icon @click="$router.push('/mobile-cart')">
         <v-badge
           :content="cartStore.cartCount"
-          color="red"
-          v-if="cartStore.cartCount"
+          color="error"
+          offset-x="3"
+          offset-y="3"
+          v-if="cartStore.cartCount > 0"
         >
-          <v-icon>mdi-shopping-outline</v-icon>
+          <v-icon size="24">mdi-shopping-outline</v-icon>
         </v-badge>
+        <v-icon v-else size="24">mdi-shopping-outline</v-icon>
       </v-btn>
     </v-container>
   </v-app-bar>
+
+  <v-bottom-sheet v-model="langSheet">
+    <v-card class="rounded-t-xl pa-4">
+      <div class="d-flex justify-center mb-4">
+        <div class="close-tab"></div>
+      </div>
+      <div class="text-subtitle-1 font-weight-black mb-4 px-2">
+        Select Language
+      </div>
+
+      <v-list class="bg-transparent">
+        <v-list-item
+          v-for="lang in languages"
+          :key="lang.code"
+          @click="changeLanguage(lang)"
+          :active="activeLang === lang.code"
+          base-color="teal-darken-2"
+          class="rounded-pill mb-2 border"
+        >
+          <template v-slot:prepend>
+            <v-avatar size="28">
+              <v-img :src="lang.flag"></v-img>
+            </v-avatar>
+          </template>
+          <v-list-item-title class="font-weight-bold ml-2">
+            {{ lang.name }}
+          </v-list-item-title>
+          <template v-slot:append v-if="activeLang === lang.code">
+            <v-icon color="teal-darken-2">mdi-check-circle</v-icon>
+          </template>
+        </v-list-item>
+      </v-list>
+    </v-card>
+  </v-bottom-sheet>
 
   <v-main>
     <v-container class="pa-0 pb-16 pb-md-4">
@@ -402,6 +489,12 @@
 </template>
 
 <style scoped>
+  .close-tab {
+    width: 40px;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 10px;
+  }
   .tracking-tighter {
     letter-spacing: -1.5px;
   }
