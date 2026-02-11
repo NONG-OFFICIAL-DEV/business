@@ -15,7 +15,22 @@
     address: '',
     deliveryMethod: 'standard'
   })
-
+  const formRef = ref(null)
+  const loading = ref(false)
+  // --- VALIDATION RULES ---
+  const rules = {
+    required: v => !!v || 'This field is required',
+    phone: v => {
+      const pattern = /^(0\d{8,9})$/
+      return pattern.test(v) || 'Enter a valid phone number (e.g., 012345678)'
+    },
+    googleMaps: v => {
+      if (!v) return true // Address is optional/handled by rules below
+      return (
+        v.includes('google.com/maps') || 'Please paste a valid Google Maps link'
+      )
+    }
+  }
   const provinces = [
     'Siem Reap',
     'Sihanoukville',
@@ -124,29 +139,39 @@
     )
   })
 
-  const submitOrder = () => {
-    const items = cartStore.cart.map(i => `${i.qty}x ${i.name}`).join('\n')
+  const submitOrder = async () => {
+    loading.value = true
+    const { valid } = await formRef.value.validate()
 
-    const location =
-      form.value.locationType === 'pp'
-        ? 'Phnom Penh'
-        : `${form.value.province} - ${form.value.district}`
+    if (valid) {
+      loading.value = false
+      const items = cartStore.cart.map(i => `${i.qty}x ${i.name}`).join('\n')
 
-    const addressText =
-      form.value.locationType === 'pp'
-        ? `Address: ${form.value.address}%0A`
-        : ''
+      const location =
+        form.value.locationType === 'pp'
+          ? 'Phnom Penh'
+          : `${form.value.province} - ${form.value.district}`
 
-    const text =
-      `New Order from App!%0A%0A` +
-      `Name: ${form.value.name}%0A` +
-      `Phone: ${form.value.phone}%0A` +
-      `Location: ${location}%0A` +
-      addressText +
-      `%0AItems:%0A${items}%0A%0A` +
-      `Total: $${(cartStore.cartTotal + currentDeliveryFee.value).toLocaleString()}`
+      const addressText =
+        form.value.locationType === 'pp'
+          ? `Address: ${form.value.address}%0A`
+          : ''
 
-    window.open(`https://wa.me/85512345678?text=${text}`, '_blank')
+      const text =
+        `New Order from App!%0A%0A` +
+        `Name: ${form.value.name}%0A` +
+        `Phone: ${form.value.phone}%0A` +
+        `Location: ${location}%0A` +
+        addressText +
+        `%0AItems:%0A${items}%0A%0A` +
+        `Total: $${(cartStore.cartTotal + currentDeliveryFee.value).toLocaleString()}`
+
+      window.open(`https://wa.me/85512345678?text=${text}`, '_blank')
+    } else {
+      loading.value = false
+      // Scroll to the first error if mobile
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 
   const openGoogleMaps = () => {
@@ -171,129 +196,135 @@
         <div style="width: 40px"></div>
       </div>
     </v-sheet>
-
     <div class="scroll-area px-4 py-6">
-      <div class="mx-auto">
-        <div class="section-label mb-2 ml-1">Contact Information</div>
-        <v-card flat class="rounded-xl border-light pa-4 mb-6">
-          <v-text-field
-            v-model="form.name"
-            label="Full Name"
-            variant="outlined"
-            color="teal-darken-2"
-            rounded="lg"
-            hide-details
-            prepend-inner-icon="mdi-account-outline"
-          />
-          <v-text-field
-            v-model="form.phone"
-            label="Phone Number *"
-            placeholder="012 345 678"
-            variant="outlined"
-            color="teal-darken-2"
-            rounded="lg"
-            class="mt-4"
-            prepend-inner-icon="mdi-phone-outline"
-          />
-        </v-card>
-
-        <div class="section-label mb-2 ml-1">Delivery Location</div>
-        <v-card flat class="rounded-xl border-light pa-4 mb-6">
-          <v-btn-toggle
-            v-model="form.locationType"
-            mandatory
-            color="teal-darken-2"
-            variant="outlined"
-            class="w-100 mb-4 location-toggle"
-            rounded="lg"
-          >
-            <v-btn value="pp" class="flex-grow-1">Phnom Penh</v-btn>
-            <v-btn value="province" class="flex-grow-1">Province</v-btn>
-          </v-btn-toggle>
-
-          <v-expand-transition>
-            <v-select
-              v-if="form.locationType === 'province'"
-              v-model="form.province"
-              :items="provinces"
-              label="Select Province"
-              variant="outlined"
-              color="teal-darken-2"
-              rounded="lg"
-              class="mb-4"
-              prepend-inner-icon="mdi-map-marker-outline"
-            />
-          </v-expand-transition>
-
-          <!-- District (only when province selected) -->
-          <v-expand-transition>
-            <v-select
-              v-if="form.locationType === 'province' && form.province"
-              v-model="form.district"
-              :items="availableDistricts"
-              label="Select District"
-              variant="outlined"
-              color="teal-darken-2"
-              rounded="lg"
-              class="mb-4"
-              prepend-inner-icon="mdi-map-marker-outline"
-            />
-          </v-expand-transition>
-
-          <!-- Address only for Phnom Penh -->
-          <v-textarea
-            v-if="form.locationType === 'pp'"
-            v-model="form.address"
-            label="Google Maps Location (Paste Link)"
-            variant="outlined"
-            color="teal-darken-2"
-            rounded="lg"
-            rows="2"
-            hide-details
-            prepend-inner-icon="mdi-map-outline"
-          >
-            <template #append-inner>
-              <v-btn
-                icon="mdi-google-maps"
-                size="small"
-                variant="text"
+      <v-form ref="formRef">
+        <div class="mx-auto">
+          <div class="section-label mb-2 ml-1">Contact Information</div>
+          <v-card flat class="rounded-xl border-light pa-0 mb-6">
+            <v-card-text>
+              <v-text-field
+                v-model="form.name"
+                variant="outlined"
                 color="teal-darken-2"
-                @click="openGoogleMaps"
+                rounded="lg"
+                label="Full Name"
+                prepend-inner-icon="mdi-account-outline"
               />
-            </template>
-          </v-textarea>
-        </v-card>
+              <v-text-field
+                v-model="form.phone"
+                label="Phone Number *"
+                placeholder="012 345 678"
+                variant="outlined"
+                color="teal-darken-2"
+                rounded="lg"
+                class="mt-4"
+                :rules="[rules.required, rules.phone]"
+                type="tel"
+                prepend-inner-icon="mdi-phone-outline"
+              />
+            </v-card-text>
+          </v-card>
 
-        <div class="section-label mb-2 ml-1">Delivery Method</div>
-        <v-radio-group v-model="form.deliveryMethod" hide-details>
-          <v-slide-y-transition group>
-            <v-card
-              v-for="method in filteredOptions"
-              :key="method.id"
-              flat
-              :class="[
-                'rounded-xl border-light mb-3 method-card',
-                form.deliveryMethod === method.id ? 'active-method' : ''
-              ]"
-              @click="form.deliveryMethod = method.id"
+          <div class="section-label mb-2 ml-1">Delivery Location</div>
+          <v-card flat class="rounded-xl border-light pa-4 mb-6">
+            <v-btn-toggle
+              v-model="form.locationType"
+              mandatory
+              color="teal-darken-2"
+              variant="outlined"
+              class="w-100 mb-4 location-toggle"
+              rounded="lg"
             >
-              <div class="d-flex align-center pa-4">
-                <v-radio :value="method.id" color="teal-darken-2"></v-radio>
-                <div class="ml-2">
-                  <div class="font-weight-bold">{{ method.name }}</div>
-                  <div class="text-caption text-grey">{{ method.time }}</div>
-                </div>
-                <v-spacer></v-spacer>
-                <div class="font-weight-bold text-teal-darken-2">
-                  {{formatCurrency(method.price)}}
-                </div>
-              </div>
-            </v-card>
-          </v-slide-y-transition>
-        </v-radio-group>
-      </div>
-    </div>
+              <v-btn value="pp" class="flex-grow-1">Phnom Penh</v-btn>
+              <v-btn value="province" class="flex-grow-1">Province</v-btn>
+            </v-btn-toggle>
 
+            <v-expand-transition>
+              <v-select
+                v-if="form.locationType === 'province'"
+                v-model="form.province"
+                :items="provinces"
+                :rules="[rules.required]"
+                label="Select Province *"
+                variant="outlined"
+                color="teal-darken-2"
+                rounded="lg"
+                class="mb-4"
+                prepend-inner-icon="mdi-map-marker-outline"
+              />
+            </v-expand-transition>
+
+            <!-- District (only when province selected) -->
+            <v-expand-transition>
+              <v-select
+                v-if="form.locationType === 'province' && form.province"
+                v-model="form.district"
+                :items="availableDistricts"
+                label="Select District *"
+                variant="outlined"
+                color="teal-darken-2"
+                rounded="lg"
+                class="mb-4"
+                prepend-inner-icon="mdi-map-marker-outline"
+                :rules="[rules.required]"
+              />
+            </v-expand-transition>
+
+            <!-- Address only for Phnom Penh -->
+            <v-textarea
+              v-if="form.locationType === 'pp'"
+              v-model="form.address"
+              label="Google Maps Location (Paste Link) *"
+              :rules="[rules.required, rules.googleMaps]"
+              variant="outlined"
+              color="teal-darken-2"
+              rounded="lg"
+              rows="2"
+              hide-details
+              prepend-inner-icon="mdi-map-outline"
+            >
+              <template #append-inner>
+                <v-btn
+                  icon="mdi-google-maps"
+                  size="small"
+                  variant="text"
+                  color="teal-darken-2"
+                  @click="openGoogleMaps"
+                />
+              </template>
+            </v-textarea>
+          </v-card>
+
+          <div class="section-label mb-2 ml-1">Delivery Method</div>
+          <v-radio-group v-model="form.deliveryMethod" hide-details>
+            <v-slide-y-transition group>
+              <v-card
+                v-for="method in filteredOptions"
+                :key="method.id"
+                flat
+                :class="[
+                  'rounded-xl border-light mb-3 method-card',
+                  form.deliveryMethod === method.id ? 'active-method' : ''
+                ]"
+                @click="form.deliveryMethod = method.id"
+              >
+                <div class="d-flex align-center pa-4">
+                  <v-radio :value="method.id" color="teal-darken-2"></v-radio>
+                  <div class="ml-2">
+                    <div class="font-weight-bold">{{ method.name }}</div>
+                    <div class="text-caption text-grey">{{ method.time }}</div>
+                  </div>
+                  <v-spacer></v-spacer>
+                  <div class="font-weight-bold text-teal-darken-2">
+                    {{ formatCurrency(method.price) }}
+                  </div>
+                </div>
+              </v-card>
+            </v-slide-y-transition>
+          </v-radio-group>
+        </div>
+      </v-form>
+    </div>
     <v-sheet class="sticky-footer px-6 pt-5 pb-8 shadow-top">
       <div class="mx-auto">
         <div class="d-flex justify-space-between mb-2">
@@ -324,6 +355,7 @@
           class="rounded-pill text-none mt-4"
           elevation="4"
           :disabled="!isFormValid"
+          :loading="loading"
           @click="submitOrder"
         >
           Confirm and Pay

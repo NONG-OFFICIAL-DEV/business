@@ -5,7 +5,7 @@
   import { useCartStore } from '@/stores/cartStore'
 
   const langSheet = ref(false)
-  const activeLang = ref('EN') // Default language
+  const activeLang = ref('KH') // Default language
 
   const cartStore = useCartStore()
   /** PRODUCTS */
@@ -223,17 +223,9 @@
   const searchQuery = ref('')
   const activeCategory = ref('All')
 
-  /** CART (simple for demo) */
-  const cart = ref([]) // array of product objects
-
   /** DIALOG */
   const dialog = ref(false)
   const selectedProduct = ref(null)
-
-  /** STORE OWNER CONTACT (for WhatsApp) */
-  const whatsappNumber = '85512345678' // <-- CHANGE THIS
-
-  const cartCount = computed(() => cart.value.length)
 
   const filteredProducts = computed(() => {
     return products.value.filter(p => {
@@ -342,7 +334,6 @@
           :key="lang.code"
           @click="changeLanguage(lang)"
           :active="activeLang === lang.code"
-          base-color="teal-darken-2"
           class="rounded-pill mb-2 border"
         >
           <template v-slot:prepend>
@@ -350,11 +341,11 @@
               <v-img :src="lang.flag"></v-img>
             </v-avatar>
           </template>
-          <v-list-item-title class="font-weight-bold ml-2">
+          <v-list-item-title class="ml-2">
             {{ lang.name }}
           </v-list-item-title>
           <template v-slot:append v-if="activeLang === lang.code">
-            <v-icon color="teal-darken-2">mdi-check-circle</v-icon>
+            <v-icon color="primary">mdi-check-circle</v-icon>
           </template>
         </v-list-item>
       </v-list>
