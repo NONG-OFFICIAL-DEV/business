@@ -3,9 +3,6 @@
     <custom-title icon="mdi-file-chart">
       Purchase Reports
       <template #right>
-        <v-btn variant="outlined" prepend-icon="mdi-file-pdf-box">
-          Export PDF
-        </v-btn>
         <v-btn
           class="ms-2"
           variant="outlined"

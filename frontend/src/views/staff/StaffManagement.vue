@@ -25,7 +25,6 @@
           lg="3"
         >
           <v-card rounded="lg" border="sm" flat class="staff-card elevation-0">
-            <v-sheet :color="getRoleColor(member.role)" height="4" />
             <v-card-text class="pa-4">
               <div class="d-flex align-center mb-3">
                 <v-avatar size="48" class="border">
@@ -33,10 +32,7 @@
                 </v-avatar>
 
                 <div class="ml-3 overflow-hidden">
-                  <div
-                    class="text-subtitle-2 font-weight-bold text-truncate"
-                    style="line-height: 1.2"
-                  >
+                  <div class="text-subtitle-2 font-weight-bold text-truncate">
                     {{ member.first_name }} {{ member.last_name }}
                   </div>
                   <v-chip
@@ -44,7 +40,6 @@
                     variant="flat"
                     :color="getRoleColor(member.role)"
                     class="mt-1 font-weight-bold text-uppercase"
-                    style="font-size: 0.65rem !important; height: 16px"
                   >
                     {{ member.role }}
                   </v-chip>
@@ -52,13 +47,27 @@
 
                 <v-spacer></v-spacer>
 
-                <v-btn
-                  icon="mdi-dots-vertical"
-                  variant="text"
-                  color="grey-lighten-1"
-                  density="comfortable"
-                  size="small"
-                ></v-btn>
+                <v-menu location="end">
+                  <template v-slot:activator="{ props }">
+                    <v-btn
+                      v-bind="props"
+                      icon="mdi-dots-vertical"
+                      variant="text"
+                      density="comfortable"
+                      size="small"
+                    ></v-btn>
+                  </template>
+
+                  <v-list>
+                    <v-list-item
+                      v-for="(item, index) in items(member)"
+                      :key="index"
+                      @click="item.action()"
+                    >
+                      <v-list-item-title>{{ item.title }}</v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
               </div>
 
               <v-divider class="mb-3 border-opacity-25"></v-divider>
@@ -71,9 +80,9 @@
               </div>
 
               <div class="d-flex justify-space-between mb-1">
-                <span class="text-caption text-grey-darken-1">Joined</span>
+                <span class="text-caption text-grey-darken-1">Department</span>
                 <span class="text-caption font-weight-medium">
-                  {{ member.joining_date }}
+                  {{ member.department }}
                 </span>
               </div>
 
@@ -81,21 +90,20 @@
                 <span class="text-caption text-grey-darken-1">Status</span>
                 <v-chip
                   :color="
-                    member.status === 'On Clock' ? 'success' : 'grey-lighten-2'
+                    member.status === 'Active' ? 'success' : 'grey-lighten-2'
                   "
                   :text-color="
-                    member.status === 'On Clock' ? 'white' : 'grey-darken-2'
+                    member.status === 'Active' ? 'white' : 'grey-darken-2'
                   "
                   size="x-small"
                   variant="flat"
                   class="font-weight-bold"
-                  style="height: 20px"
                 >
                   <v-icon
                     start
                     size="12"
                     :icon="
-                      member.status === 'On Clock'
+                      member.status === 'Active'
                         ? 'mdi-circle'
                         : 'mdi-circle-outline'
                     "
@@ -104,21 +112,6 @@
                 </v-chip>
               </div>
             </v-card-text>
-
-            <v-divider class="border-opacity-25"></v-divider>
-
-            <v-card-actions class="pa-2 bg-grey-lighten-5">
-              <v-btn
-                variant="text"
-                color="primary"
-                block
-                class="text-none font-weight-bold"
-                size="small"
-                @click="viewDetails(member)"
-              >
-                Management
-              </v-btn>
-            </v-card-actions>
           </v-card>
         </v-col>
       </v-row>
@@ -133,68 +126,75 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useStaffStore } from '@/stores/employeeStore'
-import StaffDialogForm from '../../components/staffs/StaffDialogForm.vue'
+  import { ref, computed, onMounted } from 'vue'
+  import { useStaffStore } from '@/stores/employeeStore'
+  import StaffDialogForm from '../../components/staffs/StaffDialogForm.vue'
 
-// --- Store ---
-const employeeStore = useStaffStore()
+  // --- Store ---
+  const employeeStore = useStaffStore()
 
-onMounted(() => {
-  employeeStore.fetchEmployees()
-})
+  onMounted(() => {
+    employeeStore.fetchEmployees()
+  })
 
-// --- Dialog & Form State ---
-const isStaffDialogOpen = ref(false)
-const selectedStaff = ref(null)
-const isSaving = ref(false)
-const searchStaff = ref('')
+  const items = row => [
+    { title: 'Details', action: () => viewDetails(row) },
+    { title: 'Update', action: () => viewDetails(row) },
+    { title: 'Delete', action: () => onDeleteEmployee(row) }
+  ]
+  // --- Dialog & Form State ---
+  const isStaffDialogOpen = ref(false)
+  const selectedStaff = ref(null)
+  const isSaving = ref(false)
+  const searchStaff = ref('')
 
-// ✅ READ staff list from store (DO NOT MUTATE)
-const staffList = computed(() => employeeStore.employees)
+  // ✅ READ staff list from store (DO NOT MUTATE)
+  const staffList = computed(() => employeeStore.employees)
 
-// --- Methods ---
-const openStaffDialog = () => {
-  selectedStaff.value = null
-  isStaffDialogOpen.value = true
-}
-
-const viewDetails = member => {
-  selectedStaff.value = { ...member }
-  isStaffDialogOpen.value = true
-}
-
-// ❌ Local only (NO store update)
-const handleSaveStaff = async formData => {
-  isSaving.value = true
-  try {
-    await employeeStore.createEmployee(formData)
-    isStaffDialogOpen.value = false
-  } finally {
-    isSaving.value = false
+  // --- Methods ---
+  const openStaffDialog = () => {
+    selectedStaff.value = null
+    isStaffDialogOpen.value = true
   }
-}
 
-// --- Filtering ---
-// const filteredStaff = computed(() => {
-//   return staffList.value.filter(s =>
-//     `${s.first_name} ${s.last_name}`
-//       .toLowerCase()
-//       .includes(searchStaff.value.toLowerCase()) ||
-//     s.role?.toLowerCase().includes(searchStaff.value.toLowerCase())
-//   )
-// })
-
-// --- Role Colors ---
-const getRoleColor = role => {
-  const map = {
-    Admin: 'deep-purple',
-    Staff: 'blue',
-    Manager: 'teal',
-    Chef: 'deep-orange'
+  const viewDetails = member => {
+    selectedStaff.value = { ...member }
+    isStaffDialogOpen.value = true
   }
-  return map[role] || 'grey'
-}
+  const onDeleteEmployee = member => {
+    employeeStore.deleteEmployee(member.id)
+  }
+
+  // ❌ Local only (NO store update)
+  const handleSaveStaff = async formData => {
+    isSaving.value = true
+
+    try {
+      if (formData.id) {
+        await employeeStore.updateEmployee(formData.id, formData)
+      } else {
+        await employeeStore.createEmployee(formData)
+      }
+
+      isStaffDialogOpen.value = false
+    } catch (err) {
+      console.error(err)
+    } finally {
+      isSaving.value = false
+    }
+  }
+
+
+  // --- Role Colors ---
+  const getRoleColor = role => {
+    const map = {
+      Admin: 'deep-purple',
+      Staff: 'blue',
+      Manager: 'teal',
+      Chef: 'deep-orange'
+    }
+    return map[role] || 'grey'
+  }
 </script>
 
 <style scoped>

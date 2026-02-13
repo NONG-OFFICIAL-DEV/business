@@ -1,16 +1,17 @@
 <script setup>
-import { useCurrency } from '@/composables/useCurrency'
+  import { useCurrency } from '@/composables/useCurrency'
+  import QtyStepper from '@/components/customs/QtyStepper.vue'
 
-const { formatCurrency } = useCurrency()
+  const { formatCurrency } = useCurrency()
 
-defineProps({
-  items: {
-    type: Array,
-    required: true
-  }
-})
+  defineProps({
+    items: {
+      type: Array,
+      required: true
+    }
+  })
 
-defineEmits(['update-qty'])
+  defineEmits(['update-qty'])
 </script>
 
 <template>
@@ -59,26 +60,15 @@ defineEmits(['update-qty'])
           </span>
 
           <!-- Editable qty ONLY for cart -->
-          <div
+          <QtyStepper
             v-if="item.editable !== false"
-            class="d-flex align-center bg-grey-lighten-4 rounded-pill border"
-          >
-            <v-btn
-              icon="mdi-minus"
-              size="x-small"
-              variant="text"
-              @click="$emit('update-qty', item.id, item.qty - 1)"
-            />
-            <span class="px-2 font-weight-bold text-caption">
-              {{ item.qty }}
-            </span>
-            <v-btn
-              icon="mdi-plus"
-              size="x-small"
-              variant="text"
-              @click="$emit('update-qty', item.id, item.qty + 1)"
-            />
-          </div>
+            :modelValue="item.qty"
+            :min="0"
+            :max="100"
+            small
+            strict
+            @update:modelValue="val => $emit('update-qty', item.id, val)"
+          />
 
           <!-- Read-only qty (bill) -->
           <div v-else>

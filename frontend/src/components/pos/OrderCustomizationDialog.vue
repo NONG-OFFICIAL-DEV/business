@@ -1,5 +1,6 @@
 <script setup>
   import { ref, computed, watch } from 'vue'
+  import QtyStepper from '../customs/QtyStepper.vue'
 
   const props = defineProps({
     modelValue: Boolean,
@@ -91,7 +92,7 @@
       </v-card-title>
 
       <v-card-text class="pa-2">
-        <div class="bg-grey-lighten-4 d-flex align-center mb-5 pa-3 rounded-xl">
+        <div class="d-flex align-center mb-5 pa-3 rounded-xl border">
           <v-avatar size="70" rounded="lg" class="border">
             <v-img :src="product?.image_url" cover />
           </v-avatar>
@@ -104,22 +105,7 @@
               ${{ currentItemPrice.toFixed(2) }}
             </div>
           </div>
-
-          <div class="d-flex align-center bg-white rounded-pill border px-1">
-            <v-btn
-              icon="mdi-minus"
-              variant="text"
-              size="small"
-              @click="quantity > 1 ? quantity-- : null"
-            />
-            <span class="px-2 font-weight-black">{{ quantity }}</span>
-            <v-btn
-              icon="mdi-plus"
-              variant="text"
-              size="small"
-              @click="quantity++"
-            />
-          </div>
+          <QtyStepper v-model="quantity" :min="1" :max="100" />
         </div>
 
         <v-btn-toggle

@@ -1,5 +1,10 @@
 <script setup>
   import { useCartStore } from '@/stores/cartStore'
+  import { useCurrency } from '@/composables/useCurrency'
+
+  const { formatCurrency } = useCurrency()
+  import QtyStepper from '@/components/customs/QtyStepper.vue'
+
   const cartStore = useCartStore()
 
   const confirmClearCart = () => {
@@ -81,7 +86,7 @@
                     <div
                       class="text-caption text-teal-darken-2 font-weight-bold"
                     >
-                      ${{ item.price.toLocaleString() }} / unit
+                      {{ formatCurrency(item.price) }} / unit
                     </div>
                   </div>
                   <v-btn
@@ -95,30 +100,16 @@
 
                 <div class="mt-auto d-flex align-center justify-space-between">
                   <div class="text-subtitle-2 font-weight-black">
-                    ${{ (item.price * item.qty).toLocaleString() }}
+                    {{ formatCurrency(item.price * item.qty) }}
                   </div>
-
-                  <div
-                    class="quantity-stepper d-flex align-center border rounded-pill bg-grey-lighten-5"
-                  >
-                    <v-btn
-                      icon="mdi-minus"
-                      size="x-small"
-                      variant="text"
-                      :disabled="item.qty <= 1"
-                      @click="cartStore.decreaseQty(item.id)"
-                    />
-                    <span class="mx-3 text-caption font-weight-bold">
-                      {{ item.qty }}
-                    </span>
-                    <v-btn
-                      icon="mdi-plus"
-                      size="x-small"
-                      variant="text"
-                      color="teal-darken-2"
-                      @click="cartStore.increaseQty(item.id)"
-                    />
-                  </div>
+                  <QtyStepper
+                    :modelValue="item.qty"
+                    :min="1"
+                    :max="100"
+                    small
+                    strict
+                    @update:modelValue="val => cartStore.setQty(item.id, val)"
+                  />
                 </div>
               </div>
             </div>
@@ -138,7 +129,7 @@
               Total Payment
             </span>
             <span class="text-h5 font-weight-black text-black">
-              ${{ cartStore.cartTotal.toLocaleString() }}
+              {{ formatCurrency(cartStore.cartTotal) }}
             </span>
           </div>
           <div class="text-right">
@@ -155,7 +146,7 @@
           class="rounded-pill text-none checkout-btn"
           elevation="8"
           @click="$router.push('/mobile-checkout')"
-          >
+        >
           <span>Complete Order</span>
           <v-icon size="20" class="ml-2 animate-arrow">mdi-arrow-right</v-icon>
         </v-btn>
@@ -206,11 +197,6 @@
     background: white !important;
     border-top: 1px solid rgba(0, 0, 0, 0.05);
     border-radius: 32px 32px 0 0;
-  }
-
-  .quantity-stepper {
-    height: 36px;
-    border: 1px solid #eee !important;
   }
 
   .empty-icon-wrapper {
