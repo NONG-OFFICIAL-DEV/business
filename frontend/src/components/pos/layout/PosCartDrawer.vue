@@ -7,7 +7,7 @@
   import HospitalityCartItems from './cardDrawer/HospitalityCartItems.vue'
   import RetailCartTable from './cardDrawer/RetailCartTable.vue'
   import CartFooter from './cardDrawer/CartFooter.vue'
-  const emit = defineEmits(['checkout', 'print-bill','scan'])
+  const emit = defineEmits(['checkout', 'print-bill', 'scan'])
 
   /* Store */
   const posStore = usePosStore()
@@ -98,7 +98,7 @@
           @keyup.enter="scan"
         />
 
-        <v-divider class="my-2" />
+        <v-divider class="my-2" v-if="!isHospitality" />
         <HospitalityCartItems
           v-if="isHospitality"
           :items="displayItems"

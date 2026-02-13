@@ -43,17 +43,11 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
-  const increaseQty = id => {
-    const item = cart.value.find(i => i.id === id)
-    if (item) item.qty += 1
-  }
-
-  const decreaseQty = id => {
+  const setQty = (id, qty) => {
     const item = cart.value.find(i => i.id === id)
     if (!item) return
 
-    if (item.qty > 1) item.qty -= 1
-    else cart.value = cart.value.filter(i => i.id !== id)
+    item.qty = Math.max(1, qty)
   }
 
   const removeItem = id => {
@@ -72,8 +66,7 @@ export const useCartStore = defineStore('cart', () => {
     cartCount,
     cartTotal,
     addToCart,
-    increaseQty,
-    decreaseQty,
+    setQty,
     removeItem,
     clearCart
   }

@@ -25,7 +25,7 @@ export const useStaffStore = defineStore('employee', {
     },
 
     async deleteEmployee(id) {
-      await employeeService.remove(id)
+      await employeeService.delete(id)
       this.fetchEmployees()
     }
   }

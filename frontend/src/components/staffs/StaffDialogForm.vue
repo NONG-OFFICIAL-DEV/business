@@ -1,16 +1,14 @@
 <template>
   <v-dialog v-model="show" max-width="700px" scrollable>
-    <v-card rounded="xl">
-      <v-card-title class="pa-6 d-flex align-center">
-        <v-icon color="#3b828e" class="mr-3">mdi-account-plus</v-icon>
+    <v-card rounded="lg">
+      <v-card-title class="d-flex align-center bg-primary">
+        <v-icon class="mr-3">mdi-account-plus</v-icon>
         <span class="text-h6 font-weight-black">
           {{ isEdit ? 'Update Staff Member' : 'Add New Staff' }}
         </span>
         <v-spacer></v-spacer>
         <v-btn icon="mdi-close" variant="text" @click="show = false"></v-btn>
       </v-card-title>
-
-      <v-divider></v-divider>
 
       <v-card-text class="pa-6">
         <v-form ref="formRef" v-model="isFormValid">
@@ -147,7 +145,7 @@
 
       <v-divider></v-divider>
 
-      <v-card-actions class="pa-6">
+      <v-card-actions class="px-4">
         <v-btn
           variant="text"
           class="text-none font-weight-bold"
@@ -157,10 +155,9 @@
         </v-btn>
         <v-spacer></v-spacer>
         <v-btn
-          color="#3b828e"
+          color="primary"
           variant="flat"
-          size="large"
-          class="px-8 rounded-pill text-none font-weight-bold"
+          class="text-none font-weight-bold"
           :loading="loading"
           :disabled="!isFormValid"
           @click="submit"
