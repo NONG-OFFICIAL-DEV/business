@@ -236,7 +236,7 @@
     confirm({
       title: 'Are you sure?',
       message: 'Are you sure you want to delete this supplier?',
-      options: { type: 'error' },
+      options: { type: 'error',width: 500 },
       agree: async () => {
         await supplierStore.removeSupplier(id)
         notif(t('messages.deleted_success'), { type: 'success' })

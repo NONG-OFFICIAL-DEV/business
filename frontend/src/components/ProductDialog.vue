@@ -13,16 +13,18 @@
           <v-row>
             <v-col cols="12" sm="4" md="4">
               <v-select
-                label="Supplier"
                 :items="supplierStore.suppliers.data"
                 v-model="form.supplier_id"
                 item-title="name"
                 item-value="id"
                 :rules="[rules.required]"
               >
+                <template #label>
+                  Supplier
+                  <span class="required-star">*</span>
+                </template>
                 <template #append-item>
                   <v-divider />
-
                   <v-list-item class="text-primary" @click="openCreateSupplier">
                     <v-list-item-title>
                       <v-icon>mdi-plus</v-icon>
@@ -35,10 +37,14 @@
             <v-col cols="12" sm="4">
               <v-text-field
                 v-model="form.name"
-                label="Name"
                 :rules="[rules.required]"
                 required
-              />
+              >
+                <template #label>
+                  Name
+                  <span class="required-star">*</span>
+                </template>
+              </v-text-field>
             </v-col>
             <v-col cols="12" sm="4">
               <v-select
@@ -46,9 +52,12 @@
                 :items="categoryStore.categories.data"
                 item-title="name"
                 item-value="id"
-                label="Category"
                 :rules="[rules.required]"
               >
+                <template #label>
+                  Category
+                  <span class="required-star">*</span>
+                </template>
                 <template #append-item>
                   <v-divider />
                   <v-list-item class="text-primary" @click="openCreateCatetory">
@@ -68,27 +77,60 @@
                 :items="unitStore.units"
                 item-title="name"
                 item-value="id"
-                label="Unit"
                 :rules="[rules.required]"
-              />
+              >
+                <template #label>
+                  Unit
+                  <span class="required-star">*</span>
+                </template>
+              </v-select>
             </v-col>
             <v-col cols="12" sm="6">
-              <v-text-field v-model="form.sku" label="SKU" />
+              <v-text-field
+                v-model="form.sku"
+                label="SKU"
+                :rules="[rules.required]"
+              />
             </v-col>
           </v-row>
-          <v-row>
+          <v-row align="center">
             <v-col cols="12" sm="6">
-              <v-text-field v-model="form.price" label="Price" type="number" />
+              <v-text-field
+                v-model="form.price"
+                type="number"
+                prefix="$"
+                :rules="[rules.required, rules.minZero]"
+                persistent-hint
+                :hint="pricePreview"
+              >
+                <template #label>
+                  Price
+                  <span class="required-star">*</span>
+                </template>
+              </v-text-field>
             </v-col>
             <v-col cols="12" sm="6">
-              <v-select
-                v-model="form.status"
-                :items="statusOptions"
-                item-title="name"
-                item-value="id"
-                label="Status"
-                :rules="[rules.required]"
-              />
+              <div class="d-flex align-center mt-n2">
+                <v-switch
+                  v-model="form.status"
+                  :true-value="'active'"
+                  :false-value="'inactive'"
+                  color="success"
+                  inset
+                  hide-details
+                >
+                  <template #label>
+                    <span class="mr-2">Status:</span>
+                    <v-chip
+                      size="x-small"
+                      :color="form.status === 'active' ? 'success' : 'error'"
+                      class="text-uppercase"
+                    >
+                      {{ form.status }}
+                    </v-chip>
+                  </template>
+                </v-switch>
+              </div>
             </v-col>
           </v-row>
           <v-row>
@@ -111,7 +153,7 @@
                 v-if="preview"
                 :src="preview"
                 max-width="150"
-                class="mt-2 rounded"
+                class="mt-2 rounded border"
                 aspect-ratio="1"
                 cover
               />
@@ -126,6 +168,7 @@
       </v-card-actions>
     </v-card>
   </v-dialog>
+
   <SupplierDialog
     v-model="isDialogSupplierOpen"
     :supplier="selectedSupplier"
@@ -139,7 +182,7 @@
 </template>
 
 <script setup>
-  import { ref, watch, onMounted } from 'vue'
+  import { ref, watch, onMounted, computed } from 'vue'
   import { useCategoryStore } from '@/stores/categoryStore'
   import { useUnitStore } from '@/stores/unitStore'
   import { useSupplierStore } from '@/stores/supplierStore'
@@ -147,6 +190,8 @@
   import CategoryDialog from '@/components/CategoryDialog.vue'
   import { useAppUtils } from '@/composables/useAppUtils'
   import { useI18n } from 'vue-i18n'
+  import { useCurrency } from '@/composables/useCurrency.js'
+  const { formatCurrency } = useCurrency()
 
   const unitStore = useUnitStore()
   const categoryStore = useCategoryStore()
@@ -172,50 +217,45 @@
     id: null,
     name: '',
     sku: '',
-    status: '',
+    status: 'active', // Default to active
     unit_id: null,
-    // category_id: null,
+    supplier_id: null,
+    category_id: null,
     price: 0
   })
 
   const image = ref(null)
-  const preview = ref(props.product?.image_url || null)
+  const preview = ref(null)
+
+  // Create a reactive preview of the price
+  const pricePreview = computed(() => {
+    if (!form.value.price) return ''
+    return formatCurrency(form.value.price)
+  })
+  const rules = {
+    required: v => !!v || 'This field is required',
+    minZero: v => v >= 0 || 'Price cannot be negative'
+  }
 
   const previewImage = value => {
-    // Clear preview
     if (!value) {
-      preview.value = null
+      preview.value = props.product?.image_url || null
       return
     }
-
-    // Vuetify may return File OR File[]
     const file = Array.isArray(value) ? value[0] : value
-
-    // Extra safety
-    if (!(file instanceof File)) {
-      preview.value = null
-      return
-    }
-
+    if (!(file instanceof File)) return
     preview.value = URL.createObjectURL(file)
   }
 
-  const statusOptions = ref([
-    { id: 'active', name: 'Active' },
-    { id: 'inactive', name: 'Inactive' }
-  ])
-
-  const rules = {
-    required: v => !!v || 'This field is required'
-  }
-  const openCreateSupplier = supplier => {
-    selectedSupplier.value = { ...supplier }
+  const openCreateSupplier = () => {
+    selectedSupplier.value = null
     isDialogSupplierOpen.value = true
   }
-  const openCreateCatetory = categories => {
-    selectedCategory.value = { ...categories }
+  const openCreateCatetory = () => {
+    selectedCategory.value = null
     isDialogCategoryOpen.value = true
   }
+
   const handleSave = async supplier => {
     await supplierStore.addSupplier(supplier)
     notif(t('messages.saved_success'), { type: 'success' })
@@ -234,21 +274,32 @@
       per_page: -1
     })
   }
-  // 🧹 Reset form
+
   const resetForm = () => {
-    form.value = { id: null, name: '', sku: '', price: 0 }
+    form.value = {
+      id: null,
+      name: '',
+      sku: '',
+      price: 0,
+      status: 'active',
+      unit_id: null,
+      category_id: null,
+      supplier_id: null
+    }
+    preview.value = null
+    image.value = null
     isValid.value = false
     formRef.value?.resetValidation()
   }
-  // 🔄 Sync with parent
+
   watch(
     () => props.isOpen,
     val => {
       internalOpen.value = val
       if (val) {
-        // opening dialog → load product if editing, otherwise reset
         if (props.product) {
           form.value = { ...props.product }
+          preview.value = props.product.image_url
         } else {
           resetForm()
         }
@@ -257,25 +308,22 @@
     { immediate: true }
   )
 
-  // 🔄 Emit back
   watch(internalOpen, val => emit('update:isOpen', val))
 
   const close = () => {
     internalOpen.value = false
-    resetForm()
   }
 
   const submit = async () => {
-    const ok = await formRef.value?.validate()
-    if (ok) {
+    const { valid } = await formRef.value?.validate()
+    if (valid) {
       emit('save', { ...form.value, image: image.value })
-      close() // close & reset after successful save
+      close()
     }
   }
+
   const loadData = () => {
-    categoryStore.fetchCategories({
-      per_page: -1
-    })
+    categoryStore.fetchCategories({ per_page: -1 })
     unitStore.fetchUnits()
     supplierStore.fetchSuppliers({ status: 1, per_page: -1 })
   }

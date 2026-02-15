@@ -88,4 +88,10 @@ thead tr th {
 ::-webkit-scrollbar {
   display: none;
 }
+
+.required-star {
+  color: #ff5252; /* Vuetify Error Red */
+  font-weight: bold;
+  margin-left: 2px;
+}
 </style>
