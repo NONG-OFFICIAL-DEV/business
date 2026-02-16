@@ -3,17 +3,13 @@
     <custom-title icon="mdi-food">
       Menu Management
       <template #right>
-        <v-btn
-          color="primary"
-          prepend-icon="mdi-plus"
-          @click="openAddDialog"
-        >
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="openAddDialog">
           Add New Menu Item
         </v-btn>
       </template>
     </custom-title>
 
-    <v-row>
+    <v-row class="mb-4 align-center">
       <v-col cols="4">
         <v-select
           v-model="selectedCategory"
@@ -35,29 +31,50 @@
           </template>
         </v-select>
       </v-col>
+      <v-col cols="8" class="d-flex justify-end">
+        <v-pagination
+          v-model="currentPage"
+          :length="pageCount"
+          total-visible="5"
+          rounded="circle"
+          size="small"
+        />
+      </v-col>
     </v-row>
-    <v-window v-model="menuStore.loading" class="mt-4">
-      <v-row v-if="menuStore.loading">
-        <v-col v-for="n in 8" :key="n" cols="12" sm="6" md="4" lg="3" xl="2">
-          <v-skeleton-loader type="card" class="rounded-xl" />
-        </v-col>
-      </v-row>
 
-      <v-row v-else class="mt-2">
-        <v-col
-          v-for="product in filteredProducts"
-          :key="product.id"
-          cols="12"
-          sm="6"
-          md="4"
-          lg="3"
-          xl="2"
-        >
-          <v-card flat class="product-card rounded-xl border">
+    <v-row>
+      <v-col
+        v-if="menuStore.loading"
+        v-for="n in 8"
+        :key="n"
+        cols="12"
+        sm="6"
+        md="4"
+        lg="3"
+        xl="2"
+      >
+        <v-skeleton-loader type="card" class="rounded-xl" />
+      </v-col>
+
+      <v-col
+        v-else
+        v-for="product in paginatedProducts"
+        :key="product.id"
+        cols="12"
+        sm="6"
+        md="4"
+        lg="3"
+        xl="2"
+      >
+        <v-hover v-slot="{ hover }">
+          <v-card
+            flat
+            class="rounded-xl border overflow-hidden"
+          >
             <v-img
               :src="product.image_url"
-              height="160"
               cover
+              aspect-ratio="2"
               class="bg-grey-lighten-3"
             >
               <div class="d-flex justify-end pa-2">
@@ -67,27 +84,26 @@
                   class="font-weight-bold"
                   variant="flat"
                 >
-                  {{ 'LIVE' }}
+                  {{ product.status === 'active' ? 'LIVE' : 'OFFLINE' }}
                 </v-chip>
               </div>
             </v-img>
 
-            <v-card-text class="pa-4 bg-white">
-              <div class="text-subtitle-2 font-weight-bold text-truncate mb-1">
+            <v-card-text>
+              <div class="text-subtitle-1 text-truncate mb-1">
                 {{ product.name }}
               </div>
-              <div
-                v-if="product.has_variants"
-                class="text-h6 font-weight-black text-primary"
-              >
-                ${{ product.variants[0].price }}
-              </div>
-              <div v-else class="text-h6 font-weight-black text-primary">
-                ${{ product.price }}
+              <div class="text-h6 font-weight-bold text-primary">
+                ${{
+                  product.has_variants
+                    ? product.variants[0].price
+                    : product.price
+                }}
               </div>
             </v-card-text>
 
             <v-divider />
+
             <v-card-actions class="pa-2">
               <v-spacer />
               <v-btn
@@ -108,21 +124,20 @@
               />
             </v-card-actions>
           </v-card>
-        </v-col>
+        </v-hover>
+      </v-col>
 
-        <v-col
-          v-if="filteredProducts.length === 0"
-          cols="12"
-          class="text-center py-12"
-        >
-          <v-icon size="64" color="grey-lighten-2">mdi-food-off</v-icon>
-          <div class="text-grey mt-2">
-            No menu items found for this category.
-          </div>
-        </v-col>
-      </v-row>
-    </v-window>
+      <v-col
+        v-if="filteredProducts.length === 0"
+        cols="12"
+        class="text-center py-12"
+      >
+        <v-icon size="64" color="grey-lighten-2">mdi-food-off</v-icon>
+        <div class="text-grey mt-2">No menu items found for this category.</div>
+      </v-col>
+    </v-row>
 
+    <!-- Dialogs -->
     <MenuFormDialog
       v-model="dialog"
       :edit-mode="isEdit"
@@ -163,18 +178,27 @@
   const isCategoryEdit = ref(false)
   const selectedCategoryItem = ref(null)
 
+  // --- Pagination ---
+  const currentPage = ref(1)
+  const itemsPerPage = 8
+
   const filteredProducts = computed(() => {
     const data = menuStore.menus?.data || []
-
-    // no category selected → show all
-    if (!selectedCategory.value) {
-      return data
-    }
-
-    // filter by category
+    if (!selectedCategory.value) return data
     return data.filter(item => item.menu_category_id === selectedCategory.value)
   })
-  /* Menu Actions */
+
+  const pageCount = computed(() =>
+    Math.ceil(filteredProducts.value.length / itemsPerPage)
+  )
+  const paginatedProducts = computed(() =>
+    filteredProducts.value.slice(
+      (currentPage.value - 1) * itemsPerPage,
+      currentPage.value * itemsPerPage
+    )
+  )
+
+  // --- Menu Actions ---
   const openAddDialog = () => {
     isEdit.value = false
     selectedItem.value = null
@@ -211,7 +235,7 @@
     })
   }
 
-  /* Category Actions */
+  // --- Category Actions ---
   const openCategoryDialog = (item = null) => {
     isCategoryEdit.value = !!item
     selectedCategoryItem.value = item
@@ -220,14 +244,11 @@
 
   const handleCategorySave = async data => {
     try {
-      if (isCategoryEdit.value) {
-        await categoryStore.updateItem(data.id, data)
-      } else {
-        await categoryStore.createItem(data)
-      }
+      if (isCategoryEdit.value) await categoryStore.updateItem(data.id, data)
+      else await categoryStore.createItem(data)
       notif(t('messages.saved_success'), { type: 'success' })
       categoryDialog.value = false
-      await categoryStore.fetchAllMenuCategory({loading:'overlay'})
+      await categoryStore.fetchAllMenuCategory({ loading: 'overlay' })
     } catch {
       notif(t('messages.save_failed'), { type: 'error' })
     }
@@ -235,6 +256,6 @@
 
   onMounted(() => {
     menuStore.fetchMenus()
-    categoryStore.fetchAllMenuCategory({loading:'overlay'})
+    categoryStore.fetchAllMenuCategory({ loading: 'overlay' })
   })
 </script>
