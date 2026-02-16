@@ -54,8 +54,6 @@
     } finally {
       loadingStore.stop()
     }
-
-    console.log('loadingStore.isLoading =>', loadingStore.isLoading)
   }
 
   const languages = [
@@ -248,7 +246,7 @@
           </v-slide-group-item>
           <v-slide-group-item v-for="(item, n) in 12" :key="n" :value="n">
             <v-skeleton-loader
-              v-if="!categoryStore.categories?.data"
+              v-if="loadingStore.isLoading"
               width="200"
               class="px-0 ma-1 rounded-lg"
             ></v-skeleton-loader>
