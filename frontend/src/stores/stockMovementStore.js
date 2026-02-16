@@ -3,19 +3,13 @@ import stockMovementService from '../api/stockMovement'
 
 export const useStockMovementStore = defineStore('stockMovements', {
   state: () => ({
-    movements: [],
-    loading: false
+    movements: []
   }),
 
   actions: {
     async fetchMovements(productId) {
-      this.loading = true
-      try {
-        const res = await stockMovementService.getByProductId(productId)
-        this.movements = res.data.data
-      } finally {
-        this.loading = false
-      }
+      const res = await stockMovementService.getByProductId(productId)
+      this.movements = res.data.data
     },
 
     async createMovement(payload) {

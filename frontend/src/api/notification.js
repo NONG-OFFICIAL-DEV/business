@@ -1,10 +1,6 @@
-import http from './api' // <-- your axios instance (with baseURL set)
+import http from './api'
 
-/**
- * Category http service
- */
 export default {
-  // Get all categories
   linkTelegram(userId) {
     return http.post('/telegram/link', { user_id: userId })
   },

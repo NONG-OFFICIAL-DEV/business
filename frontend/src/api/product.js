@@ -1,10 +1,15 @@
 import http from './api'
 
 export const productService = {
-  async getAll(params = {}) {
-    const res = await http.get('/products', { params },)
+  async getAll(params = {}, loading) {
+    const res = await http.get('/products', {
+      params,
+      meta: { loader: loading }
+    })
+
     return res.data
   },
+
   async getById(id) {
     const res = await http.get(`/products/${id}`)
     return res.data
@@ -25,6 +30,6 @@ export const productService = {
     await http.delete(`/products/${id}`)
   },
   async productsScan(barcode) {
-   return await http.get(`/products/scan/${barcode}`)
+    return await http.get(`/products/scan/${barcode}`)
   }
 }

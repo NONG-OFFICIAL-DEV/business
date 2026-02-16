@@ -5,22 +5,13 @@ export const useUserStore = defineStore('userStore', {
   state: () => ({
     users: {
       data: []
-    },
-    loading: false,
-    error: null
+    }
   }),
 
   actions: {
     async fetchUsers(param) {
-      this.loading = true
-      try {
-        const res = await userAPI.getAll(param)
-        this.users.data = res
-      } catch (err) {
-        this.error = err
-      } finally {
-        this.loading = false
-      }
+      const res = await userAPI.getAll(param)
+      this.users.data = res
     },
 
     async addUser(user) {

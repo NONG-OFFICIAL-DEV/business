@@ -64,7 +64,7 @@
       // If variant selected, we use variant details
       variant_id: selectedVariant.value?.id || null,
       name: selectedVariant.value
-        ? `${props.product.name} (${selectedVariant.value.name})`
+        ? `${props.product.name}`
         : props.product.name,
       price: currentItemPrice.value, // Send the specific price for this variant
       qty: quantity.value,

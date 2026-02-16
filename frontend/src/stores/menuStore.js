@@ -4,7 +4,6 @@ import { menuService } from '@/api/menu'
 
 export const useMenuStore = defineStore('menu', () => {
   const menus = ref([])
-  const loading = ref(false)
 
   async function fetchMenus() {
     const res = await menuService.fetchMenus()
@@ -23,5 +22,5 @@ export const useMenuStore = defineStore('menu', () => {
     await menuService.deleteMenu(id)
   }
 
-  return { menus, loading, fetchMenus, saveMenu, deleteMenu }
+  return { menus, fetchMenus, saveMenu, deleteMenu }
 })

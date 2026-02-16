@@ -6,7 +6,7 @@
   /* STORES */
   import { usePosStore } from '@/stores/posStore'
   import { useProductStore } from '@/stores/productStore'
-  import { useSaleStore } from '@/stores/salePOSStore'
+  import { useSaleStore } from '@/stores/saleStore'
   import { useMenuStore } from '@/stores/menuStore'
   import { useCategoryMenuStore } from '@/stores/categoryMenu'
   import { useOrderStore } from '@/stores/orderStore'
@@ -120,7 +120,7 @@ ACTIONS
 
       // Clear cart and refresh products
       posStore.clearCart()
-      await productStore.fetchProducts()
+      await productStore.fetchProducts({}, { loading: 'skeleton' })
     } catch (error) {
       console.error(error)
       alert('Checkout failed!')
@@ -161,7 +161,7 @@ ON MOUNT
 --------------------------*/
   onMounted(async () => {
     await menuStore.fetchMenus()
-    await categoryStore.fetchAllMenuCategory({loading:'skeleton'})
+    await categoryStore.fetchAllMenuCategory({ loading: 'skeleton' })
     try {
       await authStore.fetchMe()
       user.value = authStore.me

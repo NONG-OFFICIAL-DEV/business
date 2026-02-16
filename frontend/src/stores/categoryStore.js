@@ -3,25 +3,18 @@ import categoryService from '../api/category'
 
 export const useCategoryStore = defineStore('category', {
   state: () => ({
-    categories: [],
-    loading: false,
-    error: null
+    categories: []
   }),
 
   actions: {
-    async fetchCategories(filters) {
-      const res = await categoryService.getAll(filters)
+    async fetchCategories(filters, loading) {
+      const res = await categoryService.getAll(filters, loading)
       this.categories = res.data
     },
 
     async addCategory(data) {
-      try {
-        await categoryService.create(data)
-        this.fetchCategories()
-      } catch (err) {
-        this.error = err.response?.data?.message || err.message
-        throw err
-      }
+      await categoryService.create(data)
+      this.fetchCategories()
     },
 
     async updateCategory(id, data) {
@@ -30,13 +23,8 @@ export const useCategoryStore = defineStore('category', {
     },
 
     async deleteCategory(id) {
-      try {
-        await categoryService.delete(id)
-        await this.fetchCategories()
-      } catch (err) {
-        this.error = err.response?.data?.message || err.message
-        throw err
-      }
+      await categoryService.delete(id)
+      await this.fetchCategories()
     }
   }
 })

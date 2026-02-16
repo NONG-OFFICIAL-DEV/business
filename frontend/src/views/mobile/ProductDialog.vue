@@ -8,7 +8,7 @@
     <v-card class="rounded-xl overflow-hidden border-0">
       <div class="position-relative">
         <v-img
-          :src="product?.image"
+          :src="product?.image_url"
           height="340"
           cover
           class="bg-grey-lighten-4"
@@ -29,7 +29,7 @@
       <v-card-text class="pa-6">
         <div class="d-flex justify-space-between align-center mb-1">
           <span class="text-overline text-grey-darken-1 font-weight-bold">
-            {{ product?.category || 'Premium Collection' }}
+            {{ product?.category.name || 'Premium Collection' }}
           </span>
           <div class="text-h6 font-weight-black text-black">
             ${{ product?.price }}

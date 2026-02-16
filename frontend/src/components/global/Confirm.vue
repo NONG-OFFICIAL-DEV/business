@@ -4,17 +4,19 @@
       <v-card-title :class="`bg-${options.type}`">
         <strong>{{ title }}</strong>
       </v-card-title>
-      <v-card-text
-        v-show="!!message"
-        class="capitalize-first-letter pt-6 pb-4"
-        v-html="message"
-      />
+      <v-card-text v-show="!!message" class="capitalize-first-letter pt-6 pb-4">
+        <span v-html="message"></span>
+        <div class="text-caption text-medium-emphasis mt-2">
+          This action cannot be undone.
+        </div>
+      </v-card-text>
+      <v-divider />
       <v-card-actions class="pa-4">
-        <v-spacer />
         <v-btn elevation="0" ref="btnNo" @click="cancel" variant="tonal">
           {{ $t('btn.cancel') }}
         </v-btn>
-        <v-btn elevation="0" class="bg-red" @click="agree">
+        <v-spacer />
+        <v-btn elevation="0" class="bg-error" @click="agree">
           {{ $t('btn.yes') }}
         </v-btn>
       </v-card-actions>

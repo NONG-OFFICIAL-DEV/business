@@ -215,16 +215,19 @@
   ===================== */
 
   const fetchData = () => {
-    productStore.fetchProducts({
-      page: tableOptions.page,
-      per_page: tableOptions.itemsPerPage,
-      keyword: appliedFilters.keyword,
-      category_id: appliedFilters.category_id.length
-        ? appliedFilters.category_id.join(',')
-        : null,
-      min_price: appliedFilters.min_price,
-      max_price: appliedFilters.max_price
-    })
+    productStore.fetchProducts(
+      {
+        page: tableOptions.page,
+        per_page: tableOptions.itemsPerPage,
+        keyword: appliedFilters.keyword,
+        category_id: appliedFilters.category_id.length
+          ? appliedFilters.category_id.join(',')
+          : null,
+        min_price: appliedFilters.min_price,
+        max_price: appliedFilters.max_price
+      },
+      { loader: 'overlay' }
+    )
   }
 
   /* =====================
