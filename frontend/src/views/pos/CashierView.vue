@@ -48,7 +48,7 @@
               class="d-flex align-center text-caption text-grey-darken-1 mb-4"
             >
               <v-icon size="14" class="me-1">mdi-package-variant</v-icon>
-              <span>{{ bill.item_count || 0 }} items</span>
+              <span>{{ bill.item_count || 0 }} Qty</span>
             </div>
 
             <v-divider class="mb-3 border-dashed" />

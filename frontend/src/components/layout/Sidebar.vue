@@ -179,6 +179,25 @@
         }
       ]
     },
+    {
+      title: 'Back Office',
+      icon: 'mdi-office-building-cog',
+      roles: [1, 2, 3],
+      subLinks: [
+        {
+          path: '/customer-orders',
+          title: 'Customer Order',
+          icon: 'mdi-cash-minus',
+          roles: [1, 2, 3]
+        },
+        {
+          path: '/sales-reports',
+          title: 'Sales Analytics',
+          icon: 'mdi-chart-bar',
+          roles: [1, 2, 3]
+        }
+      ]
+    },
     /* --- NEW SECTION: HUMAN RESOURCES --- */
     {
       title: 'Staff & Payroll',

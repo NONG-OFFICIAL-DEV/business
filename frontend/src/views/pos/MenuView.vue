@@ -5,6 +5,7 @@
   import { usePosStore } from '@/stores/posStore' // to get selectedStore
   import { useMenuStore } from '@/stores/menuStore'
   import { useCategoryMenuStore } from '@/stores/categoryMenu'
+  import { useLoadingStore } from '@/stores/loading'
 
   const productStore = useProductStore()
   const categoryStore = useCategoryStore()
@@ -12,6 +13,7 @@
   const menuCategoryStore = useCategoryMenuStore()
 
   const posStore = usePosStore()
+  const loadingStore = useLoadingStore()
 
   const search = ref('')
 
@@ -57,7 +59,7 @@
       const data = menuCategoryStore.items || []
       return data
     } else {
-      const data = menuStore.menus?.data || []
+      const data = categoryStore.categories.data || []
       return data
     }
   })
@@ -77,8 +79,8 @@
 
   // Fetch products and categories
   onMounted(async () => {
-    await productStore.fetchProducts()
-    await categoryStore.fetchCategories()
+    await productStore.fetchProducts({}, { loading: 'skeleton' })
+    await categoryStore.fetchCategories({}, { loading: 'skeleton' })
   })
 </script>
 <template>
@@ -107,12 +109,11 @@
             All
           </v-btn>
         </v-slide-group-item>
-
         <v-slide-group-item
           v-for="cat in categoriesList"
           :key="cat.id"
-          v-slot="{ isSelected, toggle }"
           :value="cat.id"
+          v-slot="{ isSelected, toggle }"
         >
           <v-btn
             :color="isSelected ? 'primary' : undefined"
@@ -124,6 +125,13 @@
           >
             {{ cat.name }}
           </v-btn>
+        </v-slide-group-item>
+        <v-slide-group-item v-for="(item, n) in 12" :key="n" :value="n">
+          <v-skeleton-loader
+            v-if="!categoriesList.length"
+            width="200"
+            class="px-0 ma-1 rounded-lg"
+          ></v-skeleton-loader>
         </v-slide-group-item>
       </v-slide-group>
     </div>
@@ -166,6 +174,29 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-row v-if="loadingStore.isLoading">
+      <v-col v-for="(item, n) in 12" :key="n" cols="12" lg="3" md="3">
+        <v-skeleton-loader
+          type="image, list-item-two-line"
+          class="rounded-xl"
+        ></v-skeleton-loader>
+      </v-col>
+    </v-row>
+    <v-row v-if="!filteredProducts.length && !loadingStore.isLoading" justify="center" class="py-12">
+      <v-col cols="12" class="text-center">
+        <v-icon
+          icon="mdi-package-variant-closed"
+          size="64"
+          color="grey-lighten-1"
+          class="mb-4"
+        ></v-icon>
+
+        <div class="text-h6 text-grey-darken-1">No Items Found</div>
+        <p class="text-body-2 text-grey">
+          We couldn't find any POS operators matching your criteria.
+        </p>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -180,5 +211,10 @@
 
   .category-slider {
     background: transparent;
+  }
+
+  :deep(.v-skeleton-loader__image) {
+    height: 200px;
+    border-radius: 25px;
   }
 </style>

@@ -59,6 +59,7 @@ export const usePosStore = defineStore('pos', () => {
   function selectBill(bill) {
     isPrintBill.value = true
     selectedBill.value = bill.items
+    selectedTable.value = null
     clearCart()
   }
 

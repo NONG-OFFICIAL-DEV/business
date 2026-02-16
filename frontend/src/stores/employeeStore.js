@@ -3,9 +3,7 @@ import employeeService from '../api/staff'
 
 export const useStaffStore = defineStore('employee', {
   state: () => ({
-    employees: [],
-    loading: false,
-    error: null
+    employees: []
   }),
 
   actions: {

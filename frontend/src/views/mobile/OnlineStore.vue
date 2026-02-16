@@ -1,236 +1,30 @@
 <script setup>
-  import { ref, computed } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import ProductDialog from './ProductDialog.vue'
 
+  import { useProductStore } from '@/stores/productStore'
+  import { useCategoryStore } from '@/stores/categoryStore'
   import { useCartStore } from '@/stores/cartStore'
+  import { useLoadingStore } from '@/stores/loading'
+
+  const productStore = useProductStore()
+  const categoryStore = useCategoryStore()
+  const cartStore = useCartStore()
+  const loadingStore = useLoadingStore()
 
   const langSheet = ref(false)
-  const activeLang = ref('KH') // Default language
+  const activeLang = ref('KH')
 
-  const cartStore = useCartStore()
-  /** PRODUCTS */
-  const products = ref([
-    {
-      id: 1,
-      name: 'Ultra Headphones',
-      price: 299,
-      category: 'Style',
-      image:
-        'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
-      description: 'Premium sound with noise cancellation and soft ear pads.'
-    },
-    {
-      id: 2,
-      name: 'Smart Watch S10',
-      price: 450,
-      category: 'Tech',
-      image:
-        'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
-      description: 'Track fitness, notifications, heart rate and sleep quality.'
-    },
-    {
-      id: 3,
-      name: 'Minimal Camera',
-      price: 890,
-      category: 'Tech',
-      image:
-        'https://images.unsplash.com/photo-1495707902641-75cac588d2e9?w=500',
-      description: 'Clean design camera with ultra sharp lens and 4K video.'
-    },
-    {
-      id: 4,
-      name: 'Studio Mic',
-      price: 199,
-      category: 'Tech',
-      image:
-        'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=500',
-      description: 'Perfect microphone for podcast, studio and voice recording.'
-    },
-    {
-      id: 5,
-      name: 'Wireless Mouse',
-      price: 75,
-      category: 'Tech',
-      image:
-        'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500',
-      description: 'Fast, smooth and ergonomic mouse for daily work.'
-    },
-    {
-      id: 6,
-      name: 'Mechanical Keyboard',
-      price: 160,
-      category: 'Tech',
-      image:
-        'https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?w=500',
-      description: 'Mechanical keys, premium typing feel, modern minimal look.'
-    },
-    {
-      id: 7,
-      name: 'Leather Bag',
-      price: 120,
-      category: 'Style',
-      image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500',
-      description: 'Elegant leather bag for office, travel, and everyday style.'
-    },
-    {
-      id: 8,
-      name: 'Classic Sunglasses',
-      price: 85,
-      category: 'Style',
-      image:
-        'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500',
-      description: 'Classic UV protection sunglasses with premium frame.'
-    },
-    {
-      id: 9,
-      name: 'Wool Beanie',
-      price: 35,
-      category: 'Style',
-      image:
-        'https://images.unsplash.com/photo-1576871337622-98d48d385e2c?w=500',
-      description: 'Warm wool beanie, perfect for cold season and fashion.'
-    },
-    {
-      id: 10,
-      name: 'Minimalist Wallet',
-      price: 55,
-      category: 'Style',
-      image:
-        'https://images.unsplash.com/photo-1627123430985-71d464a0b89a?w=500',
-      description: 'Slim wallet with modern design and strong material.'
-    },
-    {
-      id: 11,
-      name: 'Denim Jacket',
-      price: 110,
-      category: 'Style',
-      image:
-        'https://images.unsplash.com/photo-1523205771623-e0faa4d2813d?w=500',
-      description: 'Classic denim jacket. Stylish, durable and comfortable.'
-    },
-    {
-      id: 12,
-      name: 'Canvas Sneakers',
-      price: 95,
-      category: 'Style',
-      image:
-        'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=500',
-      description: 'Lightweight sneakers for daily walking and casual outfits.'
-    },
-    {
-      id: 13,
-      name: 'Ceramic Vase',
-      price: 45,
-      category: 'Home',
-      image:
-        'https://images.unsplash.com/photo-1581781870027-04212e231e96?w=500',
-      description: 'Minimal ceramic vase to decorate your home interior.'
-    },
-    {
-      id: 14,
-      name: 'Soy Wax Candle',
-      price: 28,
-      category: 'Home',
-      image:
-        'https://images.unsplash.com/photo-1603007905991-65500b164b38?w=500',
-      description: 'Natural soy wax candle with relaxing fragrance.'
-    },
-    {
-      id: 15,
-      name: 'Modern Desk Lamp',
-      price: 79,
-      category: 'Home',
-      image:
-        'https://images.unsplash.com/photo-1534073828943-f801091bb18c?w=500',
-      description: 'Modern lamp for office desk and bedroom lighting.'
-    },
-    {
-      id: 17,
-      name: 'Glass Carafe',
-      price: 40,
-      category: 'Home',
-      image:
-        'https://images.unsplash.com/photo-1616645258469-ce5e762463b2?w=500',
-      description: 'Beautiful glass carafe for water, juice or cold tea.'
-    },
-    {
-      id: 18,
-      name: 'Bamboo Storage Box',
-      price: 32,
-      category: 'Home',
-      image:
-        'https://images.unsplash.com/photo-1591123120675-6f7f1aae0e5b?w=500',
-      description: 'Eco bamboo storage box. Clean look, strong and useful.'
-    },
-    {
-      id: 19,
-      name: 'Yoga Mat',
-      price: 50,
-      category: 'Wellness',
-      image:
-        'https://images.unsplash.com/photo-1592432678891-9c654914a5ad?w=500',
-      description: 'Anti-slip yoga mat for home and gym training.'
-    },
-    {
-      id: 20,
-      name: 'Insulated Bottle',
-      price: 38,
-      category: 'Wellness',
-      image:
-        'https://images.unsplash.com/photo-1602143399827-bd959518b450?w=500',
-      description: 'Keeps your drink cold/hot for long time.'
-    },
-    {
-      id: 21,
-      name: 'Essential Oil Diffuser',
-      price: 60,
-      category: 'Wellness',
-      image:
-        'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=500',
-      description: 'Relaxing diffuser for aromatherapy and fresh air.'
-    },
-    {
-      id: 22,
-      name: 'Weighted Eye Mask',
-      price: 25,
-      category: 'Wellness',
-      image:
-        'https://images.unsplash.com/photo-1585128719715-46776b56a0d1?w=500',
-      description: 'Soft weighted eye mask for sleep and stress relief.'
-    },
-    {
-      id: 23,
-      name: 'Foam Roller',
-      price: 42,
-      category: 'Wellness',
-      image:
-        'https://images.unsplash.com/photo-1593110014310-918903259960?w=500',
-      description: 'Perfect for muscle recovery and workout stretching.'
-    },
-    {
-      id: 24,
-      name: 'Adjustable Dumbbells',
-      price: 180,
-      category: 'Wellness',
-      image:
-        'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=500',
-      description: 'Adjustable weights for full body home training.'
-    }
-  ])
-
-  /** UI FILTERS */
-  const categories = ['All', 'Tech', 'Style', 'Home', 'Wellness']
   const searchQuery = ref('')
   const activeCategory = ref('All')
 
-  /** DIALOG */
   const dialog = ref(false)
   const selectedProduct = ref(null)
 
   const filteredProducts = computed(() => {
-    return products.value.filter(p => {
+    return productStore.products.data?.filter(p => {
       const matchCat =
-        activeCategory.value === 'All' || p.category === activeCategory.value
+        activeCategory.value === 'All' || p.category_id === activeCategory.value
 
       const matchSearch =
         !searchQuery.value ||
@@ -240,7 +34,6 @@
     })
   })
 
-  /** FUNCTIONS */
   const openProduct = product => {
     selectedProduct.value = product
     dialog.value = true
@@ -248,6 +41,19 @@
 
   const addToCart = product => {
     cartStore.addToCart(product)
+  }
+
+  const fetchData = async () => {
+    loadingStore.start('skeleton')
+
+    try {
+      await Promise.all([
+        productStore.fetchProducts({}, { loading: 'skeleton' }),
+        categoryStore.fetchCategories({ per_page: -1 }, { loading: 'skeleton' })
+      ])
+    } finally {
+      loadingStore.stop()
+    }
   }
 
   const languages = [
@@ -276,6 +82,8 @@
 
     console.log('Language changed to:', lang.name)
   }
+
+  onMounted(fetchData)
 </script>
 
 <template>
@@ -408,10 +216,22 @@
       <!-- CATEGORIES -->
       <div class="px-3 mb-4">
         <v-slide-group v-model="activeCategory" mandatory show-arrows>
+          <v-slide-group-item v-slot="{ isSelected, toggle }" value="All">
+            <v-btn
+              :color="isSelected ? 'black' : 'grey-darken-1'"
+              class="mx-1 text-none"
+              rounded
+              prepend-icon="mdi-sort"
+              :variant="isSelected ? 'flat' : 'text'"
+              @click="toggle"
+            >
+              All
+            </v-btn>
+          </v-slide-group-item>
           <v-slide-group-item
-            v-for="cat in categories"
-            :key="cat"
-            :value="cat"
+            v-for="cat in categoryStore.categories?.data"
+            :key="cat.id"
+            :value="cat.id"
             v-slot="{ isSelected, toggle }"
           >
             <v-btn
@@ -421,8 +241,15 @@
               class="mx-1 text-none"
               @click="toggle"
             >
-              {{ cat }}
+              {{ cat.name }}
             </v-btn>
+          </v-slide-group-item>
+          <v-slide-group-item v-for="(item, n) in 12" :key="n" :value="n">
+            <v-skeleton-loader
+              v-if="loadingStore.isLoading"
+              width="200"
+              class="px-0 ma-1 rounded-lg"
+            ></v-skeleton-loader>
           </v-slide-group-item>
         </v-slide-group>
       </div>
@@ -430,47 +257,74 @@
       <!-- PRODUCTS -->
       <div class="px-2">
         <v-row no-gutters>
-          <v-col
-            v-for="(product, i) in filteredProducts"
-            :key="product.id"
-            cols="6"
-            sm="4"
-            md="3"
-            class="pa-2"
-          >
-            <transition
-              name="card-pop"
-              appear
-              :style="{ transitionDelay: i * 30 + 'ms' }"
-            >
-              <v-card flat class="product-card" @click="openProduct(product)">
-                <v-img
-                  :src="product.image"
-                  aspect-ratio="1"
-                  cover
-                  class="rounded-xl bg-grey-lighten-4"
-                />
-
-                <div class="pa-2">
-                  <div class="text-body-2 font-weight-bold text-truncate">
-                    {{ product.name }}
-                  </div>
-
-                  <div class="d-flex align-center justify-space-between mt-1">
-                    <span class="font-weight-black">${{ product.price }}</span>
-
-                    <v-btn
-                      icon="mdi-plus"
-                      size="x-small"
-                      color="black"
-                      class="elevation-1"
-                      @click.stop="addToCart(product)"
-                    />
-                  </div>
+          <!-- SKELETON LOADING -->
+          <template v-if="loadingStore.isLoading">
+            <v-col v-for="i in 8" :key="i" cols="6" sm="4" md="3" class="pa-2">
+              <v-card flat rounded="xl" class="pa-0 bg-white">
+                <v-skeleton-loader
+                  type="image"
+                  class="mx-auto mb-2"
+                ></v-skeleton-loader>
+                <div class="d-flex justify-space-between align-center">
+                  <v-skeleton-loader
+                    type="list-item-two-line"
+                    width="40%"
+                  ></v-skeleton-loader>
+                  <v-skeleton-loader
+                    type="avatar"
+                    size="32"
+                  ></v-skeleton-loader>
                 </div>
               </v-card>
-            </transition>
-          </v-col>
+            </v-col>
+          </template>
+
+          <!-- REAL PRODUCTS -->
+          <template v-else>
+            <v-col
+              v-for="(product, i) in filteredProducts"
+              :key="product.id"
+              cols="6"
+              sm="4"
+              md="3"
+              class="pa-2"
+            >
+              <transition
+                name="card-pop"
+                appear
+                :style="{ transitionDelay: i * 30 + 'ms' }"
+              >
+                <v-card flat class="product-card" @click="openProduct(product)">
+                  <v-img
+                    :src="product.image_url"
+                    aspect-ratio="1"
+                    cover
+                    class="rounded-xl bg-grey-lighten-4"
+                  />
+
+                  <div class="pa-2">
+                    <div class="text-body-2 font-weight-bold text-truncate">
+                      {{ product.name }}
+                    </div>
+
+                    <div class="d-flex align-center justify-space-between mt-1">
+                      <span class="font-weight-black">
+                        ${{ product.price }}
+                      </span>
+
+                      <v-btn
+                        icon="mdi-plus"
+                        size="x-small"
+                        color="black"
+                        class="elevation-1"
+                        @click.stop="addToCart(product)"
+                      />
+                    </div>
+                  </div>
+                </v-card>
+              </transition>
+            </v-col>
+          </template>
         </v-row>
       </div>
     </v-container>
@@ -480,6 +334,10 @@
 </template>
 
 <style scoped>
+  :deep(.v-skeleton-loader__image) {
+    height: 150px;
+    border-radius: 25px;
+  }
   .close-tab {
     width: 40px;
     height: 4px;
@@ -509,9 +367,9 @@
   }
 
   .product-card {
-    background: transparent !important;
     cursor: pointer;
     transition: all 0.2s ease;
+    border-radius: 25px;
   }
 
   .product-card:hover {

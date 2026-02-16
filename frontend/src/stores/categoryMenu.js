@@ -7,7 +7,7 @@ export const useCategoryMenuStore = defineStore('categoryMenu', () => {
   const loading = ref(false)
   const error = ref(null)
 
-  async function fetchAll(loading) {
+  async function fetchAllMenuCategory(loading) {
     loading.value = true
     try {
       const { data } = await categoryMenuService.getAll(loading)
@@ -23,7 +23,7 @@ export const useCategoryMenuStore = defineStore('categoryMenu', () => {
     loading.value = true
     try {
       await categoryMenuService.create(payload)
-      await fetchAll()
+      await fetchAllMenuCategory()
     } finally {
       loading.value = false
     }
@@ -33,7 +33,7 @@ export const useCategoryMenuStore = defineStore('categoryMenu', () => {
     loading.value = true
     try {
       await categoryMenuService.update(id, payload)
-      await fetchAll()
+      await fetchAllMenuCategory()
     } finally {
       loading.value = false
     }
@@ -53,7 +53,7 @@ export const useCategoryMenuStore = defineStore('categoryMenu', () => {
     items,
     loading,
     error,
-    fetchAll,
+    fetchAllMenuCategory,
     createItem,
     updateItem,
     deleteItem

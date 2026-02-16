@@ -200,6 +200,11 @@ const routes = [
       {
         path: '/dining-table',
         component: () => import('@/views/pos/DiningTableView.vue')
+      },
+      {
+        path: '/customer-orders',
+        component: () => import('@/views/backOffice/CustomerOrders.vue'),
+        meta: { requiresAuth: true }
       }
     ]
   },

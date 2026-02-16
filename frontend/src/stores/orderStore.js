@@ -3,16 +3,13 @@ import orderService from '@/api/order'
 
 export const useOrderStore = defineStore('order', {
   state: () => ({
-    orders: [],
-    loading: false
+    orders: []
   }),
 
   actions: {
     async createOrder(payload, loading) {
-      this.loading = true
       const res = await orderService.createOrder(payload, loading)
       this.orders = res
-      this.loading = false
       return res
     },
     async fetchOrderByTable(tableNumber) {

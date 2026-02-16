@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="internalOpen" max-width="600">
+  <v-dialog v-model="internalOpen" max-width="600" persistent>
     <v-card>
       <v-toolbar
         :title="form.id ? 'Edit Category' : 'Add Category'"
@@ -13,11 +13,15 @@
         <v-form ref="formRef" v-model="isValid">
           <v-text-field
             v-model="form.name"
-            label="Category Name"
             :rules="[rules.required]"
             required
             mandatory
-          />
+          >
+            <template #label>
+              Category Name
+              <span class="required-star">*</span>
+            </template>
+          </v-text-field>
           <v-textarea v-model="form.description" label="Description" rows="3" />
         </v-form>
       </v-card-text>
@@ -74,7 +78,7 @@
     { immediate: true }
   )
 
-  const close = () => (internalOpen.value = false)
+  const close = () => ((internalOpen.value = false), resetForm())
 
   const save = () => {
     formRef.value?.validate().then(success => {

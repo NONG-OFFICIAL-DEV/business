@@ -7,15 +7,15 @@ export const useProductStore = defineStore('product', {
   }),
 
   actions: {
-    async fetchProducts(filterParams = {}) {
-      const res = await productService.getAll(filterParams)
+    async fetchProducts(filterParams = {}, loading) {
+      const res = await productService.getAll(filterParams, loading)
       this.products = res.data
     },
     async addProduct(product) {
       await productService.create(product)
     },
 
-    async updateProduct(product,id) {
+    async updateProduct(product, id) {
       await productService.update(product, id)
     },
 
@@ -24,8 +24,8 @@ export const useProductStore = defineStore('product', {
     },
 
     async scanProduct(barcode) {
-     const res = await productService.productsScan(barcode)
-     return res.data
+      const res = await productService.productsScan(barcode)
+      return res.data
     }
   }
 })

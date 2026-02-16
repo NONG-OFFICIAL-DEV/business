@@ -28,6 +28,7 @@ export const useLoadingStore = defineStore('loading', () => {
 
   function stop() {
     count.value = Math.max(0, count.value - 1)
+    return count.value
   }
 
   return {

@@ -47,7 +47,7 @@
     if (page.value === 'cart' && cart.value.length === 0) {
       page.value = 'home'
     }
-    await menuCategoryStore.fetchAll({loading:'skeleton'})
+    await menuCategoryStore.fetchAllMenuCategory({ loading: 'skeleton' })
   })
 
   const selectedCategory = ref('All')
@@ -144,11 +144,13 @@
                 >
                   <v-col v-for="n in 6" :key="n" cols="6" class="pa-2">
                     <v-card flat rounded="xl" class="pa-3 bg-white">
-                      <v-skeleton-loader
-                        type="avatar"
-                        height="100"
-                        class="mx-auto mb-2"
-                      ></v-skeleton-loader>
+                      <div class="d-flex justify-space-between align-center">
+                        <v-skeleton-loader
+                          type="avatar"
+                          height="100"
+                          class="image mx-auto mb-2"
+                        ></v-skeleton-loader>
+                      </div>
                       <v-skeleton-loader
                         type="text"
                         width="80%"
@@ -241,6 +243,14 @@
 </template>
 <style scoped>
   /* Update your style section */
+  :deep(.image .v-skeleton-loader__avatar) {
+    max-height: 100px;
+    min-height: 100px;
+    height: 100px;
+    max-width: 100px;
+    min-width: 100px;
+    width: 100px;
+  }
   .sticky-nav {
     position: -webkit-sticky; /* Support for Safari */
     position: sticky;

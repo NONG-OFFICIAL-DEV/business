@@ -17,7 +17,6 @@
       <div class="text-subtitle-2 font-weight-black">
         {{ isHospitality ? 'CURRENT ORDER' : 'CART' }}
       </div>
-
       <div v-if="isHospitality && table" class="text-caption">
         Table T-{{ table.table_number }}
       </div>

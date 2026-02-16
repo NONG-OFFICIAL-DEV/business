@@ -140,8 +140,8 @@
       }
       notif(t('messages.saved_success'), { type: 'success' })
       resetForm()
-      await categoryStore.fetchAll({loading:'overlay'})
-    } catch (err) {
+      await categoryStore.fetchAllMenuCategory({ loading: 'overlay' })
+    } catch {
       notif(t('messages.save_failed'), { type: 'error' })
     } finally {
       loading.value = false
@@ -152,16 +152,16 @@
     confirm({
       title: t('Confirm Delete'),
       message: `Are you sure delete category "${item.name}"?`,
-      options: { type: 'error', color: 'error',width: 550 },
+      options: { type: 'error', color: 'error', width: 550 },
       agree: async () => {
         await categoryStore.deleteItem(item.id)
         notif(t('messages.deleted_success'), { type: 'success' })
-        await categoryStore.fetchAll({loading:'overlay'})
+        await categoryStore.fetchAllMenuCategory({ loading: 'overlay' })
       }
     })
   }
 
   onMounted(() => {
-    categoryStore.fetchAll({loading:'overlay'})
+    categoryStore.fetchAllMenuCategory({ loading: 'overlay' })
   })
 </script>

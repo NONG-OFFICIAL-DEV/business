@@ -251,7 +251,7 @@
 
 <script setup>
   import { ref, onMounted, reactive, computed } from 'vue'
-  import { useSaleStore } from '../../stores/salePOSStore'
+  import { useSaleStore } from '../../stores/saleStore'
   import { useCurrency } from '@/composables/useCurrency'
   import { useDate } from '@/composables/useDate'
 

@@ -3,8 +3,7 @@ import tableService from '@/api/table'
 
 export const useDiningTableStore = defineStore('diningTable', {
   state: () => ({
-    tables: [],
-    loading: false
+    tables: []
   }),
 
   actions: {
@@ -12,13 +11,8 @@ export const useDiningTableStore = defineStore('diningTable', {
       FETCH ALL TABLES
     --------------------------*/
     async fetchTables(params = {}) {
-      this.loading = true
-      try {
-        const res = await tableService.getAllTables(params)
-        this.tables = res.data.data
-      } finally {
-        this.loading = false
-      }
+      const res = await tableService.getAllTables(params)
+      this.tables = res.data.data
     },
 
     /* -------------------------
