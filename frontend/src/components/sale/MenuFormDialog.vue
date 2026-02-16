@@ -209,14 +209,23 @@
 
           <!-- FORM -->
           <v-col cols="12" md="8">
-            <v-text-field v-model="form.name" label="Name" />
+            <v-text-field v-model="form.name" label="Name">
+              <template #label>
+                Menu name
+                <span class="required-star">*</span>
+              </template>
+            </v-text-field>
             <v-select
               v-model="form.menu_category_id"
               :items="categories"
-              label="Category"
               item-title="name"
               item-value="id"
-            />
+            >
+              <template #label>
+                Menu category
+                <span class="required-star">*</span>
+              </template>
+            </v-select>
 
             <v-textarea
               v-model="form.description"

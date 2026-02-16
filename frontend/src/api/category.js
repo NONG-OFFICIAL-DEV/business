@@ -6,7 +6,13 @@ import http from './api' // <-- your axios instance (with baseURL set)
 export default {
   // Get all categories
   getAll(filters) {
-    return http.get('/categories', { params: filters })
+    return http.get(
+      '/categories',
+      { params: filters },
+      {
+        meta: { loader: 'skeleton' }
+      }
+    )
   },
 
   // Get a single category by ID
@@ -27,5 +33,5 @@ export default {
   // Delete a category
   delete(id) {
     return http.delete(`/categories/${id}`)
-  },
+  }
 }

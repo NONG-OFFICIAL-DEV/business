@@ -47,7 +47,7 @@
     if (page.value === 'cart' && cart.value.length === 0) {
       page.value = 'home'
     }
-    await menuCategoryStore.fetchAll({loading:'skeleton'})
+    await menuCategoryStore.fetchAllMenuCategory({loading:'skeleton'})
   })
 
   const selectedCategory = ref('All')

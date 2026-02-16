@@ -50,17 +50,6 @@ LOCAL STATE
   /* -------------------------
 COMPUTED
 --------------------------*/
-  // Filter products or menu based on store type and search term
-  const filteredProducts = computed(() => {
-    const term = search.value.toLowerCase()
-    if (posStore.selectedStore.type === 'hospitality') {
-      const data = menuStore.menus?.data || []
-      return term ? data.filter(p => p.name.toLowerCase().includes(term)) : data
-    } else {
-      const data = productStore.products?.data || []
-      return term ? data.filter(p => p.name.toLowerCase().includes(term)) : data
-    }
-  })
 
   // Use POS store computed: activeItems, subtotal, total
   const activeItems = computed(() => posStore.activeItems)
@@ -146,7 +135,6 @@ ACTIONS
       await orderStore.fetchAllOrders()
       window.open(res.data.invoice_url, '_blank')
     }
-    console.log(res.status)
   }
 
   async function handleLogout() {
@@ -173,8 +161,7 @@ ON MOUNT
 --------------------------*/
   onMounted(async () => {
     await menuStore.fetchMenus()
-    await productStore.fetchProducts()
-    await categoryStore.fetchAll({loading:'overlay'})
+    await categoryStore.fetchAllMenuCategory({loading:'skeleton'})
     try {
       await authStore.fetchMe()
       user.value = authStore.me
@@ -210,7 +197,6 @@ ON MOUNT
       <router-view v-slot="{ Component }" :key="$route.fullPath">
         <component
           :is="Component"
-          :filtered-products="filteredProducts"
           @quick-add="handleQuickAdd"
           @select="openCustomizer"
         />

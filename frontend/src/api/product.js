@@ -2,7 +2,7 @@ import http from './api'
 
 export const productService = {
   async getAll(params = {}) {
-    const res = await http.get('/products', { params })
+    const res = await http.get('/products', { params },)
     return res.data
   },
   async getById(id) {

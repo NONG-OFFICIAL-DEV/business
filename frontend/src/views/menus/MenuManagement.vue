@@ -6,7 +6,6 @@
         <v-btn
           color="primary"
           prepend-icon="mdi-plus"
-          class="text-none font-weight-black rounded-lg"
           @click="openAddDialog"
         >
           Add New Menu Item
@@ -228,7 +227,7 @@
       }
       notif(t('messages.saved_success'), { type: 'success' })
       categoryDialog.value = false
-      await categoryStore.fetchAll({loading:'overlay'})
+      await categoryStore.fetchAllMenuCategory({loading:'overlay'})
     } catch {
       notif(t('messages.save_failed'), { type: 'error' })
     }
@@ -236,6 +235,6 @@
 
   onMounted(() => {
     menuStore.fetchMenus()
-    categoryStore.fetchAll({loading:'overlay'})
+    categoryStore.fetchAllMenuCategory({loading:'overlay'})
   })
 </script>

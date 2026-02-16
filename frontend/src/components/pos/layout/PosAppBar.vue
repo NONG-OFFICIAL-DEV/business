@@ -91,6 +91,13 @@
       <div class="text-right d-none d-md-block">
         <div class="text-caption font-weight-bold text-capitalize">
           {{ user?.username }}
+          <v-skeleton-loader
+            v-if="!user?.username"
+            type="text"
+            width="80"
+            height="12"
+            class="px-0 ma-0 custom-skeleton"
+          ></v-skeleton-loader>
         </div>
         <div class="text-caption text-grey">POS Operator</div>
       </div>
@@ -112,3 +119,13 @@
     </div>
   </v-app-bar>
 </template>
+<style scoped>
+.custom-skeleton :deep(.v-skeleton-loader__bone) {
+  margin: 0;
+}
+
+.custom-skeleton {
+  background: transparent !important;
+  display: inline-block;
+}
+</style>
