@@ -48,8 +48,8 @@
 
     try {
       await Promise.all([
-        productStore.fetchProducts({}, { loader: 'skeleton' }),
-        categoryStore.fetchCategories({ per_page: -1 }, { loader: 'skeleton' })
+        productStore.fetchProducts({}, { loading: 'skeleton' }),
+        categoryStore.fetchCategories({ per_page: -1 }, { loading: 'skeleton' })
       ])
     } finally {
       loadingStore.stop()
