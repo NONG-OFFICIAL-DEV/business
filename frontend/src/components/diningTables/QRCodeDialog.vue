@@ -16,7 +16,7 @@
       <v-card-text class="pa-8 text-center bg-grey-lighten-4">
         <div class="qr-wrapper bg-white pa-4 rounded-xl shadow-sm mb-6">
           <div class="qr-placeholder d-flex align-center justify-center">
-             <div v-if="qrCode" v-html="qrCode" class="mx-auto"></div>
+            <div v-if="qrCode" v-html="qrCode" class="mx-auto"></div>
           </div>
         </div>
 
@@ -101,9 +101,58 @@
     console.log('Printing QR for Table:', props.table.table_number)
   }
 
-  function downloadQR() {
-    // Logic to save the QR as PNG
-    console.log('Downloading QR...')
+  async function downloadQR() {
+    if (!qrCode.value) return
+
+    const svgString = qrCode.value
+
+    // 1) Convert SVG string to Blob
+    const svgBlob = new Blob([svgString], {
+      type: 'image/svg+xml;charset=utf-8'
+    })
+
+    const url = URL.createObjectURL(svgBlob)
+
+    // 2) Create Image
+    const img = new Image()
+
+    img.onload = () => {
+      // 3) Create canvas
+      const canvas = document.createElement('canvas')
+      const size = 500 // PNG size
+      canvas.width = size
+      canvas.height = size
+
+      const ctx = canvas.getContext('2d')
+
+      // White background
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, size, size)
+
+      // Draw SVG into canvas
+      ctx.drawImage(img, 0, 0, size, size)
+
+      // 4) Convert canvas to PNG and download
+      canvas.toBlob(blob => {
+        const pngUrl = URL.createObjectURL(blob)
+
+        const link = document.createElement('a')
+        link.href = pngUrl
+        link.download = `table-${props.tableSelect?.table_number}-qr.png`
+        link.click()
+
+        URL.revokeObjectURL(pngUrl)
+      }, 'image/png')
+
+      URL.revokeObjectURL(url)
+    }
+
+    img.onerror = err => {
+      console.error('QR PNG download failed', err)
+      URL.revokeObjectURL(url)
+    }
+
+    img.src = url
   }
 </script>
 

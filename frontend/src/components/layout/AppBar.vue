@@ -6,6 +6,8 @@
     <v-app-bar-title class="font-weight-bold d-none d-lg-block d-print-block">
       Inventory Management
     </v-app-bar-title>
+     <switcher-language :icon-btn="false"/>
+
     <v-btn class="text-none" stacked to="/notifications">
       <v-badge color="error" :content="props.notifications_count">
         <v-icon>mdi-bell-outline</v-icon>
@@ -51,6 +53,7 @@
   import { useAuthStore } from '@/stores/auth'
   import { useRouter } from 'vue-router'
   import { useAppUtils } from '@/composables/useAppUtils'
+  import SwitcherLanguage from '../customs/SwitcherLanguage.vue'
   import { useI18n } from 'vue-i18n'
   const { t } = useI18n()
   const { notif } = useAppUtils()

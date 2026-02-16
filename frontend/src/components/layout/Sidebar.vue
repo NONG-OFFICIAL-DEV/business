@@ -1,6 +1,8 @@
 <script setup>
   import { ref, computed } from 'vue'
   import logo from '/logo.png'
+  import { useI18n } from 'vue-i18n'
+  const { t } = useI18n()
 
   const props = defineProps({
     user: Object, // user will be passed from parent (Layout.vue),
@@ -37,10 +39,10 @@
       .filter(Boolean)
   })
 
-  const menu = ref([
+  const menu = computed(() =>[
     {
       path: '/dashboard',
-      title: 'Dashboard',
+      title: t('menu.dashboard'),
       icon: 'mdi-view-dashboard',
       roles: [1, 2, 3]
     },
@@ -415,7 +417,7 @@
 <style scoped>
   :deep(.v-list-group__items .v-list-item) {
     padding-inline-start: 16px !important;
-    background-color:rgb(233, 226, 226) !important;
+    background-color: rgb(233, 226, 226) !important;
   }
 
   .sub-item :deep(.v-list-item-title) {

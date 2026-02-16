@@ -70,7 +70,7 @@
           class="text-none"
           @click="openCreateDialog"
         >
-          New Store
+          {{t('btn.create')}}
         </v-btn>
       </template>
     </custom-title>
