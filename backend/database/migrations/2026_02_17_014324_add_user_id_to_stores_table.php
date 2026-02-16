@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('stores', function (Blueprint $table) {
-            $table->unsignedBigInteger('user_id')->after('id');
+            $table->unsignedBigInteger('user_id')->nullable()->after('id');
 
             // Optional: add foreign key constraint to users table
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
