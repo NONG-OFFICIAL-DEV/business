@@ -142,6 +142,7 @@ class OrderController extends Controller
             'order_no' => $table->activeOrder->order_no,
             'status' => $table->activeOrder->status,
             'kitchen_status' => $table->activeOrder->kitchen_status,
+            'order_date' => $table->activeOrder->created_at,
             'items' => $table->activeOrder->items->map(fn($item) => [
                 'id' => $item->id,
                 'name' => $item->menu->name,
