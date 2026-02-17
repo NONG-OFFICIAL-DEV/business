@@ -28,23 +28,25 @@
     { immediate: true }
   )
 
-  //   const reset = () => {
-  //     form.value = {
-  //       table_number: '',
-  //       capacity: null,
-  //       status: 'available',
-  //       area: '',
-  //       note: '',
-  //       is_active: true
-  //     }
-  //   }
+    const reset = () => {
+      form.value = {
+        table_number: '',
+        capacity: null,
+        status: 'available',
+        area: '',
+        note: '',
+        is_active: true
+      }
+    }
 
   const close = () => {
     emit('update:modelValue', false)
+    reset()
   }
 
   const submit = () => {
     emit('save', form.value)
+    reset()
   }
 </script>
 

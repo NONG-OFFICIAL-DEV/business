@@ -191,7 +191,7 @@
               {{ table.area }}
             </div>
 
-            <v-fade-transition v-if="isAdmin">
+            <div v-if="isAdmin">
               <div class="admin-actions d-flex justify-center gap-1 mt-3">
                 <v-btn
                   icon="mdi-pencil"
@@ -215,7 +215,7 @@
                   @click="deleteTable(table.id)"
                 />
               </div>
-            </v-fade-transition>
+            </div>
           </v-card-text>
 
           <div
