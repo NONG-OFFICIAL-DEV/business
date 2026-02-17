@@ -20,6 +20,7 @@ services:
   frontend:
     build:
       context: ./frontend
+    container_name: inventory-frontend
     image: nongdev/inventory-frontend:latest
     restart: always
     networks:
