@@ -236,7 +236,7 @@
       await usersStore.fetchUsers()
       dialog.value = false
     } catch (error) {
-      notif(error.response?.data?.message || t('messages.save_failed'), {
+      notif(error.response?.data?.message || t('messages.error_occurred'), {
         type: 'error',
         color: 'error'
       })

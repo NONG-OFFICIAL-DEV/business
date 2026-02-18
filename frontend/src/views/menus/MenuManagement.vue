@@ -218,7 +218,7 @@
       await menuStore.fetchMenus()
       dialog.value = false
     } catch {
-      notif(t('messages.save_failed'), { type: 'error' })
+      notif(t('messages.error_occurred'), { type: 'error' })
     }
   }
 
@@ -250,7 +250,7 @@
       categoryDialog.value = false
       await categoryStore.fetchAllMenuCategory({ loading: 'overlay' })
     } catch {
-      notif(t('messages.save_failed'), { type: 'error' })
+      notif(t('messages.error_occurred'), { type: 'error' })
     }
   }
 

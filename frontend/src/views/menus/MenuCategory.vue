@@ -142,7 +142,7 @@
       resetForm()
       await categoryStore.fetchAllMenuCategory({ loading: 'overlay' })
     } catch {
-      notif(t('messages.save_failed'), { type: 'error' })
+      notif(t('messages.error_occurred'), { type: 'error' })
     } finally {
       loading.value = false
     }
@@ -161,7 +161,7 @@
     })
   }
 
-  onMounted(() => {
-    categoryStore.fetchAllMenuCategory({ loading: 'overlay' })
+  onMounted(async () => {
+    await categoryStore.fetchAllMenuCategory({ loading: 'overlay' })
   })
 </script>
