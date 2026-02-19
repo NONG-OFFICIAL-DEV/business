@@ -74,17 +74,31 @@
   </v-container>
 </template>
 <script setup>
-  import { onMounted, ref } from 'vue'
+  import { onMounted, ref, onBeforeUnmount } from 'vue'
   import { useOrderStore } from '../../stores/orderStore'
   import { usePosStore } from '../../stores/posStore'
   import { useDate } from '@/composables/useDate'
+  import { connectOrderStream, closeOrderStream } from '@/services/orderStream'
 
   const { formatTimeAgo } = useDate()
   const orderStore = useOrderStore()
   const posStore = usePosStore()
+  let intervalId = null
+  // onMounted(() => {
+  //   orderStore.fetchAllOrders()
+  // })
+
+  const fetchOrders = async () => {
+    await orderStore.fetchAllOrders()
+  }
 
   onMounted(() => {
-    orderStore.fetchAllOrders()
+    fetchOrders()
+    intervalId = setInterval(fetchOrders, 3000)
+  })
+
+  onBeforeUnmount(() => {
+    clearInterval(intervalId)
   })
 
   function selectBill(bill) {

@@ -43,3 +43,12 @@ php artisan migrate --seed
 php artisan serve
 9. Clear Catch
 php artisan optimize:clear
+
+
+
+## web socket 
+
+composer require beyondcode/laravel-websockets
+php artisan vendor:publish --provider="BeyondCode\LaravelWebSockets\WebSocketsServiceProvider" --tag="migrations"
+php artisan migrate
+php artisan vendor:publish --provider="BeyondCode\LaravelWebSockets\WebSocketsServiceProvider" --tag="config"
