@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OrderCreated;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Table;
@@ -99,6 +100,7 @@ class OrderController extends Controller
 
         // Load relations for response
         $order->load('table', 'items.menu');
+        event(new OrderCreated($order));
 
         return response()->json([
             'success' => true,

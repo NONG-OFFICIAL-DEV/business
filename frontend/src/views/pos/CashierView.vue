@@ -78,28 +78,15 @@
   import { useOrderStore } from '../../stores/orderStore'
   import { usePosStore } from '../../stores/posStore'
   import { useDate } from '@/composables/useDate'
-  import { connectOrderStream, closeOrderStream } from '@/services/orderStream'
 
   const { formatTimeAgo } = useDate()
   const orderStore = useOrderStore()
   const posStore = usePosStore()
   let intervalId = null
-  // onMounted(() => {
-  //   orderStore.fetchAllOrders()
-  // })
-
-  const fetchOrders = async () => {
-    await orderStore.fetchAllOrders()
-  }
-
   onMounted(() => {
-    fetchOrders()
-    intervalId = setInterval(fetchOrders, 3000)
+    orderStore.fetchAllOrders()
   })
 
-  onBeforeUnmount(() => {
-    clearInterval(intervalId)
-  })
 
   function selectBill(bill) {
     // console.log(bill.order_id);

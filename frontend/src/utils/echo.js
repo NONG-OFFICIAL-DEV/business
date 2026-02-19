@@ -1,19 +1,15 @@
-import Echo from 'laravel-echo'
-import Pusher from 'pusher-js'
+import Echo from 'laravel-echo';
+import io from 'socket.io-client';  // ← replace pusher-js
 
-window.Pusher = Pusher
+window.io = io;  // ← NOT window.Pusher
 
 window.Echo = new Echo({
-  broadcaster: 'pusher',
-  key: 'local', // must match laravel-echo-server.json
-  wsHost: '127.0.0.1', // host of Echo server
-  wsPort: 6001,
-  forceTLS: false,
-  disableStats: true,
-  enabledTransports: ['ws', 'wss'] // optional, ensures WebSocket only
-})
+  broadcaster: 'socket.io',          // ← was 'pusher'
+  host: 'http://127.0.0.1:6001',     // ← single host field, not wsHost/wsPort
+  // remove: key, forceTLS, encrypted, disableStats, enabledTransports, cluster
+});
 
-window.Echo.channel('orders').listen('OrderCreated', e => {
-  console.log('New order:', e.order)
-  // Update your Vue store/orders array here
-})
+window.Echo.channel('orders')
+  .listen('OrderCreated', e => {
+    console.log('New order:', e.order);
+  });
