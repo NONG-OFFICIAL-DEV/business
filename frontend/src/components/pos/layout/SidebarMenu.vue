@@ -129,12 +129,6 @@
       icon: 'mdi-cash-register',
       value: 'Cashier',
       to: '/pos/cashier'
-    },
-    {
-      tooltip: 'Reports',
-      icon: 'mdi-chart-bar',
-      value: 'Reports',
-      to: '/pos/reports'
     }
   ]
 </script>
