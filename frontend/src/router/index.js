@@ -229,10 +229,6 @@ const routes = [
       {
         path: 'cashier',
         component: () => import('@/views/pos/CashierView.vue')
-      },
-      {
-        path: 'reports',
-        component: () => import('@/views/pos/SalesReportView.vue')
       }
     ]
   },

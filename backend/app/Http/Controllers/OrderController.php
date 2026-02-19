@@ -59,13 +59,24 @@ class OrderController extends Controller
             'items.*.price' => 'nullable',
         ]);
 
+        // 1️⃣ Find unpaid order for table
+        $order = Order::where('table_id', $request->table_id)
+            ->where('status', 'new')
+            ->first();
+
         // Create order
-        $order = Order::create([
-            'order_no' => 'ORD-' . now()->format('YmdHis'), // simple order_no
-            'table_id' => $request->table_id,
-            'status' => 'new',
-            'kitchen_status' => 'pending',
-        ]);
+        if (!$order) {
+            $order = Order::create([
+                'order_no' => 'ORD-' . now()->format('YmdHis'),
+                'table_id' => $request->table_id,
+                'status' => 'new',
+                'total' => 0
+            ]);
+
+            Table::where('id', $request->table_id)
+                ->update(['status' => 'occupied']);
+        }
+
 
         // Add order items
         foreach ($request->items as $item) {
@@ -182,7 +193,7 @@ class OrderController extends Controller
                     'kitchen_status' => $order->kitchen_status,
                     'item_count' => $order->items->sum('quantity'),
                     'total' => $order->items->sum(fn($i) => $i->quantity * $i->price),
-                    'items' => $order->items->map(fn ($item) => [
+                    'items' => $order->items->map(fn($item) => [
                         'id'     => $item->id,
                         'menu_id' => $item->menu_id,
                         'name'   => $item->menu->name,
@@ -202,12 +213,10 @@ class OrderController extends Controller
 
                 sleep(2); // update interval
             }
-
         }, 200, [
             'Content-Type'  => 'text/event-stream',
             'Cache-Control' => 'no-cache',
             'Connection'    => 'keep-alive',
         ]);
     }
-
 }
