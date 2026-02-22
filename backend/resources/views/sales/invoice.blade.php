@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
     <style>
         @page {
             size: 80mm 200mm;
@@ -10,7 +11,7 @@
         }
 
         body {
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Noto Sans Khmer', sans-serif;
             width: 70mm;
             /* Reduced width to prevent right-edge clipping */
             margin: 0 auto;
@@ -71,6 +72,7 @@
 </head>
 
 <body onload="window.print()">
+
     <div class="center">
         <img src="https://i.pinimg.com/736x/fd/9c/fc/fd9cfc4eb0b0498a45b73343f1aa04ed.jpg" class="logo"><br>
         <span class="bold" style="font-size: 16px;">MY POS STORE</span><br>
@@ -86,7 +88,7 @@
         </tr>
         <tr>
             <td>
-              Date:{{ is_string($sale->created_at) ? date('d-M-y H:i', strtotime($sale->created_at)) : $sale->created_at->format('d-M-y H:i') }}
+                Date:{{ is_string($sale->created_at) ? date('d-M-y H:i', strtotime($sale->created_at)) : $sale->created_at->format('d-M-y H:i') }}
             </td>
         </tr>
         <tr>
@@ -135,7 +137,7 @@
     <table>
         <tr>
             <td class="bold">TOTAL (KHR):</td>
-            <td class="text-right bold total-khr">{{ number_format($totalRiel, 0, '.', ',') }}KHR</td>
+            <td class="text-right bold total-khr">{{ number_format($totalRiel, 0, '.', ',') }}៛</td>
         </tr>
         <tr>
             <td class="bold">TOTAL (USD):</td>

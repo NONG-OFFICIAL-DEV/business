@@ -107,13 +107,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [changes, build-push]
-    # Only run if something actually changed
-    if: |
-      needs.changes.outputs.backend   == 'true' ||
-      needs.changes.outputs.frontend  == 'true' ||
-      needs.changes.outputs.ai        == 'true' ||
-      needs.changes.outputs.webserver == 'true'
-
     steps:
       - uses: actions/checkout@v4
 

@@ -225,7 +225,7 @@ class SaleController extends Controller
             ->setOptions([
                 'isHtml5ParserEnabled' => true,
                 'isRemoteEnabled' => true, // Allows loading images from URL
-                'defaultFont' => 'sans-serif'
+                'defaultFont' => 'NotoSansKhmer'
             ]);
 
         return $pdf->download("invoice-{$sale->id}.pdf");
