@@ -11,6 +11,7 @@ import BaseButton from "./components/customs/BaseButton.vue";
 import BaseButtonFilter from "./components/customs/BaseButtonFilter.vue";
 import Notif from '@/components/global/Notification.vue'
 import Confirm from '@/components/global/Confirm.vue'
+import axios from 'axios'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -27,6 +28,11 @@ document.addEventListener(
   },
   { passive: false }
 )
+
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL
+axios.defaults.headers.common['Content-Type'] = 'application/json'
+axios.defaults.headers.common['Accept'] = 'application/json'
+
 app.use(pinia)
 app.use(vuetify)
 app.use(router)

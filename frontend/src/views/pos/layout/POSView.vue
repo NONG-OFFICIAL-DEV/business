@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, onMounted } from 'vue'
+  import { ref, computed, onMounted, onUnmounted } from 'vue'
   import { useRouter } from 'vue-router'
   import { useI18n } from 'vue-i18n'
 
@@ -162,6 +162,7 @@ ON MOUNT
   onMounted(async () => {
     await menuStore.fetchMenus()
     await categoryStore.fetchAllMenuCategory({ loading: 'skeleton' })
+    orderStore.subscribeToOrders()
     try {
       await authStore.fetchMe()
       user.value = authStore.me
@@ -169,6 +170,10 @@ ON MOUNT
       await authStore.logout()
       router.push({ name: 'Login' })
     }
+  })
+
+  onUnmounted(() => {
+    orderStore.unsubscribeFromOrders() // 👈 clean up
   })
 </script>
 

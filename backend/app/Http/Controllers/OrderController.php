@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\OrderCreated;
+use App\Events\OrderItemsAdded;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Table;
@@ -59,7 +60,7 @@ class OrderController extends Controller
             'items.*.note' => 'nullable|string|max:255',
             'items.*.price' => 'nullable',
         ]);
-
+        $isNewOrder = false;
         // 1️⃣ Find unpaid order for table
         $order = Order::where('table_id', $request->table_id)
             ->where('status', 'new')
@@ -67,6 +68,7 @@ class OrderController extends Controller
 
         // Create order
         if (!$order) {
+            $isNewOrder = true;
             $order = Order::create([
                 'order_no' => 'ORD-' . now()->format('YmdHis'),
                 'table_id' => $request->table_id,
@@ -97,10 +99,14 @@ class OrderController extends Controller
             'current_order_id' => $order->id,
         ]);
 
-
+        // 🔴 Broadcast real-time event
+        if ($isNewOrder) {
+            broadcast(new OrderCreated($order));
+        } else {
+            broadcast(new OrderItemsAdded($order));
+        }
         // Load relations for response
         $order->load('table', 'items.menu');
-        event(new OrderCreated($order));
 
         return response()->json([
             'success' => true,

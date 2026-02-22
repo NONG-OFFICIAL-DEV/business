@@ -48,7 +48,8 @@ php artisan optimize:clear
 
 ## web socket 
 
-composer require beyondcode/laravel-websockets
-php artisan vendor:publish --provider="BeyondCode\LaravelWebSockets\WebSocketsServiceProvider" --tag="migrations"
-php artisan migrate
-php artisan vendor:publish --provider="BeyondCode\LaravelWebSockets\WebSocketsServiceProvider" --tag="config"
+# Terminal 2 — Reverb WebSocket server
+php artisan reverb:start
+
+# Terminal 3 — Queue worker
+php artisan queue:work

@@ -1,15 +1,16 @@
 import Echo from 'laravel-echo';
-import io from 'socket.io-client';  // ← replace pusher-js
+import Pusher from 'pusher-js';
 
-window.io = io;  // ← NOT window.Pusher
+window.Pusher = Pusher;
 
-window.Echo = new Echo({
-  broadcaster: 'socket.io',          // ← was 'pusher'
-  host: 'http://127.0.0.1:6001',     // ← single host field, not wsHost/wsPort
-  // remove: key, forceTLS, encrypted, disableStats, enabledTransports, cluster
+const echo = new Echo({
+    broadcaster: 'reverb',
+    key: import.meta.env.VITE_REVERB_APP_KEY,
+    wsHost: import.meta.env.VITE_REVERB_HOST,
+    wsPort: import.meta.env.VITE_REVERB_PORT,
+    wssPort: import.meta.env.VITE_REVERB_PORT,
+    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'http') === 'https',
+    enabledTransports: ['ws', 'wss'],
 });
 
-window.Echo.channel('orders')
-  .listen('OrderCreated', e => {
-    console.log('New order:', e.order);
-  });
+export default echo;
