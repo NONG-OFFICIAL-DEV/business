@@ -9,4 +9,4 @@ Route::get('/', function () {
     return view('welcome');
 });
 // routes/web.php
-Route::get('/sales/{sale}/invoice', [SaleController::class, 'invoice'])->name('sales.invoice');
+Route::get('/download/{sale}/invoice', [SaleController::class, 'invoice'])->name('sales.invoice');

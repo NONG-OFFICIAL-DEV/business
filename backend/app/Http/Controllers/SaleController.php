@@ -239,7 +239,7 @@ class SaleController extends Controller
         return response()->json([
             'message' => 'Sale created successfully',
             'sale_id' => $sale->id,
-            'invoice_url' => url("/sales/{$sale->id}/invoice")
+            'invoice_url' => url("/download/{$sale->id}/invoice")
         ]);
         // return redirect()->route('sales.invoice', $sale);
     }
