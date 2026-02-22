@@ -7,15 +7,25 @@ services:
     env_file:
       - ./backend/.env
     volumes:
-      # - backend_storage:/var/www/html/storage
       - inventory_backend_storage:/var/www/html/storage
       - ./backend/bootstrap/cache:/var/www/html/bootstrap/cache
     depends_on:
       - db
+      - redis
     command: >
       sh -c "chown -R www-data:www-data storage bootstrap/cache &&
              chmod -R 775 storage bootstrap/cache &&
-             php-fpm"
+             supervisord -c /etc/supervisor/conf.d/supervisord.conf"
+
+  # ── NEW: Redis ──────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: inventory_redis
+    restart: always
+    networks:
+      - web
+    volumes:
+      - redis_data:/data
 
   frontend:
     build:
@@ -50,7 +60,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - web
-    #Nginx Service
+
   webserver:
     depends_on:
       - backend
@@ -78,6 +88,6 @@ networks:
     driver: bridge
 
 volumes:
-  # backend_storage:
   inventory_backend_storage:
   postgres_data:
+  redis_data:        # ← NEW

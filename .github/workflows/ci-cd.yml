@@ -103,8 +103,25 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [changes, build-push]
+    # Only run if something actually changed
+    if: |
+      needs.changes.outputs.backend   == 'true' ||
+      needs.changes.outputs.frontend  == 'true' ||
+      needs.changes.outputs.ai        == 'true' ||
+      needs.changes.outputs.webserver == 'true'
+
     steps:
       - uses: actions/checkout@v4
+
+      # ── NEW: Copy docker-compose.yml to server ──
+      - name: Copy docker-compose to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ubuntu
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "~/inventory/"
 
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
@@ -114,7 +131,7 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             set -e
-            cd ~/inventory || mkdir -p ~/inventory && cd ~/inventory
+            cd ~/inventory
 
             echo ">>> Pull only changed images"
 
@@ -139,7 +156,13 @@ jobs:
             docker compose up -d --remove-orphans
 
             if [ "${{ needs.changes.outputs.backend }}" = "true" ]; then
-              echo ">>> Backend post-deploy tasks"
-              docker compose exec backend php artisan optimize:clear
-              docker compose exec backend php artisan migrate --force
+              echo ">>> Backend post-deploy"
+              docker compose exec -T backend php artisan optimize:clear
+              docker compose exec -T backend php artisan migrate --force
+
+              echo ">>> Restart Reverb + Queue"
+              docker compose exec -T backend supervisorctl restart reverb
+              docker compose exec -T backend supervisorctl restart queue
             fi
+
+            echo ">>> Deploy complete ✅"
