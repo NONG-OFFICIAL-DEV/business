@@ -152,14 +152,25 @@ jobs:
             docker compose down --remove-orphans || true
             docker compose up -d --remove-orphans
 
-            if [ "${{ needs.changes.outputs.backend }}" = "true" ]; then
-              echo ">>> Backend post-deploy"
-              docker compose exec -T app_backend php artisan optimize:clear
-              docker compose exec -T app_backend php artisan migrate --force
+            # ✅ Wait for backend to be ready
+            echo ">>> Waiting for backend to start..."
+            sleep 15
 
-              echo ">>> Restart Reverb + Queue"
-              docker compose exec -T app_backend supervisorctl restart reverb
-              docker compose exec -T app_backend supervisorctl restart queue
+            if [ "${{ needs.changes.outputs.backend }}" = "true" ]; then
+              # ✅ Check container is actually running before exec
+              if docker compose ps app_backend | grep -q "Up"; then
+                echo ">>> Backend post-deploy"
+                docker compose exec -T app_backend php artisan optimize:clear
+                docker compose exec -T app_backend php artisan migrate --force
+
+                echo ">>> Restart Reverb + Queue"
+                docker compose exec -T app_backend supervisorctl restart reverb
+                docker compose exec -T app_backend supervisorctl restart queue
+              else
+                echo ">>> Backend container not running — checking logs"
+                docker logs app_backend --tail=30
+                exit 1
+              fi
             fi
 
             echo ">>> Deploy complete ✅"
