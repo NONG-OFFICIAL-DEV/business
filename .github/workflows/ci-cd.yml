@@ -161,12 +161,12 @@ jobs:
 
             if [ "${{ needs.changes.outputs.backend }}" = "true" ]; then
               echo ">>> Backend post-deploy"
-              docker compose exec -T backend php artisan optimize:clear
-              docker compose exec -T backend php artisan migrate --force
+              docker compose exec -T app_backend php artisan optimize:clear
+              docker compose exec -T app_backend php artisan migrate --force
 
               echo ">>> Restart Reverb + Queue"
-              docker compose exec -T backend supervisorctl restart reverb
-              docker compose exec -T backend supervisorctl restart queue
+              docker compose exec -T app_backend supervisorctl restart reverb
+              docker compose exec -T app_backend supervisorctl restart queue
             fi
 
             echo ">>> Deploy complete ✅"
