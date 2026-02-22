@@ -14,8 +14,9 @@ services:
       - redis
     command: >
       sh -c "chown -R www-data:www-data storage bootstrap/cache &&
-             chmod -R 775 storage bootstrap/cache &&
-             supervisord -c /etc/supervisor/conf.d/supervisord.conf"
+            chmod -R 775 storage bootstrap/cache &&
+            mkdir -p /var/log/supervisor &&
+            /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"
 
   # ── NEW: Redis ──────────────────────────────────
   redis:
