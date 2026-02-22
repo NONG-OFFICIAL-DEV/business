@@ -1,6 +1,7 @@
 services:
   backend:
     image: nongdev/inventory-backend:latest
+    container_name: app_backend
     restart: always
     networks:
       - web
