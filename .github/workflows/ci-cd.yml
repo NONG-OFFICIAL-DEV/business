@@ -74,6 +74,10 @@ jobs:
             --build-arg VITE_APP_I18N_LOCALE=en \
             --build-arg VITE_APP_I18N_FALLBACK_LOCALE=en \
             --build-arg VITE_APP_API_BASE_AI_URL=${{ secrets.AI_API_URL }} \
+            --build-arg VITE_REVERB_APP_KEY=${{ secrets.VITE_REVERB_APP_KEY }} \
+            --build-arg VITE_REVERB_HOST=${{ secrets.VITE_REVERB_HOST }} \
+            --build-arg VITE_REVERB_PORT=${{ secrets.VITE_REVERB_PORT }} \
+            --build-arg VITE_REVERB_SCHEME=https \
             -t $IMAGE_FRONTEND:latest \
             -t $IMAGE_FRONTEND:$IMAGE_TAG \
             ./frontend
